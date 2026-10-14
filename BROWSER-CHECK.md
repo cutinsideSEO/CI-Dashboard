@@ -4,12 +4,17 @@ Most tools in the Tools Database have no API this project can reach. Once a week
 
 This runs on the owner's computer, in the Claude desktop app with Claude in Chrome. The cloud session that refreshes the dashboard has no browser with those logins.
 
-## Set it up once (about 3 minutes)
+## How it runs
 
-1. On your computer, open the Claude desktop app. Make sure Claude in Chrome is connected, and that Chrome is signed in to the tools.
-2. Open the Control Room, go to **Tools → Weekly browser check** and click **Copy the task prompt**.
-3. In the desktop app, create a scheduled task that runs weekly (for example Sunday 08:00) and paste the prompt.
-4. Run it once now to check that it works. Results show up straight away in the same card and in the **Usage** column.
+A scheduled task in the Claude desktop app, **"בדיקת כלים שבועית – Control Room"**, runs every Sunday at 08:00 on the owner's computer. It reads `.claude/skills/control-room-tool-check/SKILL.md` from this folder and follows it. The app must be open, with Claude in Chrome connected; if the app is closed at 08:00, the task runs the next time it opens.
+
+Besides the billing pages, it checks the billing emails:
+- **seo@cutinside.com**, in Chrome. Most tool receipts arrive here. Gmail filters label them `Receipts/<Vendor>` and `Receipts/Payment problems`.
+- **or@cutinside.com**, through the Gmail connector (Anthropic, Google Cloud, Timeless).
+
+Each run ends with a list of the tools that need signing in, grouped by account, so the owner can sign in to all of them in one go. Sessions with "stay signed in" usually last for weeks.
+
+To run it by hand, open the task in the desktop app and click **Run now**.
 
 The list of tools to check lives in the dashboard database (`sources/toolchecks` → `plan`), built from the Tools Database sheet:
 - **30 paid tools** to read;
@@ -20,9 +25,11 @@ The full procedure is in `.claude/skills/control-room-tool-check/SKILL.md`.
 ## Rules
 
 - **Read only.** Never change a setting, plan or seat, never buy credits, never cancel anything, and never accept a prompt that does.
-- **Never type a password or 2FA code.** If a tool isn't signed in, record `loginOk: false` and move on.
-- **Write down only what the page shows.** Leave a field out rather than guess it.
+- **Never type a password or 2FA code**, and never approve a Google or GitHub sign-in consent. If a tool isn't signed in, record `loginOk: false` and move on.
+- **Report what is really charged.** Read the invoices or receipts, not just the plan name, and write any difference from the sheet in `gap`.
+- **Write down only what the page or email shows.** Leave a field out rather than guess it.
 - Take about 2 minutes per tool. If a page won't load, record that and move on.
+- Work in one browser tab. Background tabs freeze.
 
 ## Tools to check
 
@@ -55,23 +62,26 @@ Write one document, `sources/toolchecks`, in the artifact's database:
     {
       "tool": "Ahrefs",
       "checkedAt": "2026-10-18T06:02:00Z",
-      "method": "browser",
+      "method": "browser+email",
       "loginOk": true,
       "plan": "Standard",
       "renewsOn": "2027-05-07",
       "lastUsed": "2026-10-17",
+      "lastCharge": {"amount": "$2,490.00", "date": "2026-05-07"},
       "value": "412 / 500",
       "unit": "credits",
       "status": "ok",
       "headline": "412 of 500 credits used, renews 7 May 2027",
-      "detail": "Anything unusual, in one or two sentences."
+      "detail": "Anything unusual, in one or two sentences.",
+      "gap": "Difference from the sheet, if any."
     }
   ]
 }
 ```
 
-- `tool` must equal the **Name** in the sheet exactly.
-- `status` is `critical` when something will stop working within 14 days (credits running out, expired, payment failed). It is `low` when credits are under 25% or there's a renewal decision within 30 days. Otherwise it is `ok`.
+- `tool` must equal the **Name** in the sheet exactly. A charge from a tool that isn't in the sheet gets its own item, named after the vendor, with `method: "email"`.
+- One item per tool: the dashboard keeps only the last item with a given name.
+- `status` is `critical` when a payment failed or is past due, an account is locked, or something will stop working within 14 days. It is `low` when credits are under 25%, there's a renewal decision within 30 days, or a tool that isn't in the sheet is charging. Otherwise it is `ok`.
 - `lastUsed` is the most recent activity or login the tool shows. Leave it out if the tool doesn't show one.
 
 **How to save it, in order of preference:**
