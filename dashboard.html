@@ -663,7 +663,7 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
       covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
-      prepNext: "Prep for the meeting ({0})", kPrep: "Internal, about a client",
+      prepNext: "Prep for the meeting ({0})", cSlack: "Slack", covQuiet: "no client messages", srcSlack: "Slack", srcCal: "Team calendars", clashToday: "Double-booked today", kPrep: "Internal, about a client",
       tTeam: "Team", tsTitle: "Team schedule", tsSub: "From each teammate's Google Calendar · updated {0}", tsWeek: "Meeting load", tsWeekSub: "Hours in meetings per person per working day. Click a day to open it above.",
       tsCover: "Client meetings ahead", tsCoverSub: "Who meets which client in the next two weeks, and which clients have nothing booked", tsOut: "Out of office", tsConf: "Double bookings", tsConfSub: "Overlapping meetings on one person's calendar",
       kClient: "Client meeting", kExternal: "Other external", kInternal: "Internal", kPersonal: "Personal / focus", kOut: "Out", tsMeet: "{0} meetings", tsMeet1: "1 meeting", tsHours: "{0}h in meetings", tsClientM: "{0} client meetings", tsOutN: "{0} out", tsBusiest: "busiest: {0} ({1}h)",
@@ -752,7 +752,7 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
       covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
-      prepNext: "הכנה לפגישה ({0})", kPrep: "פנימי, על לקוח",
+      prepNext: "הכנה לפגישה ({0})", cSlack: "Slack", covQuiet: "אין הודעות מהלקוח", srcSlack: "Slack", srcCal: "יומני הצוות", clashToday: "כפל זימונים היום", kPrep: "פנימי, על לקוח",
       tTeam: "צוות", tsTitle: "לו\"ז הצוות", tsSub: "מהיומן של כל אחד בצוות ב-Google Calendar · עודכן {0}", tsWeek: "עומס פגישות", tsWeekSub: "שעות בפגישות לכל אחד בכל יום עבודה. לחיצה על יום פותחת אותו למעלה.",
       tsCover: "פגישות לקוחות קרובות", tsCoverSub: "מי נפגש עם איזה לקוח בשבועיים הקרובים, ולאילו לקוחות לא נקבע כלום", tsOut: "לא במשרד", tsConf: "כפל זימונים", tsConfSub: "פגישות חופפות ביומן של אותו אדם",
       kClient: "פגישת לקוח", kExternal: "חיצוני אחר", kInternal: "פנימי", kPersonal: "אישי / ריכוז", kOut: "לא במשרד", tsMeet: "{0} פגישות", tsMeet1: "פגישה אחת", tsHours: "{0} שע' בפגישות", tsClientM: "{0} פגישות לקוחות", tsOutN: "{0} לא במשרד", tsBusiest: "הכי עמוס: {0} ({1} שע')",
@@ -855,7 +855,7 @@ tbody tr:hover { background: var(--line-subtle); }
     const staleH = (Date.now() - new Date(m.updatedAt)) / 36e5;
     $("#staleBar").hidden = !(staleH > 14);
     if (staleH > 14) $("#staleText").textContent = t("staleText", ago(m.updatedAt));
-    const it = [[t("srcSheet"), ss.sheet && ago(ss.sheet)], [t("srcDrive"), ss.drive && ago(ss.drive)], [t("srcSurge"), m.dataThrough && fmtD(m.dataThrough)], [t("srcDfs"), ss.dataforseo && ago(ss.dataforseo)], [t("srcBrowser"), S.toolcheckAt ? ago(S.toolcheckAt) : t("notChecked")]].filter((x) => x[1]);
+    const it = [[t("srcSheet"), ss.sheet && ago(ss.sheet)], [t("srcDrive"), ss.drive && ago(ss.drive)], [t("srcSurge"), m.dataThrough && fmtD(m.dataThrough)], [t("srcDfs"), ss.dataforseo && ago(ss.dataforseo)], [t("srcBrowser"), S.toolcheckAt ? ago(S.toolcheckAt) : t("notChecked")], [t("srcSlack"), m.team?.checkedAt && ago(m.team.checkedAt)], [t("srcCal"), S.team?.generatedAt && ago(S.team.generatedAt)]].filter((x) => x[1]);
     const runs = (m.runs || []).slice(-12);
     $("#srcline").innerHTML = (it.length ? `<span><b>${esc(t("srcTitle"))}</b></span>` + it.map(([l, v]) => `<span>${esc(l)}: ${esc(v)}</span>`).join("") : "")
       + (runs.length ? `<span>${esc(t("runsTitle"))}: <span class="runs">${runs.map((r) => `<i class="${(r.failed || []).length ? "partial" : ""}" title="${esc(new Date(r.at).toLocaleString(LOC()))}${(r.failed || []).length ? " · " + esc(t("runFailed", r.failed.join(", "))) : ""}"></i>`).join("")}</span></span>` : "");
@@ -1056,8 +1056,10 @@ tbody tr:hover { background: var(--line-subtle); }
   function renderTeam() {
     const tm = S.meta?.team, card = $("#teamCard"); card.hidden = !tm; if (!tm) return;
     const recent = (tm.announcements || []).map((x, i) => ({ ...x, he: tm.he?.announcements?.[i] })).filter((x) => days(x.date) >= -14).slice(0, 5);
-    const out = (tm.who_is_out || []).filter((x) => days(x.to) >= 0);
-    $("#team").innerHTML = `${(LANG === "he" && tm.he?.summary) || tm.summary ? `<p style="margin:0 0 12px;color:var(--ink-2);font-size:13px">${esc((LANG === "he" && tm.he?.summary) || tm.summary)}</p>` : ""}<ul class="tnews">${recent.map((x) => `<li><span class="dd">${esc(fmtD(x.date).replace(/ \d{4}$/, ""))}</span><span>${esc((LANG === "he" && x.he) || x.text)}</span></li>`).join("")}</ul>${out.length ? `<div class="caption" style="margin-top:14px">${esc(t("whoOut"))}</div><ul class="tnews" style="margin-top:6px">${out.map((x) => `<li><span class="dd">${esc(fmtD(x.to).replace(/ \d{4}$/, ""))}</span><span>${esc(x.who)} · ${esc(fmtD(x.from))} → ${esc(fmtD(x.to))}</span></li>`).join("")}</ul>` : ""}`;
+    const todayIl = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+    const out = S.team ? (S.team.out || []).filter((o) => o.to >= todayIl && o.from <= workDays(todayIl, 5)[4]).map((o) => ({ who: pName(o.person) + " · " + o.title, from: o.from, to: o.to })) : (tm.who_is_out || []).filter((x) => days(x.to) >= 0);
+    const clashes = (S.team?.conflicts || []).filter((c) => c.date === todayIl);
+    $("#team").innerHTML = `${(LANG === "he" && tm.he?.summary) || tm.summary ? `<p style="margin:0 0 12px;color:var(--ink-2);font-size:13px">${esc((LANG === "he" && tm.he?.summary) || tm.summary)}</p>` : ""}<ul class="tnews">${recent.map((x) => `<li><span class="dd">${esc(fmtD(x.date).replace(/ \d{4}$/, ""))}</span><span>${esc((LANG === "he" && x.he) || x.text)}</span></li>`).join("")}</ul>${clashes.length ? `<div class="caption" style="margin-top:14px">${esc(t("clashToday"))}</div><ul class="tnews" style="margin-top:6px">${clashes.map((c) => `<li><span class="dd">${esc(c.at.split("–")[0])}</span><span><b>${esc(pName(c.person))}</b> · ${esc(c.a)} / ${esc(c.b)}</span></li>`).join("")}</ul>` : ""}${out.length ? `<div class="caption" style="margin-top:14px">${esc(t("whoOut"))}</div><ul class="tnews" style="margin-top:6px">${out.map((x) => `<li><span class="dd">${esc(fmtD(x.from).replace(/ \d{4}$/, ""))}</span><span>${esc(x.who)} · ${esc(fmtD(x.from))} → ${esc(fmtD(x.to))}</span></li>`).join("")}</ul>` : ""}`;
   }
   function renderHealth() {
     renderFeed(); renderAhead(); renderTeam();
@@ -1123,9 +1125,10 @@ tbody tr:hover { background: var(--line-subtle); }
       const k = c.contract, contract = !k ? cell("bad", t("covNone")) : cell(k.signed === false || k.status === "expired" || k.confidence === "low" ? "warn" : "ok", t("covConf", k.confidence || "?") + (k.sharedFrom ? " · " + t("covShared", clientName(k.sharedFrom)) : ""));
       const perf = c.perf?.w28 ? cell("ok", fmtD(S.meta?.dataThrough)) : cell("bad", t("covNone"));
       const lg = c.domain && S.icons[c.domain] ? cell("ok", t("covYes")) : cell("warn", t("covNone"));
-      return `<tr><td><button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(c.key)}">${cname(c.key, 18)}</button></td><td>${brain}</td><td>${meet}</td><td>${contract}</td><td>${perf}</td><td>${lg}</td></tr>`;
+      const sl = c.slack?.lastClientMessageAt ? cell(-days(c.slack.lastClientMessageAt.slice(0, 10)) > 30 ? "warn" : "ok", fmtD(c.slack.lastClientMessageAt)) : c.slack ? cell("warn", t("covQuiet")) : cell("", t("covNone"));
+      return `<tr><td><button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(c.key)}">${cname(c.key, 18)}</button></td><td>${brain}</td><td>${meet}</td><td>${contract}</td><td>${perf}</td><td>${sl}</td><td>${lg}</td></tr>`;
     }).join("");
-    $("#covTable").innerHTML = `<thead><tr><th>${esc(t("cClient"))}</th><th>${esc(t("cBrain"))}</th><th>${esc(t("cMeet"))}</th><th>${esc(t("cContract"))}</th><th>${esc(t("cPerf"))}</th><th>${esc(t("cLogo"))}</th></tr></thead><tbody>${rows}</tbody>`;
+    $("#covTable").innerHTML = `<thead><tr><th>${esc(t("cClient"))}</th><th>${esc(t("cBrain"))}</th><th>${esc(t("cMeet"))}</th><th>${esc(t("cContract"))}</th><th>${esc(t("cPerf"))}</th><th>${esc(t("cSlack"))}</th><th>${esc(t("cLogo"))}</th></tr></thead><tbody>${rows}</tbody>`;
   }
   const list = (arr) => `<ul>${arr.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
   function openClient(key) {
