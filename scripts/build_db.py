@@ -758,6 +758,8 @@ def build():
         json.dump(sorted(MISSING), f, ensure_ascii=False, indent=1)
     if intel:
         put("sources", "meetings", {"items": list(intel.values()), "updatedAt": NOW})
+    if os.path.exists(os.path.join(DATA, "slack.json")):
+        put("sources", "slack", json.load(open(os.path.join(DATA, "slack.json"), encoding="utf-8")))
     for name in ("brains", "contracts", "performance"):
         raw = load(f"{name}.json", None)
         if raw is not None:
