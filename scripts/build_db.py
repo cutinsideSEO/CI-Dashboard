@@ -577,6 +577,63 @@ def build():
             seen_md.add((c["key"], m.group(2)))
     ahead.sort(key=lambda x: (x["date"], x.get("time") or "99"))
 
+    # Team schedule (data/team_calendar.json, collected read-only from each teammate's Google Calendar):
+    # classify each event, then per-person daily load, double bookings and who is out.
+    team_doc = None
+    tc = load("team_calendar.json", None)
+    if tc:
+        OOO_T = {"Out of office", "Abroad", "Vacation", "Reserve duty", "Sick"}
+        def parse_dt(x):
+            return dt.datetime.fromisoformat(x) if x and "T" in x else None
+        evs = []
+        for e in tc.get("events") or []:
+            if not e.get("people"):
+                continue
+            title = e.get("title") or ""
+            att = [a for a in (e.get("attendees") or []) if "@resource." not in a]
+            if e.get("eventType") == "OUT_OF_OFFICE" or title in OOO_T:
+                kind, ck = "ooo", None
+            elif title == "Personal":
+                kind, ck = "personal", None
+            elif e.get("eventType") == "FOCUS_TIME":
+                kind, ck = "focus", None
+            else:
+                ck, external = find_client(title, att)
+                kind = "client" if ck else ("external" if external else ("internal" if len(att) > 1 or len(e["people"]) > 1 else "solo"))
+            s0, e0 = parse_dt(e.get("start")), parse_dt(e.get("end"))
+            if e.get("allDay") and kind not in ("ooo",) and e.get("transparency") == "transparent":
+                continue
+            evs.append({"id": e.get("id"), "s": e.get("start"), "e": e.get("end"), "allDay": bool(e.get("allDay")), "t": title, "kind": kind,
+                        "client": ck, "people": e["people"], "ext": sum(1 for a in att if not a.endswith("@cutinside.com")), "url": e.get("url"),
+                        "mins": int((e0 - s0).total_seconds() // 60) if s0 and e0 else None})
+        stats, conflicts, out = {}, [], []
+        for ev in evs:
+            if ev["kind"] == "ooo":
+                for pp in ev["people"]:
+                    d1 = ev["s"][:10]; d2 = ev["e"][:10]
+                    if ev["allDay"]:
+                        d2 = (dt.date.fromisoformat(d2) - dt.timedelta(days=1)).isoformat()
+                    out.append({"person": pp, "from": d1, "to": d2, "title": ev["t"]})
+                continue
+            if ev["allDay"] or ev["kind"] in ("personal", "focus", "solo") or not ev["mins"]:
+                continue
+            for pp in ev["people"]:
+                st = stats.setdefault(pp, {}).setdefault(ev["s"][:10], {"mins": 0, "client": 0, "n": 0})
+                st["mins"] += ev["mins"]; st["n"] += 1
+                if ev["kind"] in ("client", "external"):
+                    st["client"] += ev["mins"]
+        timed = [ev for ev in evs if not ev["allDay"] and ev["kind"] not in ("ooo",) and ev["mins"]]
+        for pp in {p_ for ev in timed for p_ in ev["people"]}:
+            mine = sorted([ev for ev in timed if pp in ev["people"] and ev["kind"] not in ("personal", "focus", "solo")], key=lambda x: x["s"])
+            for i_, a_ in enumerate(mine):
+                for b_ in mine[i_ + 1:]:
+                    if parse_dt(b_["s"]) >= parse_dt(a_["e"]):
+                        break
+                    if a_["s"][:10] >= TODAY.isoformat():
+                        conflicts.append({"person": pp, "date": a_["s"][:10], "a": a_["t"], "b": b_["t"], "at": a_["s"][11:16] + "–" + b_["e"][11:16]})
+        team_doc = {"generatedAt": tc.get("generatedAt"), "from": tc.get("from"), "to": tc.get("to"), "people": tc.get("people") or [],
+                    "events": evs, "stats": stats, "conflicts": conflicts, "out": out, "updatedAt": NOW}
+
     # DataForSEO spend: compact history for the page (from data/dataforseo_usage.json, rebuilt weekly from the free
     # id_list endpoint) plus a balance series that grows by one point per refresh (data/dfs_balance.json).
     dfs_doc = None
@@ -739,6 +796,8 @@ def build():
         put("snapshot", "favicons", {"icons": fav, "updatedAt": NOW})
     if dfs_doc:
         put("snapshot", "dataforseo", dfs_doc)
+    if team_doc:
+        put("snapshot", "team", team_doc)
     meta["shards"] = shards
 
     put("meta", "state", meta)
@@ -778,7 +837,7 @@ def build():
     live = {f"{w['collection']}/{w['doc_id']}" for w in writes}
     for key, ver in versions.items():  # shards that no longer exist
         col, did = key.split("/", 1)
-        if col in ("snapshot", "sources") and key not in live and ((col == "snapshot" and did not in ("favicons", "dataforseo")) or did.startswith("tm-")):
+        if col in ("snapshot", "sources") and key not in live and ((col == "snapshot" and did not in ("favicons", "dataforseo", "team")) or did.startswith("tm-")):
             writes.append({"op": "delete", "collection": col, "doc_id": did, "if_version": int(ver)})
     with open(os.path.join(OUT, "writes.json"), "w") as f:
         json.dump(writes, f, indent=1)

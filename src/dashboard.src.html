@@ -329,6 +329,36 @@ tbody tr:hover { background: var(--line-subtle); }
 .findings { margin: 0; padding-inline-start: 18px; display: grid; gap: 10px; color: var(--ink-2); max-width: 90ch; }
 .findings b { color: var(--ink); }
 
+/* team schedule */
+.ts-sum { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--ink-2); }
+.ts-sum b { color: var(--ink); font-family: var(--f-display); }
+.tline { direction: ltr; overflow-x: auto; }
+.tl-grid { min-width: 720px; display: grid; grid-template-columns: 150px minmax(0, 1fr); }
+.tl-h { position: relative; height: 22px; }
+.tl-h span { position: absolute; top: 0; transform: translateX(-50%); font: 500 11px var(--f-body); color: var(--ink-3); }
+.tl-name { display: flex; flex-direction: column; justify-content: center; padding: 6px 10px 6px 0; border-top: 1px solid var(--line-subtle); min-height: 46px; text-align: left; }
+.tl-name b { font: 600 13px var(--f-body); color: var(--ink); }
+.tl-name small { font-size: 11px; color: var(--ink-3); }
+.tl-row { position: relative; border-top: 1px solid var(--line-subtle); min-height: 46px; background-image: linear-gradient(to right, var(--line-subtle) 1px, transparent 1px); background-size: calc(100% / 12) 100%; }
+.tl-ev { position: absolute; top: 6px; bottom: 6px; border-radius: 6px; padding: 3px 6px; font: 600 11px/1.25 var(--f-body); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: default; border: 0; text-align: left; color: var(--ink-on-light); min-width: 4px; }
+.tl-ev.client { background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.tl-ev.external { background: var(--gold); }
+.tl-ev.internal { background: var(--tag); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+.tl-ev.personal, .tl-ev.focus, .tl-ev.solo { background: repeating-linear-gradient(45deg, var(--tag), var(--tag) 4px, transparent 4px, transparent 8px); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line-subtle); }
+.tl-ev.half { top: 6px; bottom: 50%; } .tl-ev.half2 { top: 50%; bottom: 6px; }
+.tl-out { position: absolute; inset: 6px 0; border-radius: 6px; background: repeating-linear-gradient(45deg, var(--info-bg), var(--info-bg) 6px, transparent 6px, transparent 12px); display: flex; align-items: center; padding-inline: 12px; font: 600 12px var(--f-body); color: var(--info); }
+.tl-now { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--crit); z-index: 2; }
+.heat td, .heat th { text-align: center; white-space: nowrap; }
+.heat td:first-child, .heat th:first-child { text-align: start; }
+.heat .hc { display: inline-grid; place-items: center; min-width: 46px; height: 30px; border-radius: 6px; font: 700 12px var(--f-display); cursor: pointer; border: 0; color: var(--ink); background: var(--tag); }
+.heat .hc.out { background: repeating-linear-gradient(45deg, var(--info-bg), var(--info-bg) 4px, transparent 4px, transparent 8px); color: var(--info); font-weight: 600; font-size: 11px; }
+.heat .hc[aria-pressed="true"] { outline: 2px solid var(--accent); }
+.heat th.today { color: var(--accent-text); }
+.cov2 { display: grid; gap: 8px; }
+.cov2 .r { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line-subtle); font-size: 13px; }
+.cov2 .r:first-child { border-top: 0; }
+.cov2 .who { color: var(--ink-3); font-size: 12px; }
+
 /* drawer */
 .scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
 .drawer { position: fixed; top: 0; bottom: 0; inset-inline-end: 0; width: min(660px, 100%); background: var(--raised); z-index: 41; overflow-y: auto; border-inline-start: 1px solid var(--line); box-shadow: var(--shadow-lg); padding: calc(24px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); display: grid; gap: 22px; align-content: start; }
@@ -401,6 +431,7 @@ tbody tr:hover { background: var(--line-subtle); }
       <button class="tab" role="tab" data-tab="alerts"><span data-i18n="tAlerts">Alerts</span> <span class="ct" id="ct-alerts">0</span></button>
       <button class="tab" role="tab" data-tab="clients"><span data-i18n="tClients">Clients</span> <span class="ct" id="ct-clients">0</span></button>
       <button class="tab" role="tab" data-tab="contracts"><span data-i18n="tContracts">Contracts</span> <span class="ct" id="ct-contracts">0</span></button>
+      <button class="tab" role="tab" data-tab="team" id="teamTab" hidden><span data-i18n="tTeam">Team</span> <span class="ct" id="ct-team">0</span></button>
       <button class="tab" role="tab" data-tab="tools"><span data-i18n="tTools">Tools</span> <span class="ct" id="ct-tools">0</span></button>
       <button class="tab" role="tab" data-tab="ask"><span data-i18n="askOpus">Ask Opus 5.5</span></button>
     </nav>
@@ -480,6 +511,29 @@ tbody tr:hover { background: var(--line-subtle); }
     <div class="card">
       <div class="card-h"><h2 data-i18n="tContracts">Contracts</h2><span class="sub" data-i18n="contractsSub">Found in Google Drive. "Inferred" end dates were computed from start date + term.</span></div>
       <div class="card-b"><div class="filters" style="margin-bottom:10px"><button class="chip" id="olderBtn" aria-pressed="false" data-i18n="olderAg">Show older agreements</button></div><div class="tbl-wrap"><table id="contractTable"></table></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="team" hidden>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="tsTitle">Team schedule</h2><span class="sub" id="tsSub"></span></div>
+      <div class="card-b" style="display:grid;gap:16px;grid-template-columns:minmax(0,1fr)">
+        <div class="filters" id="tsDays"></div>
+        <div class="ts-sum" id="tsSum"></div>
+        <div class="tline" id="tsLine"></div>
+        <div class="legend" id="tsLegend"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="tsWeek">Meeting load</h2><span class="sub" data-i18n="tsWeekSub">Hours in meetings per person per working day. Click a day to open it above.</span></div>
+      <div class="card-b tbl-wrap"><table class="heat" id="tsHeat"></table></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-h"><h2 data-i18n="tsCover">Client meetings ahead</h2><span class="sub" data-i18n="tsCoverSub">Who meets which client in the next two weeks, and which clients have nothing booked</span></div><div class="card-b" id="tsCoverage"></div></div>
+      <div class="stack">
+        <div class="card"><div class="card-h"><h2 data-i18n="tsOut">Out of office</h2></div><div class="card-b" id="tsOutList"></div></div>
+        <div class="card"><div class="card-h"><h2 data-i18n="tsConf">Double bookings</h2><span class="sub" data-i18n="tsConfSub">Overlapping meetings on one person's calendar</span></div><div class="card-b" id="tsConfList"></div></div>
+      </div>
     </div>
   </section>
 
@@ -608,6 +662,10 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
       covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
+      tTeam: "Team", tsTitle: "Team schedule", tsSub: "From each teammate's Google Calendar · updated {0}", tsWeek: "Meeting load", tsWeekSub: "Hours in meetings per person per working day. Click a day to open it above.",
+      tsCover: "Client meetings ahead", tsCoverSub: "Who meets which client in the next two weeks, and which clients have nothing booked", tsOut: "Out of office", tsConf: "Double bookings", tsConfSub: "Overlapping meetings on one person's calendar",
+      kClient: "Client meeting", kExternal: "Other external", kInternal: "Internal", kPersonal: "Personal / focus", kOut: "Out", tsMeet: "{0} meetings", tsHours: "{0}h in meetings", tsClientM: "{0} client meetings", tsOutN: "{0} out", tsBusiest: "busiest: {0} ({1}h)",
+      tsNoAccess: "calendar not shared", tsBusyOnly: "busy times only", tsNothing: "No client meeting booked in the next 14 days:", tsNoConf: "No double bookings ahead.", tsNoOut: "Nobody is out in this period.", tsH: "{0}h", tsFree: "free",
       teamTitle: "Team news", teamSub: "From #all-cut-inside and the team channels in Slack, last 14 days", whoOut: "Out of office", dSlack: "From Slack", slackLast: "Client last wrote {0}", slackMsgs: "{0} messages in 30 days", slackAsk: "Open ask", noClientSlack: "No messages from the client in this channel in 30 days.",
       newB: "New", openFor: "open {0}d", chSince: "Since the {0} refresh:", chNew: "{0} new", chRes: "{0} resolved", chShow: "Show resolved", chHide: "Hide resolved", fNew: "New since last refresh",
       aheadTitle: "Client meetings this week", aheadSub: "From Google Calendar and the client brains. Prep asks {M} for a one-page brief.", prep: "Prep", internalM: "internal", approxM: "this week", allDay: "—", fromBrain: "from the brain",
@@ -692,6 +750,10 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
       covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
+      tTeam: "צוות", tsTitle: "לו\"ז הצוות", tsSub: "מהיומן של כל אחד בצוות ב-Google Calendar · עודכן {0}", tsWeek: "עומס פגישות", tsWeekSub: "שעות בפגישות לכל אחד בכל יום עבודה. לחיצה על יום פותחת אותו למעלה.",
+      tsCover: "פגישות לקוחות קרובות", tsCoverSub: "מי נפגש עם איזה לקוח בשבועיים הקרובים, ולאילו לקוחות לא נקבע כלום", tsOut: "לא במשרד", tsConf: "כפל זימונים", tsConfSub: "פגישות חופפות ביומן של אותו אדם",
+      kClient: "פגישת לקוח", kExternal: "חיצוני אחר", kInternal: "פנימי", kPersonal: "אישי / ריכוז", kOut: "לא במשרד", tsMeet: "{0} פגישות", tsHours: "{0} שע' בפגישות", tsClientM: "{0} פגישות לקוחות", tsOutN: "{0} לא במשרד", tsBusiest: "הכי עמוס: {0} ({1} שע')",
+      tsNoAccess: "היומן לא משותף", tsBusyOnly: "רק זמני תפוס", tsNothing: "לא נקבעה פגישת לקוח ב-14 הימים הקרובים:", tsNoConf: "אין כפל זימונים קרוב.", tsNoOut: "אף אחד לא מחוץ למשרד בתקופה הזו.", tsH: "{0} שע'", tsFree: "פנוי",
       teamTitle: "חדשות הצוות", teamSub: "מ-#all-cut-inside ומערוצי הצוות ב-Slack, 14 הימים האחרונים", whoOut: "לא במשרד", dSlack: "מ-Slack", slackLast: "הלקוח כתב לאחרונה {0}", slackMsgs: "{0} הודעות ב-30 יום", slackAsk: "בקשה פתוחה", noClientSlack: "אין הודעות מהלקוח בערוץ הזה ב-30 יום.",
       newB: "חדש", openFor: "פתוח {0} ימים", chSince: "מאז הרענון של {0}:", chNew: "{0} חדשות", chRes: "{0} נסגרו", chShow: "הצג מה נסגר", chHide: "הסתר", fNew: "חדשות מאז הרענון הקודם",
       aheadTitle: "פגישות לקוחות השבוע", aheadSub: "מ-Google Calendar ומה-client brains. \"הכנה\" מבקש מ-{M} תדריך של עמוד אחד.", prep: "הכנה", internalM: "פנימית", approxM: "השבוע", allDay: "—", fromBrain: "מה-brain",
@@ -721,7 +783,7 @@ tbody tr:hover { background: var(--line-subtle); }
   const L = (o, f) => (LANG === "he" && o?.he?.[f]) || o?.[f];   // localized data field with English fallback
   const LOC = () => (LANG === "he" ? "he-IL" : "en-GB");
 
-  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {}, icons: {}, toolchecks: {}, toolcheckAt: null, toolPlan: [], dfs: null };
+  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {}, icons: {}, toolchecks: {}, toolcheckAt: null, toolPlan: [], dfs: null, team: null };
   const TILE = ["#e0f4f4", "#fad05d", "#f7caf1", "#c5e9e6", "#7dcdc7", "#f3d9c6"];
   const logo = (key, size = 20) => {
     const c = S.clients.find((x) => x.key === key), dom = c?.domain, icon = dom && S.icons[dom];
@@ -776,6 +838,8 @@ tbody tr:hover { background: var(--line-subtle); }
     if (UI.tab === "clients") renderClients();
     if (UI.tab === "contracts") renderContracts();
     if (UI.tab === "tools") renderTools();
+    if (UI.tab === "team") renderTeamTab();
+    $("#teamTab").hidden = !S.team; if (S.team) $("#ct-team").textContent = (S.team.people || []).filter((p) => p.access !== "none").length;
     if (UI.tab === "ask") renderSuggest();
   }
   function renderFresh() {
@@ -1192,6 +1256,56 @@ c) otherwise print the JSON in one code block at the end, so I can paste it to t
     const cv = d.coverage || {};
     $("#dfsCov").textContent = t("dfsCov", fmtD(cv.from), fmtD(cv.to), (cv.tasks || 0).toLocaleString("en-US"), usd2(cv.netCost));
   }
+  // ---------------------------------------------------------------- team schedule
+  const ilDate = (iso) => (iso.length > 10 ? new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" }) : iso);
+  const ilMin = (iso) => { const p = new Date(iso).toLocaleTimeString("en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).split(":"); return +p[0] * 60 + +p[1]; };
+  const workDays = (from, n) => { const out = []; let d = new Date(from + "T00:00:00Z"); while (out.length < n) { const w = d.getUTCDay(); if (w !== 5 && w !== 6) out.push(d.toISOString().slice(0, 10)); d = new Date(d.getTime() + 864e5); } return out; };
+  const pName = (email) => (S.team?.people || []).find((p) => p.email === email)?.name || email.split("@")[0];
+  const isOut = (email, day) => (S.team?.out || []).find((o) => o.person === email && o.from <= day && o.to >= day);
+  function renderTeamTab() {
+    const T = S.team; if (!T) return;
+    const todayIso = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+    const days_ = workDays(todayIso, 10);
+    if (!UI.tsDay || !days_.includes(UI.tsDay)) UI.tsDay = days_[0];
+    const day = UI.tsDay, ppl = (T.people || []).filter((p) => p.access !== "none");
+    $("#tsSub").textContent = t("tsSub", ago(T.generatedAt));
+    const dlabel = (d) => d === todayIso ? t("today") : new Date(d + "T00:00:00Z").toLocaleDateString(LOC(), { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+    $("#tsDays").innerHTML = days_.map((d) => `<button class="chip" data-tsday="${d}" aria-pressed="${d === day}">${esc(dlabel(d))}</button>`).join("");
+    const evDay = (T.events || []).filter((e) => !e.allDay && ilDate(e.s) === day);
+    const cm = evDay.filter((e) => e.kind === "client"), outN = ppl.filter((p) => isOut(p.email, day)).length;
+    const load = ppl.map((p) => [p, (T.stats?.[p.email]?.[day]?.mins || 0) / 60]).sort((a, b) => b[1] - a[1]);
+    const tot = evDay.filter((e) => !["personal", "focus", "solo", "ooo"].includes(e.kind)).length;
+    $("#tsSum").innerHTML = [`<span><b>${tot}</b> ${esc(t("tsMeet", "").trim())}</span>`, `<span><b>${cm.length}</b> ${esc(t("tsClientM", "").trim())}</span>`, outN ? `<span><b>${outN}</b> ${esc(t("tsOutN", "").trim())}</span>` : "", load[0] && load[0][1] ? `<span>${esc(t("tsBusiest", load[0][0].name, load[0][1].toFixed(1)))}</span>` : ""].join("");
+    const H0 = 8, H1 = 20, pos = (m) => Math.max(0, Math.min(100, ((m / 60 - H0) / (H1 - H0)) * 100));
+    let g = `<div class="tl-grid"><div></div><div class="tl-h">${Array.from({ length: H1 - H0 + 1 }, (_, i) => `<span style="left:${(i / (H1 - H0)) * 100}%">${String(H0 + i).padStart(2, "0")}:00</span>`).join("")}</div>`;
+    const nowM = day === todayIso ? ilMin(new Date().toISOString()) : null;
+    ppl.forEach((p) => {
+      const o = isOut(p.email, day), mine = evDay.filter((e) => e.people.includes(p.email)).sort((a, b) => a.s.localeCompare(b.s));
+      const st = T.stats?.[p.email]?.[day];
+      g += `<div class="tl-name"><b>${esc(p.name)}</b><small>${p.access === "busy" ? esc(t("tsBusyOnly")) : st ? esc(t("tsH", (st.mins / 60).toFixed(1))) : esc(t("tsFree"))}</small></div><div class="tl-row">`;
+      if (o) g += `<div class="tl-out">${esc(o.title)}</div>`;
+      mine.forEach((e, i) => { const a = ilMin(e.s), b = ilMin(e.e), clash = mine.some((x, j) => j !== i && ilMin(x.s) < b && ilMin(x.e) > a), lane = clash ? (mine.slice(0, i).filter((x) => ilMin(x.s) < b && ilMin(x.e) > a).length % 2 ? " half2" : " half") : "";
+        const label = e.kind === "client" ? clientName(e.client) + " · " + e.t : e.t;
+        g += `<button class="tl-ev ${e.kind}${lane}" style="left:${pos(a)}%;width:${Math.max(0.6, pos(b) - pos(a))}%" ${e.client ? `data-client="${esc(e.client)}"` : ""} title="${esc(String(Math.floor(a / 60)).padStart(2, "0") + ":" + String(a % 60).padStart(2, "0") + "–" + String(Math.floor(b / 60)).padStart(2, "0") + ":" + String(b % 60).padStart(2, "0") + " · " + label)}">${esc(label)}</button>`; });
+      if (nowM != null && nowM / 60 >= H0 && nowM / 60 <= H1) g += `<div class="tl-now" style="left:${pos(nowM)}%"></div>`;
+      g += `</div>`;
+    });
+    $("#tsLine").innerHTML = g + `</div>`;
+    $("#tsLegend").innerHTML = [["var(--accent)", "kClient"], ["var(--gold)", "kExternal"], ["var(--tag)", "kInternal"], ["var(--line)", "kPersonal"], ["var(--info-bg)", "kOut"]].map(([c, k]) => `<span><i style="background:${c}"></i>${esc(t(k))}</span>`).join("");
+    // heatmap
+    const mx = Math.max(1, ...ppl.flatMap((p) => days_.map((d) => (T.stats?.[p.email]?.[d]?.mins || 0) / 60)));
+    $("#tsHeat").innerHTML = `<thead><tr><th></th>${days_.map((d) => `<th class="${d === todayIso ? "today" : ""}">${esc(dlabel(d))}</th>`).join("")}</tr></thead><tbody>${ppl.map((p) => `<tr><td><b>${esc(p.name)}</b></td>${days_.map((d) => { const o = isOut(p.email, d), h = (T.stats?.[p.email]?.[d]?.mins || 0) / 60;
+      return `<td>${o ? `<button class="hc out" data-tsday="${d}" title="${esc(o.title)}">${esc(t("kOut"))}</button>` : `<button class="hc" data-tsday="${d}" aria-pressed="${d === day}" style="background:${h ? `color-mix(in srgb, var(--accent) ${Math.round(15 + (h / mx) * 70)}%, transparent)` : "var(--tag)"}">${h ? h.toFixed(1) : "·"}</button>`}</td>`; }).join("")}</tr>`).join("")}</tbody>`;
+    // client coverage, next 14 days
+    const ahead = (T.events || []).filter((e) => e.kind === "client" && ilDate(e.s) >= todayIso && ilDate(e.s) <= days_[days_.length - 1]);
+    const byC = {}; ahead.forEach((e) => { (byC[e.client] ||= { n: 0, who: new Set(), next: e.s }).n++; e.people.forEach((x) => byC[e.client].who.add(pName(x))); if (e.s < byC[e.client].next) byC[e.client].next = e.s; });
+    const none = S.clients.filter((c) => !byC[c.key] && c.contract && !["ended", "pipeline"].includes(c.contract.relationship) && !c.intel?.sharedFrom).map((c) => c.key);
+    $("#tsCoverage").innerHTML = `<div class="cov2">${Object.entries(byC).sort((a, b) => a[1].next.localeCompare(b[1].next)).map(([k, v]) => `<div class="r"><div><button class="link-btn" style="font-size:13px;font-weight:600;color:var(--ink)" data-client="${esc(k)}">${cname(k, 18)}</button><div class="who">${esc([...v.who].join(", "))}</div></div><span class="note">${esc(dlabel(ilDate(v.next)))} · ${esc(t("tsMeet", v.n))}</span></div>`).join("")}</div>${none.length ? `<p class="note" style="margin:12px 0 0">${esc(t("tsNothing"))} ${none.map((k) => esc(clientName(k))).join(", ")}</p>` : ""}`;
+    const outs = (T.out || []).filter((o) => o.to >= todayIso).sort((a, b) => a.from.localeCompare(b.from));
+    $("#tsOutList").innerHTML = outs.length ? `<ul class="tnews">${outs.map((o) => `<li><span class="dd">${esc(fmtD(o.from).replace(/ \d{4}$/, ""))}</span><span><b>${esc(pName(o.person))}</b> · ${esc(o.title)} · ${esc(fmtD(o.from))} → ${esc(fmtD(o.to))}</span></li>`).join("")}</ul>` : `<p class="note" style="margin:0">${esc(t("tsNoOut"))}</p>`;
+    const cf = (T.conflicts || []).filter((c) => c.date >= todayIso);
+    $("#tsConfList").innerHTML = cf.length ? `<ul class="tnews">${cf.slice(0, 12).map((c) => `<li><span class="dd">${esc(fmtD(c.date).replace(/ \d{4}$/, ""))}</span><span><b>${esc(pName(c.person))}</b> · ${esc(c.at)} · ${esc(c.a)} / ${esc(c.b)}</span></li>`).join("")}</ul>` : `<p class="note" style="margin:0">${esc(t("tsNoConf"))}</p>`;
+  }
   function renderTools() {
     renderWeekly(); renderDfs();
     const tools = S.tools, sp = S.meta?.spend || {};
@@ -1308,6 +1422,7 @@ ${context()}`;
     if (b.id === "resBtn") { UI.showRes = !UI.showRes; return renderBrief(); }
     if ("anew" in d) { UI.alertNew = true; UI.alertCat = "all"; UI.alertSev = "all"; return gotoTab("alerts"); }
     if ("fnew" in d) { UI.alertNew = !UI.alertNew; return renderAlerts(); }
+    if (d.tsday) { UI.tsDay = d.tsday; return renderTeamTab(); }
     if (b.id === "olderBtn") { UI.olderAg = !UI.olderAg; return renderContracts(); }
     if (b.id === "groupBtn") { UI.group = !UI.group; return renderAlerts(); }
     if (d.sev) { UI.alertNew = false; UI.alertSev = d.sev; UI.alertCat = "all"; return gotoTab("alerts"); }
@@ -1375,6 +1490,7 @@ ${context()}`;
     db.doc("meta/state").onSnapshot((s) => { S.meta = s.exists ? s.data() : null; syncShards(S.meta?.shards); showRefresh(); render(); }, err);
     db.doc("briefing/latest").onSnapshot((s) => { S.briefing = s.exists ? s.data() : null; render(); }, err);
     db.doc("sources/toolchecks").onSnapshot((s) => { const d = s.exists ? s.data() : {}; S.toolchecks = Object.fromEntries((d.items || []).filter((x) => x.checkedAt).map((x) => [slug(x.tool || ""), x])); S.toolcheckAt = d.checkedAt || null; S.toolPlan = d.plan || []; render(); }, err);
+    db.doc("snapshot/team").onSnapshot((s) => { S.team = s.exists ? s.data() : null; render(); }, err);
     db.doc("snapshot/dataforseo").onSnapshot((s) => { S.dfs = s.exists ? s.data() : null; render(); }, err);
     db.doc("snapshot/favicons").onSnapshot((s) => { S.icons = (s.exists && s.data().icons) || {}; render(); }, err);
     db.collection("acks").limit(1000).onSnapshot(async (q) => {
