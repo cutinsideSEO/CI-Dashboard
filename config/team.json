@@ -1,0 +1,4 @@
+{
+  "note": "Who appears in the Team tab. Calendars of excluded addresses are not collected or shown.",
+  "exclude": ["yaniv@cutinside.com", "dima@cutinside.com"]
+}

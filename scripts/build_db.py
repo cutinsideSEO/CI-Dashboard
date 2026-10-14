@@ -581,6 +581,11 @@ def build():
     # classify each event, then per-person daily load, double bookings and who is out.
     team_doc = None
     tc = load("team_calendar.json", None)
+    team_cfg = json.load(open("config/team.json")) if os.path.exists("config/team.json") else {}
+    excl = {x.lower() for x in team_cfg.get("exclude") or []}
+    if tc and excl:
+        tc = dict(tc, people=[p_ for p_ in tc.get("people") or [] if p_.get("email", "").lower() not in excl],
+                  events=[dict(e, people=[x for x in e.get("people") or [] if x.lower() not in excl]) for e in tc.get("events") or []])
     if tc:
         OOO_T = {"Out of office", "Abroad", "Vacation", "Reserve duty", "Sick"}
         def parse_dt(x):

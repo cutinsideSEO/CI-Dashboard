@@ -108,7 +108,7 @@ The previous state is in `sources/meetings`. Copy it to `data/meetings/` in step
 
 ## 4b2. Team calendars → `data/team_calendar.json` (read-only)
 
-For every teammate (or, michael, yarden, maor, amitg, maya, leonid, yuval, guy, seo, plus any other @cutinside.com address that shows up in invites), call `Google_Calendar.list_events` with `calendarId=<email>` from 7 days ago to 14 days ahead. A background agent works well for this. Merge the same event across calendars by its id, and save `{generatedAt, from, to, people[{email, name, access}], events[{id, start, end, allDay, title, people[], declined[], attendees[], organizer, eventType, transparency, url}]}`.
+For every teammate (or, michael, yarden, maor, amitg, maya, leonid, yuval, guy, seo, plus any other @cutinside.com address that shows up in invites, except the addresses in `config/team.json` → `exclude`), call `Google_Calendar.list_events` with `calendarId=<email>` from 7 days ago to 14 days ahead. A background agent works well for this. Merge the same event across calendars by its id, and save `{generatedAt, from, to, people[{email, name, access}], events[{id, start, end, allDay, title, people[], declined[], attendees[], organizer, eventType, transparency, url}]}`.
 
 - **Privacy:** private or personal-looking events become "Personal" with no attendees or link. Out-of-office blocks get a neutral title (Out of office, Abroad, Vacation, Reserve duty, Sick). Never include descriptions.
 - **Use:** the build turns this into the **Team** tab (daily timeline, load heatmap, client coverage, out of office, double bookings). Ask Opus 5.5 uses it too.
