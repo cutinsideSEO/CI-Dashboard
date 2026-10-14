@@ -101,6 +101,7 @@ The previous state is in `sources/meetings`. Copy it to `data/meetings/` in step
    - Drive meeting transcripts and notes: "Transcript:", Gemini notes, Timeless notes, "סיכום", "פגישה", searched with `modifiedTime > last run`;
    - new daily-log entries in the client brains;
    - Google Calendar events from the last 2 days.
+   Also save the next 7 days of calendar events as `data/calendar.json`, a list of `{start, end, title, attendees: [emails], url}` (`url` is the event's `htmlLink`). The build matches them to clients by attendee domain or client name, adds the dated meeting items from each brain's `upcoming` list, and shows the result as **Client meetings this week** on the overview.
 2. For each client that had a meeting, add it to `meetings` and drop the oldest past 6. Refresh `themes`, `highlights` and `relationship` if the meeting changed them.
 3. Add Hebrew for every new string to `tm`. Read only: never edit Drive, Calendar or Gmail.
 

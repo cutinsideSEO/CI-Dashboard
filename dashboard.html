@@ -280,6 +280,21 @@ tbody tr:hover { background: var(--line-subtle); }
 .finder input::placeholder { color: var(--ink-3); }
 @media (max-width: 720px) { .finder { display: none; } }
 .more-row { margin-top: 10px; }
+.changes { margin-top: 10px; font-size: 12.5px; color: var(--ink-2); }
+.changes .link-btn { font-size: 12.5px; }
+.changes ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.changes li { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--line-strong); }
+.pill.new { background: var(--accent); color: var(--on-accent); }
+.age { color: var(--ink-3); }
+.ahead { display: grid; }
+.ahead .day { font: 600 11px var(--f-body); text-transform: uppercase; letter-spacing: .05em; color: var(--accent-text); padding: 12px 0 4px; }
+.ahead .day:first-child { padding-top: 0; }
+:root[lang="he"] .ahead .day { letter-spacing: 0; }
+.ahead .mt { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line-subtle); }
+.ahead .day + .mt { border-top: 0; }
+.ahead .tm { font: 700 13px var(--f-display); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.ahead .ti { font-size: 13px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ahead .who2 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 600; font-size: 13.5px; }
 .stack { display: grid; gap: 24px; align-content: start; min-width: 0; }
 .feed .row { grid-template-columns: 78px minmax(0, 1fr); }
 
@@ -388,7 +403,7 @@ tbody tr:hover { background: var(--line-subtle); }
         <div class="brief-foot"><button class="link-btn" id="briefMore" hidden></button><span class="meta" id="briefMeta"></span></div>
       </div>
       <div class="card pulse">
-        <div><div class="caption" data-i18n="pulseTitle">Open items</div><div class="sevstack" id="sevstack" style="margin-top:8px"></div></div>
+        <div><div class="caption" data-i18n="pulseTitle">Open items</div><div class="sevstack" id="sevstack" style="margin-top:8px"></div><div class="changes" id="changes"></div></div>
         <div class="kpis" id="kpis"></div>
       </div>
     </div>
@@ -399,6 +414,10 @@ tbody tr:hover { background: var(--line-subtle); }
           <div class="more-row"><button class="link-btn arrow" data-goto="alerts" id="seeAllBtn" data-i18n="seeAll">See all alerts</button></div></div>
       </div>
       <div class="stack">
+        <div class="card" id="aheadCard" hidden>
+          <div class="card-h"><h2 data-i18n="aheadTitle">Client meetings this week</h2><span class="sub" data-i18n="aheadSub">From Google Calendar and the client brains. Prep asks Opus for a one-page brief.</span></div>
+          <div class="card-b"><div class="ahead" id="ahead"></div></div>
+        </div>
         <div class="card">
           <div class="card-h"><h2 data-i18n="upcomingTitle">Coming up</h2><span class="sub" data-i18n="next90">Renewals and contract ends, next 90 days</span></div>
           <div class="card-b"><div id="upcoming"></div></div>
@@ -570,6 +589,9 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
       covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
+      newB: "New", openFor: "open {0}d", chSince: "Since the {0} refresh:", chNew: "{0} new", chRes: "{0} resolved", chShow: "Show resolved", chHide: "Hide resolved", fNew: "New since last refresh",
+      aheadTitle: "Client meetings this week", aheadSub: "From Google Calendar and the client brains. Prep asks Opus for a one-page brief.", prep: "Prep", internalM: "internal", approxM: "this week", allDay: "—", fromBrain: "from the brain",
+      askPrep: "Prepare me for this meeting: {0} — \"{1}\" on {2}. Give a one-page brief: where the relationship stands, what we promised and still owe, what changed in performance since the last meeting and why, contract and commercial points, risks to raise or avoid, and a suggested agenda with 3-5 points. Use the client brain and recent meetings; look up SurgeOS if needed.",
       dfsTitle: "DataForSEO spend", dfsSub: "Rebuilt from DataForSEO's own task log (last 6 months), as of {0}", dfsBal: "Balance", dfsLasts: "lasts about {0}–{1} days at the recent pace",
       dfs30: "Last 30 days", dfsAvg: "{0}/day on average · {1}/day in the last 7 days", dfsMonth: "This month so far", dfsProj: "on pace for {0} this month",
       dfsDep: "Deposited to date", dfsSpent: "{0} spent · {1} in the last 6 months", dfsDaily: "Daily spend", dfsSpikeL: "Spike: more than twice the 30-day median", dfsOtherL: "Other APIs", dfsAvgL: "30-day average",
@@ -650,6 +672,9 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
       covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
+      newB: "חדש", openFor: "פתוח {0} ימים", chSince: "מאז הרענון של {0}:", chNew: "{0} חדשות", chRes: "{0} נסגרו", chShow: "הצג מה נסגר", chHide: "הסתר", fNew: "חדשות מאז הרענון הקודם",
+      aheadTitle: "פגישות לקוחות השבוע", aheadSub: "מ-Google Calendar ומה-client brains. \"הכנה\" מבקש מ-Opus תדריך של עמוד אחד.", prep: "הכנה", internalM: "פנימית", approxM: "השבוע", allDay: "—", fromBrain: "מה-brain",
+      askPrep: "תכין אותי לפגישה הזו: {0} — \"{1}\" ב-{2}. תן תדריך של עמוד אחד: איפה עומדים היחסים, מה הבטחנו ועוד חייבים, מה השתנה בביצועים מאז הפגישה הקודמת ולמה, נקודות חוזה ומסחריות, סיכונים שכדאי להעלות או להימנע מהם, ואג'נדה מוצעת של 3-5 נקודות. תשתמש ב-client brain ובפגישות האחרונות; תבדוק ב-SurgeOS אם צריך.",
       dfsTitle: "הוצאות DataForSEO", dfsSub: "שוחזר מיומן המשימות של DataForSEO (6 חודשים אחרונים), נכון ל-{0}", dfsBal: "יתרה", dfsLasts: "מספיקה לכ-{0}–{1} ימים בקצב האחרון",
       dfs30: "30 הימים האחרונים", dfsAvg: "{0} ליום בממוצע · {1} ליום ב-7 הימים האחרונים", dfsMonth: "החודש עד עכשיו", dfsProj: "בקצב של {0} לחודש",
       dfsDep: "הופקד עד היום", dfsSpent: "{0} הוצאו · {1} ב-6 החודשים האחרונים", dfsDaily: "הוצאה יומית", dfsSpikeL: "קפיצה: יותר מפי 2 מהחציון של 30 יום", dfsOtherL: "ממשקים אחרים", dfsAvgL: "ממוצע 30 יום",
@@ -777,6 +802,8 @@ tbody tr:hover { background: var(--line-subtle); }
   function renderBrief() {
     const open = S.alerts.filter((a) => !isAcked(a));
     $("#sevstack").innerHTML = ["high", "medium", "low"].map((s) => `<button class="sev ${s}" data-sev="${s}"><b>${open.filter((a) => a.severity === s).length}</b><span>${t(SEVL[s])}</span></button>`).join("");
+    const ch = S.meta?.changes;
+    $("#changes").innerHTML = ch && ch.since ? `${esc(t("chSince", new Date(ch.since).toLocaleString(LOC(), { weekday: "short", hour: "2-digit", minute: "2-digit" })))} <button class="link-btn" data-anew>${esc(t("chNew", ch.new.length))}</button> · ${ch.resolved.length ? `<button class="link-btn" id="resBtn">${esc(t("chRes", ch.resolved.length))}</button>` : esc(t("chRes", 0))}${UI.showRes && ch.resolved.length ? `<ul>${ch.resolved.map((r) => `<li>${esc((LANG === "he" && r.he?.title) || r.title)}</li>`).join("")}</ul>` : ""}` : "";
     const b = S.briefing; if (!b) return;
     $("#briefDate").textContent = t("briefEyebrow") + " · " + new Date(b.generatedAt).toLocaleString(LOC(), { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     $("#briefTitle").textContent = L(b, "title") || t("briefEmptyTitle");
@@ -819,7 +846,7 @@ tbody tr:hover { background: var(--line-subtle); }
     const src = a.sourceUrl ? `<a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.source || t("source"))}</a>` : esc(a.source || "");
     const who = a.client && !inGroup ? `<button class="link-btn who" data-client="${esc(a.client)}">${cname(a.client, 16)}</button>` : `<span class="who">${esc(t(CATL[a.category] || a.category))}</span>`;
     return `<div class="alert ${esc(a.severity)} ${acked ? "acked" : ""} ${compact ? "compact" : ""}"><div style="min-width:0">
-      <div class="ah">${who}<span class="sv">${esc(t(SEVL[a.severity] || "sevLow"))}</span>${dueTag(a)}</div>
+      <div class="ah">${who}<span class="sv">${esc(t(SEVL[a.severity] || "sevLow"))}</span>${a.isNew ? `<span class="pill new">${esc(t("newB"))}</span>` : ""}${dueTag(a)}${!a.isNew && a.firstSeen && Date.now() - new Date(a.firstSeen) > 2 * 864e5 ? `<span class="age">${esc(t("openFor", Math.round((Date.now() - new Date(a.firstSeen)) / 864e5)))}</span>` : ""}</div>
       <div class="t">${esc(bareTitle(a))}</div><div class="dt">${esc(L(a, "detail"))}</div>
       ${compact ? "" : `<div class="am"><span class="pill mute">${esc(t(CATL[a.category] || a.category))}</span>${a.dueDate ? `<span>${esc(fmtD(a.dueDate))}</span>` : ""}${src ? `<span>${src}</span>` : ""}${acked ? `<span>${esc(t("ackBy", by, ago(acked.at)))}</span>` : ""}</div>`}</div>
       <div class="side"><button class="mini ${acked ? "" : "ok"}" data-ack="${esc(a.id)}">${esc(acked ? t("reopen") : t("markDone"))}</button><button class="mini" data-askalert="${esc(a.id)}">${esc(t("askOpus"))}</button></div></div>`;
@@ -917,8 +944,18 @@ tbody tr:hover { background: var(--line-subtle); }
       return `<button class="row" data-client="${esc(c.key)}"><div><div class="num" style="font-weight:700">${esc(fmtD(m.date))}</div><div class="sub note">${esc(rel(days(m.date)))}</div></div>
       <div style="min-width:0"><div class="t">${cname(c.key, 18)}<span class="note">·</span><span>${esc(h.title || m.title)}</span>${moodTag(m.sentiment, " ")}</div><div class="s">${esc(h.summary || m.summary || "")}</div></div></button>`; }).join("") : `<div class="empty">${esc(t("noMeetings"))}</div>`;
   }
+  function renderAhead() {
+    const l = S.meta?.meetingsAhead || [], card = $("#aheadCard"); card.hidden = !l.length; if (!l.length) return;
+    let html = "", last = "";
+    l.forEach((m, i) => {
+      if (m.date !== last) { last = m.date; const d = days(m.date); html += `<div class="day">${esc(d === 0 ? t("today") : new Date(m.date + "T00:00:00Z").toLocaleDateString(LOC(), { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" }))}</div>`; }
+      const title = (LANG === "he" && m.he?.title) || m.title;
+      html += `<div class="mt"><div class="tm">${esc(m.approx ? t("approxM") : m.time || t("allDay"))}</div><div style="min-width:0"><div class="who2"><button class="link-btn" style="font-size:13.5px;font-weight:600;color:var(--ink)" data-client="${esc(m.client)}">${cname(m.client, 18)}</button>${m.internal ? `<span class="pill mute">${esc(t("internalM"))}</span>` : ""}</div><div class="ti">${m.url ? `<a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(title)}</a>` : esc(title)}${m.source === "Client brain" ? ` <span class="note">· ${esc(t("fromBrain"))}</span>` : ""}</div></div><button class="mini" data-prep="${i}">${esc(t("prep"))}</button></div>`;
+    });
+    $("#ahead").innerHTML = html;
+  }
   function renderHealth() {
-    renderFeed();
+    renderFeed(); renderAhead();
     if (!S.clients.length) { $("#radar").innerHTML = `<tbody><tr><td class="empty">${esc(t("loading"))}</td></tr></tbody>`; return; }
     const open = S.alerts.filter((a) => !isAcked(a) && !isHygiene(a));
     const cnt = (k) => { const l = open.filter((a) => a.client === k); return [l.length, l.filter((a) => a.severity === "high").length]; };
@@ -946,9 +983,10 @@ tbody tr:hover { background: var(--line-subtle); }
     const vis = (a) => (UI.showAcked || !isAcked(a)) && (!q || [a.title, a.detail, a.he?.title, a.he?.detail, a.client && clientName(a.client)].join(" ").toLowerCase().includes(q));
     $("#alertFilters").innerHTML = cats.map((c) => `<button class="chip" data-acat="${c}" aria-pressed="${UI.alertCat === c}">${esc(c === "all" ? t("fAll") : t(CATL[c]))}<span class="n">${S.alerts.filter((a) => (c === "all" || a.category === c) && vis(a)).length}</span></button>`).join("")
       + `<span style="width:8px"></span>` + ["all", "high", "medium", "low"].map((s) => `<button class="chip" data-asev="${s}" aria-pressed="${UI.alertSev === s}">${esc(s === "all" ? t("fAnySev") : t(SEVL[s]))}</button>`).join("")
-      + `<button class="chip" data-acked aria-pressed="${UI.showAcked}">${esc(t("fShowAcked"))}</button>`;
+      + `<button class="chip" data-acked aria-pressed="${UI.showAcked}">${esc(t("fShowAcked"))}</button>`
+      + (S.meta?.changes ? `<button class="chip" data-fnew aria-pressed="${!!UI.alertNew}">${esc(t("fNew"))}<span class="n">${S.alerts.filter((a) => a.isNew).length}</span></button>` : "");
     $("#groupBtn").setAttribute("aria-pressed", String(UI.group));
-    const l = sortAlerts(S.alerts.filter((a) => (UI.alertCat === "all" || a.category === UI.alertCat) && (UI.alertSev === "all" || a.severity === UI.alertSev) && vis(a)));
+    const l = sortAlerts(S.alerts.filter((a) => (UI.alertCat === "all" || a.category === UI.alertCat) && (UI.alertSev === "all" || a.severity === UI.alertSev) && (!UI.alertNew || a.isNew) && vis(a)));
     let html = "";
     if (!l.length) html = `<div class="empty">${esc(t("noMatch"))}</div>`;
     else if (!UI.group) html = `<div class="alist">${l.map((a) => alertRow(a)).join("")}</div>`;
@@ -1235,9 +1273,12 @@ ${context()}`;
     if (d.goto) return gotoTab(d.goto);
     if (b.id === "briefMore") { UI.briefOpen = !UI.briefOpen; return renderBrief(); }
     if (b.id === "feedMore") { UI.feedAll = !UI.feedAll; return renderFeed(); }
+    if (b.id === "resBtn") { UI.showRes = !UI.showRes; return renderBrief(); }
+    if ("anew" in d) { UI.alertNew = true; UI.alertCat = "all"; UI.alertSev = "all"; return gotoTab("alerts"); }
+    if ("fnew" in d) { UI.alertNew = !UI.alertNew; return renderAlerts(); }
     if (b.id === "olderBtn") { UI.olderAg = !UI.olderAg; return renderContracts(); }
     if (b.id === "groupBtn") { UI.group = !UI.group; return renderAlerts(); }
-    if (d.sev) { UI.alertSev = d.sev; UI.alertCat = "all"; return gotoTab("alerts"); }
+    if (d.sev) { UI.alertNew = false; UI.alertSev = d.sev; UI.alertCat = "all"; return gotoTab("alerts"); }
     if (d.acat) { UI.alertCat = d.acat; return renderAlerts(); }
     if (d.asev) { UI.alertSev = d.asev; return renderAlerts(); }
     if ("acked" in d) { UI.showAcked = !UI.showAcked; return renderAlerts(); }
@@ -1247,6 +1288,7 @@ ${context()}`;
     if (d.askalert) { const a = S.alerts.find((x) => x.id === d.askalert); closeDrawer(); return ask(t("askAlert", L(a, "title"), L(a, "detail"))); }
     if (d.askclient) { const c = S.clients.find((x) => x.key === d.askclient); closeDrawer(); return ask(t("askClient", L(c, "name") || c.name)); }
     if (d.suggest) return ask(d.suggest);
+    if (d.prep) { const m = (S.meta?.meetingsAhead || [])[+d.prep]; if (m) return ask(t("askPrep", clientName(m.client), (LANG === "he" && m.he?.title) || m.title, fmtD(m.date) + (m.time ? " " + m.time : ""))); }
     if ("copyprompt" in d) { navigator.clipboard.writeText(wcPrompt()).then(() => toast(t("wcCopied")), () => { const r = document.createRange(); r.selectNodeContents($("#wcPrompt")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast(t("wcCopyFail")); }); return; }
     if ("close" in d) return closeDrawer();
     if (d.client) return openClient(d.client);

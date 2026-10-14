@@ -487,6 +487,51 @@ def build():
         a = alerts["agency-weekly-tool-check"]
         a["he"] = {"title": he(a["title"]), "detail": he(a["detail"])}
 
+    # Client meetings in the next 7 days: Google Calendar (data/calendar.json, saved by the refresh) plus dated
+    # meeting items in the client brains' "upcoming" lists. Calendar wins when both name the same client and day.
+    MEET_RE = re.compile(r"\b(meeting|sync|QBR|call|training)\b", re.I)
+    UP_RE = re.compile(r"^(Week of\s+)?(\d{4}-\d{2}-\d{2})(?:\s*\(\w+\))?(?:\s+(\d{1,2}:\d{2}))?\s*[–:-]\s*(.+)$")
+    ahead, seen_md = [], set()
+    def find_client(title, emails):
+        doms = {e.split("@")[-1].lower() for e in emails if not e.lower().endswith("@cutinside.com") and "@resource." not in e}
+        for k, c in client_docs.items():
+            d = (c.get("domain") or "").lower().replace("www.", "")
+            if d and any(x == d or x.endswith("." + d) for x in doms):
+                return c["key"], bool(doms)
+        tl = title.lower()
+        for k, c in client_docs.items():
+            names = {c["key"].lower(), (c.get("name") or "").split(" (")[0].lower()}
+            if any(n and len(n) > 2 and re.search(r"\b" + re.escape(n) + r"\b", tl) for n in names):
+                return c["key"], bool(doms)
+        return None, bool(doms)
+    for e in load("calendar.json", []) or []:
+        st = e.get("start") or ""
+        d0 = iso(st[:10])
+        if not d0 or not (0 <= (d0 - TODAY).days <= 7):
+            continue
+        key, external = find_client(e.get("title") or "", e.get("attendees") or [])
+        if not key:
+            continue
+        ahead.append({"date": st[:10], "time": st[11:16] or None, "client": key, "title": e.get("title"), "internal": not external,
+                      "source": "Google Calendar", "url": e.get("url") or None, "attendees": len(e.get("attendees") or [])})
+        seen_md.add((key, st[:10]))
+    for k, c in client_docs.items():
+        if c.get("sharedBrainOf"):
+            continue
+        for u in c.get("upcoming") or []:
+            m = UP_RE.match(u.strip())
+            if not m or not MEET_RE.search(m.group(4)):
+                continue
+            d0 = iso(m.group(2))
+            if not d0 or not (0 <= (d0 - TODAY).days <= 7) or (c["key"], m.group(2)) in seen_md:
+                continue
+            h = he(u)
+            hm = UP_RE.match(h.strip()) if h else None
+            ahead.append({"date": m.group(2), "time": m.group(3), "approx": bool(m.group(1)), "client": c["key"], "title": m.group(4),
+                          "he": {"title": hm.group(4) if hm else h}, "internal": False, "source": "Client brain"})
+            seen_md.add((c["key"], m.group(2)))
+    ahead.sort(key=lambda x: (x["date"], x.get("time") or "99"))
+
     # DataForSEO spend: compact history for the page (from data/dataforseo_usage.json, rebuilt weekly from the free
     # id_list endpoint) plus a balance series that grows by one point per refresh (data/dfs_balance.json).
     dfs_doc = None
@@ -564,6 +609,28 @@ def build():
             if aid in alerts:
                 alerts[aid]["he"] = {"title": he(alerts[aid]["title"]), "detail": he(alerts[aid]["detail"])}
 
+    # Alert lifecycle: keep each alert's first-seen time across runs, and list what is new and what disappeared
+    # since the previous snapshot (prev/snapshot/alerts.json, loaded in step 0 of the refresh).
+    prev_dir = os.environ.get("PREV_DIR", "prev")
+    pa_path = os.path.join(prev_dir, "snapshot", "alerts.json")
+    prev_alerts, prev_at = {}, None
+    if os.path.exists(pa_path):
+        pd_ = json.load(open(pa_path))
+        pd_ = pd_.get("data", pd_)
+        prev_at = pd_.get("updatedAt")
+        prev_alerts = {a["id"]: a for a in pd_.get("items", [])}
+        for k in range(1, 6):
+            extra = os.path.join(prev_dir, "snapshot", f"alerts-{k}.json")
+            if os.path.exists(extra):
+                e2 = json.load(open(extra)); prev_alerts.update({a["id"]: a for a in e2.get("data", e2).get("items", [])})
+    for aid, a in alerts.items():
+        pa = prev_alerts.get(aid)
+        a["firstSeen"] = (pa.get("firstSeen") or pa.get("createdAt")) if pa else NOW
+        a["isNew"] = bool(prev_alerts) and not pa
+    changes = {"since": prev_at, "new": [aid for aid, a in alerts.items() if a.get("isNew")],
+               "resolved": [{"id": aid, "title": pa.get("title"), "he": pa.get("he"), "client": pa.get("client"), "severity": pa.get("severity"), "category": pa.get("category")}
+                            for aid, pa in prev_alerts.items() if aid not in alerts]} if prev_alerts else None
+
     order = {"high": 0, "medium": 1, "low": 2}
     sev_counts = {s: sum(1 for a in alerts.values() if a["severity"] == s) for s in order}
     # refresh history: last 12 runs with the sources that succeeded or failed (source_status.json "failed")
@@ -587,6 +654,8 @@ def build():
             "toolsSheet": "https://docs.google.com/spreadsheets/d/1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU/edit",
             "surgeos": "SurgeOS (Search Console BigQuery mirror, GA4, Peec)", "drive": "Google Drive client folders",
         },
+        "meetingsAhead": ahead,
+        "changes": changes,
         "schedule": os.environ.get("SCHEDULE", "Twice a day, ~07:00 and ~15:00 Israel time"),
         "triggerId": os.environ.get("TRIGGER_ID", "trig_01WDH93AGHQEqNsCiNghRytm"),
     }
