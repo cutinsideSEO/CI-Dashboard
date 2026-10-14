@@ -224,6 +224,15 @@ def build():
     os.makedirs(OUT, exist_ok=True)
     tm = load("tm.json", {})
     TM.update(tm.get("items", tm) if isinstance(tm, dict) else {})
+    # client intelligence: recent meetings, themes, highlights (data/meetings/<key>.json, one per client)
+    intel = {}
+    mdir = os.path.join(DATA, "meetings")
+    if os.path.isdir(mdir):
+        for fn in sorted(os.listdir(mdir)):
+            if fn.endswith(".json"):
+                m = json.load(open(os.path.join(mdir, fn), encoding="utf-8"))
+                TM.update(m.pop("tm", {}) or {})
+                intel[m.get("client") or fn[:-5]] = m
     tools = build_tools()
     perf = load("performance.json", {})
     brains = load("brains.json", [])
@@ -379,6 +388,11 @@ def build():
             alert(f"contract-{key}-missing", "medium", "contracts", f"{disp}: no contract found in Drive",
                   "Active in SurgeOS but no signed agreement was found. Add the contract to the client folder so its end date can be tracked.",
                   client=key, source="Drive search")
+        it = intel.get(match_key(key, intel.keys()) or key) or intel.get((b or {}).get("primaryKey") or "")
+        shared_intel = bool(it) and it.get("client") != key and match_key(key, intel.keys()) is None
+        if it and not shared_intel and (it.get("relationship") or {}).get("mood") == "strained":
+            alert(f"intel-{key}-strained", "medium", "clients", f"{disp}: relationship strained",
+                  (it.get("relationship") or {}).get("why") or "", client=key, source="Recent meetings")
         sev = [a["severity"] for a in alerts.values() if a.get("client") == key]
         health = p.get("health")
         kst = (c.get("contract") or {}).get("status")
@@ -401,6 +415,8 @@ def build():
                                                "overdueTasks", "hoursUsed", "hoursBudget", "surgeosId")},
             "contract": c.get("contract"), "alertCount": len(sev), "updatedAt": NOW,
             "brainFullRead": bool(b.get("fullRead")),
+            "intel": ({k2: it.get(k2) for k2 in ("lastMeeting", "relationship", "meetings", "themes", "highlights", "updatedAt")}
+                      | ({"sharedFrom": it.get("client")} if shared_intel else {})) if it else None,
         }
 
     # Hebrew fields (UI falls back to English where a string is not translated yet)
@@ -414,6 +430,15 @@ def build():
             "wins": he_list((c["perf"] or {}).get("wins")),
             "issues": [{"title": he(i.get("title")), "detail": he(i.get("detail"))} for i in c["issues"]],
         }
+        it = c.get("intel")
+        if it:
+            c["he"]["intel"] = {
+                "why": he((it.get("relationship") or {}).get("why")),
+                "highlights": he_list(it.get("highlights")),
+                "themes": [{"title": he(x.get("title")), "detail": he(x.get("detail"))} for x in it.get("themes") or []],
+                "meetings": [{"title": he(x.get("title")), "summary": he(x.get("summary")), "decisions": he_list(x.get("decisions")),
+                              "followUps": he_list(x.get("followUps"))} for x in it.get("meetings") or []],
+            }
     if briefing and not briefing.get("he"):
         bt, bx = he(briefing.get("title")), he(briefing.get("text"))
         if bt and bx:
@@ -515,6 +540,8 @@ def build():
         put("sources", "tm" if k == 0 else f"tm-{k}", {"items": part, "updatedAt": NOW})
     with open(os.path.join(OUT, "untranslated.json"), "w", encoding="utf-8") as f:
         json.dump(sorted(MISSING), f, ensure_ascii=False, indent=1)
+    if intel:
+        put("sources", "meetings", {"items": list(intel.values()), "updatedAt": NOW})
     for name in ("brains", "contracts", "performance"):
         raw = load(f"{name}.json", None)
         if raw is not None:

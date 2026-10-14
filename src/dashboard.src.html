@@ -165,6 +165,30 @@ main { padding-block: 32px 80px; }
 .srcline { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--ink-3); padding: 4px 2px; }
 .srcline b { color: var(--ink-2); font-weight: 600; }
 
+/* client intelligence */
+.mood { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); }
+.mood i { width: 8px; height: 8px; border-radius: 50%; background: var(--info); display: inline-block; }
+.mood.positive i { background: var(--good); } .mood.strained i, .mood.tense i { background: var(--crit); } .mood.neutral i { background: var(--warn); }
+.hl-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.hl-list li { padding: 10px 14px; border-radius: 10px; background: var(--tag); color: var(--ink); font-size: 13.5px; }
+.mtg { display: grid; gap: 4px; padding: 14px 0; border-top: 1px solid var(--line-subtle); }
+.mtg:first-child { border-top: 0; padding-top: 2px; }
+.mtg .mh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mtg .mh b { font: 600 15px var(--f-display); }
+.mtg .ms { color: var(--ink-2); font-size: 13.5px; }
+.mtg details { font-size: 13px; color: var(--ink-2); }
+.mtg summary { cursor: pointer; color: var(--accent-text); font-size: 12px; font-weight: 500; }
+.mtg details ul { margin: 6px 0 0; }
+.themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.theme { border: 1px solid var(--line-subtle); border-radius: 12px; padding: 12px 14px; background: var(--card); }
+.theme b { display: block; font: 600 14px var(--f-display); margin-bottom: 4px; }
+.theme span { font-size: 12.5px; color: var(--ink-2); }
+.feed .row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--line-subtle); cursor: pointer; text-align: start; background: none; border-inline: 0; border-bottom: 0; width: 100%; color: inherit; font: inherit; }
+.feed .row:first-child { border-top: 0; }
+.feed .row:hover .t { color: var(--accent-text); }
+.feed .t { font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.feed .s { font-size: 12.5px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
 /* client cards */
 .cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
 .cl { text-align: start; background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; padding: 20px; cursor: pointer; display: grid; gap: 10px; min-width: 0; box-shadow: var(--shadow-card); transition: transform .15s var(--ease), border-color .15s var(--ease); }
@@ -302,6 +326,10 @@ tbody tr:hover { background: var(--line-subtle); }
       </div>
     </div>
     <div class="card">
+      <div class="card-h"><h2 data-i18n="feedTitle">Latest client meetings</h2><span class="sub" data-i18n="feedSub">What was discussed with clients recently, from the client brains, meeting notes and calendar</span></div>
+      <div class="card-b"><div class="feed" id="meetFeed"></div></div>
+    </div>
+    <div class="card">
       <div class="card-h"><h2 data-i18n="runway">Contract runway</h2><span class="sub" data-i18n="runwaySub">Each client's latest agreement, from today to its end date</span></div>
       <div class="card-b"><div class="tl" id="timeline"></div>
         <div class="legend"><span><i style="background:var(--crit)"></i><span data-i18n="lg1">Ends within 30 days or expired</span></span><span><i style="background:var(--warn)"></i><span data-i18n="lg2">31–90 days</span></span><span><i style="background:var(--accent)"></i><span data-i18n="lg3">More than 90 days</span></span><span><i style="background:var(--info)"></i><span data-i18n="lg4">No end date in the contract</span></span></div></div>
@@ -435,6 +463,9 @@ tbody tr:hover { background: var(--line-subtle); }
       wcTitle: "Weekly browser check", wcNever: "Not run yet", wcLast: "Last run {0}", wcPlan: "{0} tools to check · {1} to confirm cancelled",
       wcSteps: ["Open the Claude desktop app on your computer, with Claude in Chrome connected and signed in to the tools.", "Create a scheduled task that runs weekly (e.g. Sunday 08:00) and paste the prompt below.", "Run it once now. Results appear here and in the Usage column as soon as it finishes."],
       wcCopy: "Copy the task prompt", wcCopied: "Prompt copied. Paste it into a scheduled task in the Claude desktop app.", wcCopyFail: "Couldn't copy. Select the text and copy it.", wcCancel: "Confirm cancelled:", wcResults: "{0} checked · {1} need attention",
+      feedTitle: "Latest client meetings", feedSub: "What was discussed with clients recently, from the client brains, meeting notes and calendar", noMeetings: "No meetings found yet.",
+      iHighlights: "Highlights", iMeetings: "Recent meetings", iThemes: "Main topics", iRelationship: "Relationship", iDecisions: "Decisions and action items", iLastMeeting: "Last meeting {0}", iShared: "From the {0} meetings",
+      moodPositive: "Positive", moodNeutral: "Neutral", moodStrained: "Strained", moodTense: "Tense", mClient: "Client", mInternal: "Internal", attendees: "With",
       dFee: "Monthly fee", brainFull: "Whole brain read", brainSummary: "Summary of the brain's main files", sharedBrain: "Covered by the {0} brain",
     },
     he: {
@@ -495,6 +526,9 @@ tbody tr:hover { background: var(--line-subtle); }
       wcTitle: "בדיקת דפדפן שבועית", wcNever: "עוד לא רצה", wcLast: "רצה לאחרונה {0}", wcPlan: "{0} כלים לבדיקה · {1} לווידוא ביטול",
       wcSteps: ["פותחים את אפליקציית Claude לדסקטופ במחשב, עם Claude in Chrome מחובר ומחובר לכלים.", "יוצרים משימה מתוזמנת שבועית (למשל ראשון 08:00) ומדביקים את הפרומפט שלמטה.", "מריצים פעם אחת עכשיו. התוצאות יופיעו כאן ובעמודת השימוש מיד בסיום."],
       wcCopy: "העתקת הפרומפט למשימה", wcCopied: "הפרומפט הועתק. הדביקו אותו במשימה מתוזמנת באפליקציית Claude לדסקטופ.", wcCopyFail: "ההעתקה נכשלה. סמנו את הטקסט והעתיקו.", wcCancel: "לוודא ביטול:", wcResults: "{0} נבדקו · {1} דורשים טיפול",
+      feedTitle: "פגישות אחרונות עם לקוחות", feedSub: "מה דובר עם לקוחות לאחרונה, מה-client brains, מסיכומי פגישות ומהיומן", noMeetings: "עדיין לא נמצאו פגישות.",
+      iHighlights: "הדברים החשובים", iMeetings: "פגישות אחרונות", iThemes: "נושאים מרכזיים", iRelationship: "מצב היחסים", iDecisions: "החלטות ומשימות", iLastMeeting: "פגישה אחרונה {0}", iShared: "מתוך הפגישות של {0}",
+      moodPositive: "חיובי", moodNeutral: "ניטרלי", moodStrained: "מתוח", moodTense: "מתוח", mClient: "לקוח", mInternal: "פנימי", attendees: "עם",
       dFee: "תשלום חודשי", brainFull: "ה-brain נקרא במלואו", brainSummary: "תקציר של קבצי ה-brain העיקריים", sharedBrain: "מכוסה ע\"י ה-brain של {0}",
     },
   };
@@ -705,11 +739,24 @@ tbody tr:hover { background: var(--line-subtle); }
     const w = c.perf?.w28 || {}, k = c.contract, kd = k?.endDate ? days(k.endDate) : null;
     const kchip = !k ? `<span class="pill mute">${esc(t("noContract"))}</span>` : kd == null ? `<span class="pill unknown">${esc(t("contractNoEnd"))}</span>` : `<span class="pill ${kd < 0 ? "expired" : kd <= 30 ? "critical" : kd <= 90 ? "soon" : "ok"}">${esc(kd < 0 ? t("contractEnded") : t("contractDays", kd))}</span>`;
     return `<button class="cl" data-client="${esc(c.key)}"><div class="top"><div style="min-width:0;display:flex;gap:12px;align-items:center">${logo(c.key, 36)}<div style="min-width:0"><div class="nm">${esc(L(c, "name") || c.name)}</div><div class="dom">${esc(c.domain || "")}</div></div></div><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span></div>
-      <div class="hl">${esc(L(c, "headline") || L(c, "summary") || "")}</div>
+      <div class="hl">${esc((IL(c).highlights || c.intel?.highlights || [])[0] || L(c, "headline") || L(c, "summary") || "")}</div>
+      ${c.intel?.lastMeeting ? `<div class="mood ${esc(c.intel.relationship?.mood || "")}"><i></i>${esc(t("iLastMeeting", rel(days(c.intel.lastMeeting))))}</div>` : ""}
       <div class="stats"><div><div class="num">${fmtN(w.clicks)}</div><div class="note">${pct(w.clicksChangePct) || esc(t("d28"))} · ${esc(t("clicks"))}</div></div>${spark(c.perf?.spark28)}</div>
       <div class="foot">${kchip}${c.alertCount ? `<span class="pill mute">${esc(c.alertCount > 1 ? t("alertsNs", c.alertCount) : t("alertsN", 1))}</span>` : ""}</div></button>`;
   }
+  const MOOD = { positive: "moodPositive", neutral: "moodNeutral", strained: "moodStrained", tense: "moodTense" };
+  const IL = (c) => (LANG === "he" && c?.he?.intel) || {};
+  const moodTag = (m, label) => (m ? `<span class="mood ${esc(m)}"><i></i>${esc(label || t(MOOD[m] || "moodNeutral"))}</span>` : "");
+  function renderFeed() {
+    const rows = [];
+    S.clients.forEach((c) => { const it = c.intel; if (!it || it.sharedFrom) return; (it.meetings || []).forEach((m, i) => { if (m.type !== "internal") rows.push({ c, m, i }); }); });
+    rows.sort((a, b) => String(b.m.date).localeCompare(String(a.m.date)));
+    $("#meetFeed").innerHTML = rows.length ? rows.slice(0, 10).map(({ c, m, i }) => { const h = IL(c).meetings?.[i] || {};
+      return `<button class="row" data-client="${esc(c.key)}"><div><div class="num" style="font-weight:700">${esc(fmtD(m.date))}</div><div class="sub note">${esc(rel(days(m.date)))}</div></div>
+      <div style="min-width:0"><div class="t">${cname(c.key, 18)}<span class="note">·</span><span>${esc(h.title || m.title)}</span>${moodTag(m.sentiment, " ")}</div><div class="s">${esc(h.summary || m.summary || "")}</div></div></button>`; }).join("") : `<div class="empty">${esc(t("noMeetings"))}</div>`;
+  }
   function renderHealth() {
+    renderFeed();
     if (!S.clients.length) { $("#healthGrid").innerHTML = `<div class="empty">${esc(t("loading"))}</div>`; return; }
     const o = { risk: 0, watch: 1, good: 2 };
     $("#healthGrid").innerHTML = S.clients.slice().sort((a, b) => (o[a.status] ?? 3) - (o[b.status] ?? 3) || (b.perf?.w28?.clicks || 0) - (a.perf?.w28?.clicks || 0)).map(clientCard).join("");
@@ -746,6 +793,16 @@ tbody tr:hover { background: var(--line-subtle); }
       <div><div class="eyebrow ltr" style="direction:ltr;text-align:start">${esc(c.domain || "")}</div><h2 style="margin-top:8px;display:flex;gap:14px;align-items:center">${logo(key, 44)}<span>${esc(nm)}</span></h2><div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span>${(c.services || []).map((s) => `<span class="pill mute">${esc(s)}</span>`).join("")}</div></div>
       ${L(c, "summary") ? `<div><h3>${esc(t("dBrain"))}</h3><p style="margin:0;color:var(--ink-2)">${esc(L(c, "summary"))}</p><p class="note" style="margin:6px 0 0">${[c.lastBrainUpdate ? t("dBrainUpdated", fmtD(c.lastBrainUpdate)) : "", c.sharedBrainOf ? t("sharedBrain", c.sharedBrainOf) : c.brainFullRead ? t("brainFull") : t("brainSummary")].filter(Boolean).map(esc).join(" · ")}</p></div>` : `<p class="note">${esc(t("dNoBrain"))}</p>`}
       ${c.contract?.monthlyFee ? `<div class="mgrid"><div class="m"><div class="l">${esc(t("dFee"))}</div><div class="v">${fmtMoney(c.contract.monthlyFee, c.contract.currency)}</div></div></div>` : ""}
+      ${c.intel ? (() => { const it = c.intel, h = IL(c), mt = it.meetings || [], hl = h.highlights || it.highlights || [];
+        return `${it.relationship?.mood ? `<div><h3>${esc(t("iRelationship"))}</h3><p style="margin:0;color:var(--ink-2)">${moodTag(it.relationship.mood)} ${esc(h.why || it.relationship.why || "")}</p>${it.sharedFrom ? `<p class="note" style="margin:4px 0 0">${esc(t("iShared", clientName(it.sharedFrom)))}</p>` : ""}</div>` : ""}
+        ${hl.length ? `<div><h3>${esc(t("iHighlights"))}</h3><ul class="hl-list">${hl.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+        ${mt.length ? `<div><h3>${esc(t("iMeetings"))}</h3>${mt.map((m, i) => { const hm = h.meetings?.[i] || {}, dec = hm.decisions || m.decisions || [], fu = hm.followUps || m.followUps || [];
+          return `<div class="mtg"><div class="mh"><span class="num" style="font-weight:700">${esc(fmtD(m.date))}</span><b>${esc(hm.title || m.title)}</b><span class="pill mute">${esc(t(m.type === "internal" ? "mInternal" : "mClient"))}</span>${moodTag(m.sentiment)}</div>
+          ${(m.attendees || []).length ? `<div class="note">${esc(t("attendees"))}: ${esc(m.attendees.join(", "))}</div>` : ""}
+          <div class="ms">${esc(hm.summary || m.summary || "")}</div>
+          ${dec.length || fu.length ? `<details><summary>${esc(t("iDecisions"))}</summary><ul>${dec.concat(fu).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></details>` : ""}
+          ${m.url ? `<a class="note" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.source || t("source"))}</a>` : m.source ? `<span class="note">${esc(m.source)}</span>` : ""}</div>`; }).join("")}</div>` : ""}
+        ${(it.themes || []).length ? `<div><h3>${esc(t("iThemes"))}</h3><div class="themes">${it.themes.map((x, i) => `<div class="theme"><b>${esc(h.themes?.[i]?.title || x.title)}</b><span>${esc(h.themes?.[i]?.detail || x.detail || "")}</span></div>`).join("")}</div></div>` : ""}`; })() : ""}
       <div><button class="btn primary" data-askclient="${esc(key)}">${esc(t("dAskAbout", nm))}</button></div>
       ${p.w28 ? `<div><h3>${esc(t("dOrganic"))}</h3><div class="mgrid">${win(p.w7, t("d7"))}${win(p.w28, t("d28l"))}${win(p.w90, t("d90"))}</div>${p.spark28 ? `<div style="margin-top:10px">${spark(p.spark28, 580, 64)}</div>` : ""}${L(c, "headline") ? `<p style="margin:8px 0 0;color:var(--ink-2)">${esc(L(c, "headline"))}</p>` : ""}</div>` : ""}
       ${al.length ? `<div><h3>${esc(t("dAlerts"))}</h3><div class="alist">${al.map(alertRow).join("")}</div></div>` : ""}
@@ -833,7 +890,7 @@ Full instructions: .claude/skills/control-room-tool-check/SKILL.md in github.com
   let sampleChecked = false;
   function renderSuggest() { $("#suggest").innerHTML = t("sugg").map((s) => `<button class="chip" data-suggest="${esc(s)}">${esc(s)}</button>`).join(""); }
   function context() {
-    const c = S.clients.map((x) => ({ key: x.key, name: x.name, domain: x.domain, status: x.status, headline: x.headline, summary: x.summary, issues: (x.issues || []).map((i) => `${i.severity}: ${i.title} — ${i.detail}`), upcoming: x.upcoming, w28: x.perf?.w28 && { clicks: x.perf.w28.clicks, chg: x.perf.w28.clicksChangePct, pos: x.perf.w28.position }, okrs: x.perf?.okrs, contract: x.contract && { end: x.contract.endDate, daysLeft: x.contract.daysLeft, status: x.contract.status, fee: x.contract.monthlyFee, cur: x.contract.currency, autoRenew: x.contract.autoRenew, notice: x.contract.noticeDeadline } }));
+    const c = S.clients.map((x) => ({ key: x.key, name: x.name, domain: x.domain, status: x.status, headline: x.headline, summary: x.summary, issues: (x.issues || []).map((i) => `${i.severity}: ${i.title} — ${i.detail}`), upcoming: x.upcoming, highlights: x.intel?.highlights, lastMeeting: x.intel?.lastMeeting, relationship: x.intel?.relationship, recentMeetings: (x.intel?.meetings || []).slice(0, 3).map((m) => ({ date: m.date, title: m.title, summary: m.summary })), w28: x.perf?.w28 && { clicks: x.perf.w28.clicks, chg: x.perf.w28.clicksChangePct, pos: x.perf.w28.position }, okrs: x.perf?.okrs, contract: x.contract && { end: x.contract.endDate, daysLeft: x.contract.daysLeft, status: x.contract.status, fee: x.contract.monthlyFee, cur: x.contract.currency, autoRenew: x.contract.autoRenew, notice: x.contract.noticeDeadline } }));
     const k = S.contracts.map((x) => ({ client: x.client, title: x.title, type: x.type, start: x.startDate, end: x.endDate, daysLeft: x.daysLeft, status: x.status, autoRenew: x.autoRenew, noticeDays: x.noticeDays, monthlyFee: x.monthlyFee, currency: x.currency, hours: x.hoursPerMonth, latest: x.isLatest, signed: x.signed, notes: x.notes, url: x.url }));
     const tl = S.tools.map((x) => ({ name: x.name, paying: x.paying, yearly: x.yearlyCost, monthly: x.monthlyCost, billing: x.frequency, model: x.model, nextRenewal: x.nextRenewal, daysToRenewal: x.daysToRenewal, autoRenew: x.autoRenew, admin: x.admin, plan: x.plan, notes: x.notes, live: x.live && x.live.headline }));
     const a = sortAlerts(S.alerts).map((x) => ({ sev: x.severity, cat: x.category, client: x.client, title: x.title, detail: x.detail, due: x.dueDate, acked: !!S.acks[x.id] }));

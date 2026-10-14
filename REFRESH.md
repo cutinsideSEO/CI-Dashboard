@@ -81,6 +81,24 @@ Brains are markdown files in each client's `00. AI Brain` folder: the `AGENTS.md
 
 4. Drop issues the brain marks as resolved. Write everything in English.
 
+## 4b. Client meetings → `data/meetings/<key>.json` (incremental)
+
+Each client has a file holding these fields:
+- `lastMeeting`
+- `relationship {mood, why}`
+- `meetings[]`, newest first, at most 6 from the last ~45 days; each is `{date, title, type, attendees, summary, decisions, followUps, sentiment, source, url}`
+- `themes[]`, `highlights[]`
+- `tm`, a map from each English string to its Hebrew
+
+The previous state is in `sources/meetings`. Copy it to `data/meetings/` in step 0.
+
+1. Look for new meetings since the last run:
+   - Drive meeting transcripts and notes: "Transcript:", Gemini notes, Timeless notes, "סיכום", "פגישה", searched with `modifiedTime > last run`;
+   - new daily-log entries in the client brains;
+   - Google Calendar events from the last 2 days.
+2. For each client that had a meeting, add it to `meetings` and drop the oldest past 6. Refresh `themes`, `highlights` and `relationship` if the meeting changed them.
+3. Add Hebrew for every new string to `tm`. Read only: never edit Drive, Calendar or Gmail.
+
 ## 5. Contracts → `data/contracts.json` (incremental)
 
 1. **Drive.** Search for new or changed agreements since the last run. Search titles and full text for: contract, agreement, SOW, addendum, renewal, PO, הסכם, חוזה, תוספת, הצעת מחיר, signed.
