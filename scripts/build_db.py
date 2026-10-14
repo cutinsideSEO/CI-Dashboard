@@ -599,7 +599,7 @@ def build():
                 kind, ck = "focus", None
             else:
                 ck, external = find_client(title, att)
-                kind = "client" if ck else ("external" if external else ("internal" if len(att) > 1 or len(e["people"]) > 1 else "solo"))
+                kind = ("client" if external else "prep") if ck else ("external" if external else ("internal" if len(att) > 1 or len(e["people"]) > 1 else "solo"))
             s0, e0 = parse_dt(e.get("start")), parse_dt(e.get("end"))
             if e.get("allDay") and kind not in ("ooo",) and e.get("transparency") == "transparent":
                 continue
