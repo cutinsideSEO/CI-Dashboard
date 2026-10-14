@@ -407,6 +407,7 @@ tbody tr:hover { background: var(--line-subtle); }
 @media (max-width: 860px) { .wc { grid-template-columns: minmax(0, 1fr); } }
 .lv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 16px; border-radius: 12px; background: var(--tag); }
 .lv .v { font: 700 28px var(--f-display); color: var(--accent-text); }
+.gapline { font-size: 12px; line-height: 1.5; color: var(--warn); margin-top: 4px; }
 .ltr { direction: ltr; unicode-bidi: isolate; }
 @media (prefers-reduced-motion: no-preference) { .drawer { animation: slide .25s cubic-bezier(0, 0, .25, 1); } @keyframes slide { from { opacity: .4; transform: translateX(var(--slide, 24px)); } } :root[dir="rtl"] .drawer { --slide: -24px; } }
 @media (prefers-reduced-motion: reduce) { .cl, .sev, .btn { transition: none; } .cl:hover, .sev:hover { transform: none; } }
@@ -636,7 +637,7 @@ tbody tr:hover { background: var(--line-subtle); }
       tfAttention: "Needs attention", tfPaying: "Paying", tfAll: "All", tfCancelled: "Not paying", toolsSubT: "{0} tools · {1} paid · {2} per month",
       tTool: "Tool", tStatus: "Status", tYear: "Per year", tBilling: "Billing", tRenewal: "Next renewal", tAuto: "Auto-renew", tAdmin: "Admin", tNotes: "Notes",
       paying: "Paying", notPaying: "Not paying", on: "On", off: "Off", lapsed: "lapsed {0}d ago", projected: "projected", noTools: "No tools match.",
-      otherTools: "{0} other tools", spendTotal: "Total {0} per year across {1} paid tools.", spendTop: "{0} alone is {1}% of it.", noCost: "No cost data.", checked: "Checked {0} via {1}", noLive: "No live checks yet.",
+      otherTools: "{0} other tools", spendTotal: "Total {0} per year across {1} paid tools.", spendTop: "{0} alone is {1}% of it.", noCost: "No cost data.", checked: "Checked {0} via {1}", noLive: "No live checks yet.", lastCharge: "last charge {0} on {1}", sheetGap: "Differs from the sheet:", notSignedIn: "not signed in",
       justNow: "just now", minAgo: "{0} min ago", hAgo: "{0} h ago", dAgo: "{0} d ago",
       thinking: "Thinking…", who: "{M}", unavailable: "Asking {M} needs this page open inside Claude while signed in.",
       eNotGranted: "Claude access wasn't allowed for this page, so {M} can't answer here.", eDisabled: "Claude isn't available for this account.", eRate: "You've hit a usage limit. Try again in a few minutes.",
@@ -725,7 +726,7 @@ tbody tr:hover { background: var(--line-subtle); }
       tfAttention: "דורש טיפול", tfPaying: "בתשלום", tfAll: "הכול", tfCancelled: "לא בתשלום", toolsSubT: "{0} כלים · {1} בתשלום · {2} לחודש",
       tTool: "כלי", tStatus: "סטטוס", tYear: "לשנה", tBilling: "חיוב", tRenewal: "חידוש הבא", tAuto: "חידוש אוטומטי", tAdmin: "אדמין", tNotes: "הערות",
       paying: "בתשלום", notPaying: "לא בתשלום", on: "פעיל", off: "כבוי", lapsed: "פג לפני {0} ימים", projected: "משוער", noTools: "אין כלים שמתאימים.",
-      otherTools: "{0} כלים נוספים", spendTotal: "סה\"כ {0} לשנה על {1} כלים בתשלום.", spendTop: "{0} לבדו הוא {1}% מזה.", noCost: "אין נתוני עלות.", checked: "נבדק {0} דרך {1}", noLive: "אין עדיין בדיקות חיות.",
+      otherTools: "{0} כלים נוספים", spendTotal: "סה\"כ {0} לשנה על {1} כלים בתשלום.", spendTop: "{0} לבדו הוא {1}% מזה.", noCost: "אין נתוני עלות.", checked: "נבדק {0} דרך {1}", noLive: "אין עדיין בדיקות חיות.", lastCharge: "חיוב אחרון {0} ב-{1}", sheetGap: "פער מול הטבלה:", notSignedIn: "לא מחובר",
       justNow: "עכשיו", minAgo: "לפני {0} דק'", hAgo: "לפני {0} שע'", dAgo: "לפני {0} ימים",
       thinking: "חושב…", who: "{M}", unavailable: "כדי לשאול את {M} צריך לפתוח את הדף בתוך Claude, מחוברים.",
       eNotGranted: "לא ניתנה לדף הרשאה ל-Claude, ולכן {M} לא יכול לענות כאן.", eDisabled: "Claude לא זמין בחשבון הזה.", eRate: "הגעתם למגבלת שימוש. נסו שוב בעוד כמה דקות.",
@@ -1199,7 +1200,11 @@ tbody tr:hover { background: var(--line-subtle); }
     $("#olderBtn").setAttribute("aria-pressed", String(!!UI.olderAg));
   }
   const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const bcOf = (x) => x.browserCheck || S.toolchecks[slug(x.name)];
+  // The weekly check writes sources/toolchecks directly; the refresh copies it into the tool snapshot. Show whichever is newer.
+  const bcOf = (x) => { const a = S.toolchecks[slug(x.name)], b = x.browserCheck; return a && (!b || String(a.checkedAt || "") >= String(b.checkedAt || "")) ? a : b; };
+  const ckCls = (b) => (b.status === "critical" ? "crit" : b.status === "low" ? "warn" : b.loginOk === false ? "mute" : "good");
+  const ckSub = (b, via) => esc(t("checked", ago(b.checkedAt), b.method || via)) + (b.lastUsed ? " · " + esc(t("lastUsed", fmtD(b.lastUsed))) : "") + (b.lastCharge?.amount ? " · " + esc(t("lastCharge", b.lastCharge.amount, b.lastCharge.date ? fmtD(b.lastCharge.date) : "?")) : "");
+  const ckGap = (b) => (b.gap ? `<div class="gapline">${esc(t("sheetGap"))} ${esc(b.gap)}</div>` : "");
   function wcPrompt() {
     return `Run the Control Room weekly tool check.
 
@@ -1225,8 +1230,8 @@ tbody tr:hover { background: var(--line-subtle); }
     $("#wcSub").textContent = (S.toolcheckAt ? t("wcLast", ago(S.toolcheckAt)) + " · " + t("wcResults", done.length, bad) : t("wcNever")) + (plan.length ? " · " + t("wcPlan", paid.length, canc.length) : "");
     $("#weeklyCheck").innerHTML = `<div class="wc"><div><ol>${t("wcSteps").map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
       <div style="margin-top:14px"><button class="btn primary" data-copyprompt>${esc(t("wcCopy"))}</button></div><pre id="wcPrompt">${esc(wcPrompt())}</pre></div>
-      <div><div class="caption">${esc(t("tTool"))}</div><div class="chips">${paid.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? (S.toolchecks[slug(x.tool)].status === "ok" ? "good" : "warn") : "mute"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>
-      ${canc.length ? `<div class="caption" style="margin-top:14px">${esc(t("wcCancel"))}</div><div class="chips">${canc.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? "good" : "warn"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>` : ""}</div></div>`;
+      <div><div class="caption">${esc(t("tTool"))}</div><div class="chips">${paid.map((x) => { const c = S.toolchecks[slug(x.tool)]; return `<span class="pill ${c ? ckCls(c) : "mute"}" title="${esc(c?.headline || x.look || "")}">${esc(x.tool)}</span>`; }).join("")}</div>
+      ${canc.length ? `<div class="caption" style="margin-top:14px">${esc(t("wcCancel"))}</div><div class="chips">${canc.map((x) => { const c = S.toolchecks[slug(x.tool)]; return `<span class="pill ${!c || c.loginOk === false ? "mute" : c.status === "ok" ? "good" : ckCls(c)}" title="${esc(c?.headline || x.look || "")}">${esc(x.tool)}</span>`; }).join("")}</div>` : ""}</div></div>`;
   }
   const API = { serp: "SERP", keywords_data: "Keywords Data", dataforseo_labs: "Labs", ai_optimization: "AI Optimization", on_page: "On-Page", business_data: "Business Data", backlinks: "Backlinks" };
   const epName = (e) => { const p = String(e).split("/"), mode = p.includes("live") ? " (live)" : p.includes("task_post") ? " (queued)" : "";
@@ -1326,9 +1331,9 @@ tbody tr:hover { background: var(--line-subtle); }
     const gl = top.map((x) => [x.name, x.yearlyCost]).concat(rest ? [[t("otherTools", paid.length - 10), rest]] : []), gmax = Math.max(...gl.map((g) => g[1]), 1);
     $("#spendBars").innerHTML = gl.length ? gl.map(([g, v]) => `<div class="hb" title="${esc(g)}: ${fmtUSD(v)}"><span class="nm">${esc(g)}</span><span class="track"><span class="fill" style="width:${(v / gmax) * 100}%"></span></span><span class="num">${fmtUSD(v)}</span></div>`).join("") + `<p class="note" style="margin:8px 0 0">${esc(t("spendTotal", fmtUSD(sp.yearly), sp.paying))} ${paid[0] ? esc(t("spendTop", paid[0].name, Math.round((paid[0].yearlyCost / sp.yearly) * 100))) : ""}</p>` : `<div class="empty">${esc(t("noCost"))}</div>`;
     const live = tools.filter((x) => x.live || bcOf(x));
-    $("#liveChecks").innerHTML = live.length ? live.map((x) => { const l = x.live || bcOf(x); return `<div class="lv"><div><div style="font-weight:600">${esc(x.name)}</div><div class="note">${esc(l.headline || "")}</div><div class="note">${esc(t("checked", ago(l.checkedAt), l.method || "API"))}${l.lastUsed ? " · " + esc(t("lastUsed", fmtD(l.lastUsed))) : ""}</div></div><div style="text-align:end"><div class="v">${l.unit === "USD" ? fmtUSD(l.value) : esc(l.value ?? "")}</div><span class="pill pd ${l.status === "critical" ? "crit" : l.status === "low" ? "warn" : "good"}">${esc(l.status || "ok")}</span></div></div>`; }).join("") : `<div class="empty">${esc(t("noLive"))}</div>`;
+    $("#liveChecks").innerHTML = live.length ? live.map((x) => { const l = x.live || bcOf(x); return `<div class="lv"><div><div style="font-weight:600">${esc(x.name)}</div><div class="note">${esc(l.headline || "")}</div><div class="note">${ckSub(l, "API")}</div>${ckGap(l)}</div><div style="text-align:end"><div class="v">${l.unit === "USD" ? fmtUSD(l.value) : esc(l.value ?? "")}</div><span class="pill pd ${ckCls(l)}">${esc(l.status || (l.loginOk === false ? t("notSignedIn") : "ok"))}</span></div></div>`; }).join("") : `<div class="empty">${esc(t("noLive"))}</div>`;
     $("#toolFilters").innerHTML = [["attention", "tfAttention"], ["paying", "tfPaying"], ["all", "tfAll"], ["cancelled", "tfCancelled"]].map(([k, l]) => `<button class="chip" data-tf="${k}" aria-pressed="${UI.toolFilter === k}">${esc(t(l))}</button>`).join("");
-    const flagged = new Set(S.alerts.filter((a) => a.category === "tools").map((a) => a.id.replace(/^tool-/, "").replace(/-(expired|renewal|stale|autorenew-on|billing-unclear|live)$/, "")));
+    const flagged = new Set(S.alerts.filter((a) => a.category === "tools").map((a) => a.id.replace(/^tool-/, "").replace(/-(expired|renewal|stale|autorenew-on|billing-unclear|live|browser|sheet-gap)$/, "")));
     const rows = tools.filter((x) => UI.toolFilter === "all" || (UI.toolFilter === "paying" && x.paying) || (UI.toolFilter === "cancelled" && !x.paying) || (UI.toolFilter === "attention" && flagged.has(slug(x.name))));
     $("#toolsSub").textContent = t("toolsSubT", tools.length, sp.paying || 0, fmtUSD(sp.monthly));
     $("#toolTable").innerHTML = rows.length ? sortable([
@@ -1339,7 +1344,7 @@ tbody tr:hover { background: var(--line-subtle); }
       { key: "daysToRenewal", label: "tRenewal", render: (x) => (x.nextRenewal ? `${esc(fmtD(x.nextRenewal))}<div class="sub">${esc(x.daysToRenewal < 0 ? t("lapsed", -x.daysToRenewal) : t("inDays", x.daysToRenewal))}${x.renewalDateStale ? " · " + esc(t("projected")) : ""}</div>` : "—") },
       { key: "autoRenew", label: "tAuto", render: (x) => esc(x.autoRenew ? t("on") : t("off")) },
       { key: "admin", label: "tAdmin", render: (x) => `<span class="ltr">${esc(x.admin || "—")}</span>` },
-      { key: "usage", label: "tUsage", sortVal: (x) => bcOf(x)?.checkedAt || x.live?.checkedAt || null, render: (x) => { const b = x.live || bcOf(x); return b ? `<span class="pill ${b.status === "critical" ? "crit" : b.status === "low" ? "warn" : "good"}">${esc(b.headline || b.status)}</span><div class="sub">${esc(t("checked", ago(b.checkedAt), b.method || "browser"))}${b.lastUsed ? " · " + esc(t("lastUsed", fmtD(b.lastUsed))) : ""}</div>` : `<span class="sub">${esc(t("notChecked"))}</span>`; } },
+      { key: "usage", label: "tUsage", sortVal: (x) => bcOf(x)?.checkedAt || x.live?.checkedAt || null, render: (x) => { const b = x.live || bcOf(x); return b ? `<span class="pill ${ckCls(b)}">${esc(b.headline || b.status || t("notSignedIn"))}</span><div class="sub">${ckSub(b, "browser")}</div>${ckGap(b)}` : `<span class="sub">${esc(t("notChecked"))}</span>`; } },
       { key: "notes", label: "tNotes", render: (x) => `<span class="sub">${esc(x.notes || "")}</span>` },
     ], "toolSort", rows) : `<tbody><tr><td class="empty">${esc(t("noTools"))}</td></tr></tbody>`;
   }

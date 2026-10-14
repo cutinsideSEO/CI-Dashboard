@@ -194,9 +194,14 @@ def build_tools():
             alert(f"tool-{tid}-billing-unclear", "low", "tools", f"{name}: billing behaviour unclear", notes, source=src)
         bc = t["browserCheck"] or {}
         if bc.get("status") in ("low", "critical") or bc.get("loginOk") is False:
-            alert(f"tool-{tid}-browser", "high" if bc.get("status") == "critical" else "medium", "tools",
-                  f"{name}: {bc.get('headline') or ('login failed' if bc.get('loginOk') is False else 'needs attention')}",
+            # not being signed in is a chore for the owner, not a billing problem: keep it low unless the check found one
+            sev = "high" if bc.get("status") == "critical" else "medium" if bc.get("status") == "low" else "low"
+            alert(f"tool-{tid}-browser", sev, "tools",
+                  f"{name}: {bc.get('headline') or ('not signed in' if bc.get('loginOk') is False else 'needs attention')}",
                   bc.get("detail") or "", source="Weekly browser check")
+        if bc.get("gap"):
+            alert(f"tool-{tid}-sheet-gap", "low", "tools", f"{name}: the sheet doesn't match what is billed",
+                  bc["gap"] + " Update the Tools Database sheet.", source="Weekly browser check")
         lv = t["live"] or {}
         if lv.get("status") in ("low", "critical"):
             alert(f"tool-{tid}-live", "high" if lv["status"] == "critical" else "medium", "tools",
@@ -710,7 +715,7 @@ def build():
         recent = [x for x in usage.get("spikes", []) if x.get("date") and (TODAY - dt.date.fromisoformat(x["date"])).days <= 7]
         if recent:
             x = max(recent, key=lambda x: x["cost"])
-            alert("tool-dataforseo-spike", "low", "tools", f"DataForSEO: ${x['cost']:,.2f} spent on {dt.date.fromisoformat(x["date"]):%d %b %Y}",
+            alert("tool-dataforseo-spike", "low", "tools", f"DataForSEO: ${x['cost']:,.2f} spent on {dt.date.fromisoformat(x['date']):%d %b %Y}",
                   f"More than twice the 30-day median. Driver: {x.get('driver', '')[:220]}", due=x["date"], source="DataForSEO id_list")
         for aid in ("tool-dataforseo-runway", "tool-dataforseo-unowned", "tool-dataforseo-spike"):
             if aid in alerts:
