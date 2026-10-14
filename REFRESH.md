@@ -22,6 +22,7 @@ ArtifactData list  url=<artifact>  collection=sources   out_dir=prev
 3. Merge `prev/sources/tm.json` and any `tm-N.json` shards (each `{items: [{en, he}]}`) into `data/tm.json` as one `{english: hebrew}` object. This is the Hebrew translation memory.
 4. Copy `prev/sources/toolchecks.json` (the weekly browser check, see BROWSER-CHECK.md) to `data/toolchecks.json` if it exists.
 5. Copy `prev/snapshot/favicons.json`, taking its `icons` object, to `data/favicons.json` if it exists.
+6. Copy `prev/snapshot/dataforseo.json` to `data/dfs_prev.json` and its `balanceHistory` array to `data/dfs_balance.json`, if it exists. The build adds this run's balance to the series and keeps the spend analysis in place.
 
 ## 1. Tools sheet → `data/tools.csv`
 
@@ -39,6 +40,10 @@ ArtifactData list  url=<artifact>  collection=sources   out_dir=prev
 - status: `critical` if runway < 14 days or balance < 25; `low` if runway < 30 days; otherwise `ok`.
 
 **Peec.** Usage is shown through SurgeOS (`get_peec_trend` for a Peec-connected client). Note it only if a sync stopped.
+
+Also record `deposited` (`money.total`), `spentToday` and `runwayDays` on the DataForSEO check. The build appends each run's balance to the balance series on the Tools tab and raises the runway alert (high under 7 days, medium under 14, using the 30-day average from the spend analysis). The budget is not capped, so a low balance means "top up and check what is running", not "stop".
+
+**DataForSEO spend analysis (weekly, Sunday's first run).** Rebuild `data/dataforseo_usage.json` from the free `GET /v3/<api>/id_list` endpoints, following `scripts/dataforseo/README.md`. It takes a long time (hundreds of paged calls), so hand it to a background agent and carry on with the refresh; if it hasn't finished, the build reuses the previous analysis (`data/dfs_prev.json`). Never call a paid endpoint for this.
 
 Write each check as `{tool, metric, value, unit, status, headline, detail, checkedAt, method}`. `tool` must equal the Name in the sheet, for example "DataForSEO API".
 

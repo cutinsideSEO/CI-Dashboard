@@ -283,6 +283,22 @@ tbody tr:hover { background: var(--line-subtle); }
 .stack { display: grid; gap: 24px; align-content: start; min-width: 0; }
 .feed .row { grid-template-columns: 78px minmax(0, 1fr); }
 
+/* DataForSEO spend */
+.dfs-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 860px) { .dfs-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.dfs-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+@media (max-width: 1020px) { .dfs-cols { grid-template-columns: minmax(0, 1fr); } }
+.dfs-cols .hb { grid-template-columns: minmax(0, 150px) minmax(0, 1fr) 64px; }
+.hb .fill.warn { background: var(--warn); } .hb .fill.mute { background: var(--ink-3); }
+.dchart { direction: ltr; margin-top: 8px; overflow-x: auto; }
+.dchart svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.dchart text { fill: var(--ink-3); font: 500 11px var(--f-body); }
+.dchart .g { stroke: var(--line-subtle); }
+.dchart .serp { fill: var(--accent); } .dchart .oth { fill: var(--info); } .dchart .spk { fill: var(--crit); }
+.dchart .avg { stroke: var(--warn); stroke-dasharray: 4 3; stroke-width: 1.5; fill: none; }
+.findings { margin: 0; padding-inline-start: 18px; display: grid; gap: 10px; color: var(--ink-2); max-width: 90ch; }
+.findings b { color: var(--ink); }
+
 /* drawer */
 .scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
 .drawer { position: fixed; top: 0; bottom: 0; inset-inline-end: 0; width: min(660px, 100%); background: var(--raised); z-index: 41; overflow-y: auto; border-inline-start: 1px solid var(--line); box-shadow: var(--shadow-lg); padding: calc(24px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); display: grid; gap: 22px; align-content: start; }
@@ -430,6 +446,21 @@ tbody tr:hover { background: var(--line-subtle); }
   </section>
 
   <section class="panel" data-panel="tools" hidden>
+    <div class="card" id="dfsCard" hidden>
+      <div class="card-h"><h2 data-i18n="dfsTitle">DataForSEO spend</h2><span class="sub" id="dfsSub"></span></div>
+      <div class="card-b" style="display:grid;gap:22px;grid-template-columns:minmax(0,1fr)">
+        <div class="kpis dfs-stats" id="dfsStats"></div>
+        <div><div class="caption" data-i18n="dfsDaily">Daily spend</div><div class="dchart" id="dfsChart"></div><div class="legend" id="dfsLegend"></div></div>
+        <div class="dfs-cols">
+          <div><div class="caption" data-i18n="dfsMonthly">By month</div><div class="hbars" id="dfsMonths" style="margin-top:10px"></div></div>
+          <div><div class="caption" data-i18n="dfsByEp">Where the money went · 30 days</div><div class="hbars" id="dfsEps" style="margin-top:10px"></div></div>
+          <div><div class="caption" data-i18n="dfsByClient">By client · 30 days</div><div class="hbars" id="dfsClients" style="margin-top:10px"></div><p class="note" style="margin:8px 0 0" data-i18n="dfsAttr">Partly inferred from tracker runs and keyword topics.</p></div>
+        </div>
+        <div><h3 style="font-size:16px;margin-bottom:8px" data-i18n="dfsFind">What the data shows</h3><ul class="findings" id="dfsFind"></ul></div>
+        <div><div class="caption" data-i18n="dfsHist">Balance by refresh</div><div id="dfsHist" style="margin-top:8px"></div></div>
+        <p class="note" id="dfsCov" style="margin:0"></p>
+      </div>
+    </div>
     <div class="grid-2">
       <div class="card">
         <div class="card-h"><h2 data-i18n="moneyTitle">Where the money goes</h2><span class="sub" data-i18n="moneySub">Top paid tools by yearly cost, from the Tools Database sheet</span></div>
@@ -539,6 +570,11 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
       covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
+      dfsTitle: "DataForSEO spend", dfsSub: "Rebuilt from DataForSEO's own task log (last 6 months), as of {0}", dfsBal: "Balance", dfsLasts: "lasts about {0}–{1} days at the recent pace",
+      dfs30: "Last 30 days", dfsAvg: "{0}/day on average · {1}/day in the last 7 days", dfsMonth: "This month so far", dfsProj: "on pace for {0} this month",
+      dfsDep: "Deposited to date", dfsSpent: "{0} spent · {1} in the last 6 months", dfsDaily: "Daily spend", dfsSpikeL: "Spike: more than twice the 30-day median", dfsOtherL: "Other APIs", dfsAvgL: "30-day average",
+      dfsByEp: "Where the money went · 30 days", dfsByClient: "By client · 30 days", dfsAttr: "Partly inferred from tracker runs and keyword topics.", dfsFind: "What the data shows", dfsMonthly: "By month",
+      dfsHist: "Balance by refresh", dfsHistNote: "The balance is recorded at every refresh, so this series builds up from 14 Oct 2026.", dfsCov: "Covers {0} to {1}: {2} tasks, {3} net. Days are in UTC.", dfsMtd: "to date",
       hk: "Housekeeping", olderAg: "Show older agreements", openN: "{0} open", pulseTitle: "Open items", actTitle: "What to act on", actSub: "Ranked by severity, deadline and the kind of issue. Mark done what you've handled.",
       hygiene: "{0} tools look out of date in the tools sheet", hygieneSub: "Lapsed expiry dates, cancelled tools with auto-renew still on, and unclear billing. Review them together in Tools.", review: "Review",
       radarTitle: "Clients at a glance", radarSub: "Sorted by what needs attention first. Click a client for the full picture.",
@@ -614,6 +650,11 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
       covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
+      dfsTitle: "הוצאות DataForSEO", dfsSub: "שוחזר מיומן המשימות של DataForSEO (6 חודשים אחרונים), נכון ל-{0}", dfsBal: "יתרה", dfsLasts: "מספיקה לכ-{0}–{1} ימים בקצב האחרון",
+      dfs30: "30 הימים האחרונים", dfsAvg: "{0} ליום בממוצע · {1} ליום ב-7 הימים האחרונים", dfsMonth: "החודש עד עכשיו", dfsProj: "בקצב של {0} לחודש",
+      dfsDep: "הופקד עד היום", dfsSpent: "{0} הוצאו · {1} ב-6 החודשים האחרונים", dfsDaily: "הוצאה יומית", dfsSpikeL: "קפיצה: יותר מפי 2 מהחציון של 30 יום", dfsOtherL: "ממשקים אחרים", dfsAvgL: "ממוצע 30 יום",
+      dfsByEp: "לאן הלך הכסף · 30 יום", dfsByClient: "לפי לקוח · 30 יום", dfsAttr: "חלקית מוסק מריצות tracker ומנושאי מילות המפתח.", dfsFind: "מה הנתונים מראים", dfsMonthly: "לפי חודש",
+      dfsHist: "יתרה לפי רענון", dfsHistNote: "היתרה נרשמת בכל רענון, כך שהסדרה הזו נבנית החל מ-14 באוקטובר 2026.", dfsCov: "מכסה {0} עד {1}: {2} משימות, {3} נטו. ימים לפי UTC.", dfsMtd: "עד היום",
       hk: "תחזוקה", olderAg: "הצג גם הסכמים קודמים", openN: "{0} פתוחים", pulseTitle: "פריטים פתוחים", actTitle: "מה לטפל בו עכשיו", actSub: "מדורג לפי חומרה, מועד וסוג הבעיה. סמנו מה שכבר טופל.",
       hygiene: "{0} כלים נראים לא מעודכנים בגיליון הכלים", hygieneSub: "תאריכי תפוגה שעברו, כלים שבוטלו עם חידוש אוטומטי פעיל, וחיוב לא ברור. כדאי לעבור עליהם יחד בלשונית הכלים.", review: "לבדיקה",
       radarTitle: "הלקוחות במבט אחד", radarSub: "ממוין לפי מה שדורש טיפול קודם. לחיצה על לקוח פותחת את התמונה המלאה.",
@@ -631,7 +672,7 @@ tbody tr:hover { background: var(--line-subtle); }
   const L = (o, f) => (LANG === "he" && o?.he?.[f]) || o?.[f];   // localized data field with English fallback
   const LOC = () => (LANG === "he" ? "he-IL" : "en-GB");
 
-  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {}, icons: {}, toolchecks: {}, toolcheckAt: null, toolPlan: [] };
+  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {}, icons: {}, toolchecks: {}, toolcheckAt: null, toolPlan: [], dfs: null };
   const TILE = ["#e0f4f4", "#fad05d", "#f7caf1", "#c5e9e6", "#7dcdc7", "#f3d9c6"];
   const logo = (key, size = 20) => {
     const c = S.clients.find((x) => x.key === key), dom = c?.domain, icon = dom && S.icons[dom];
@@ -1040,8 +1081,48 @@ c) otherwise print the JSON in one code block at the end, so I can paste it to t
       <div><div class="caption">${esc(t("tTool"))}</div><div class="chips">${paid.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? (S.toolchecks[slug(x.tool)].status === "ok" ? "good" : "warn") : "mute"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>
       ${canc.length ? `<div class="caption" style="margin-top:14px">${esc(t("wcCancel"))}</div><div class="chips">${canc.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? "good" : "warn"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>` : ""}</div></div>`;
   }
+  const API = { serp: "SERP", keywords_data: "Keywords Data", dataforseo_labs: "Labs", ai_optimization: "AI Optimization", on_page: "On-Page", business_data: "Business Data", backlinks: "Backlinks" };
+  const epName = (e) => { const p = String(e).split("/"), mode = p.includes("live") ? " (live)" : p.includes("task_post") ? " (queued)" : "";
+    return (API[p[0]] || p[0]) + " · " + p.slice(1).filter((x) => !["google", "live", "task_post", "advanced", "regular"].includes(x)).join(" ").replace(/_/g, " ") + mode; };
+  const usd2 = (n) => (n == null ? "—" : "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  function renderDfs() {
+    const d = S.dfs, card = $("#dfsCard"); card.hidden = !d; if (!d) return;
+    const rr = d.runRate || {}, l30 = d.last30 || {}, bal = d.balance;
+    $("#dfsSub").textContent = t("dfsSub", new Date(d.asOf).toLocaleString(LOC(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }));
+    const r30 = rr.avg30 ? bal / rr.avg30 : null, r7 = rr.avg7 ? bal / rr.avg7 : null;
+    const st = [
+      [r30 != null && r30 < 7 ? "bad" : "", t("dfsBal"), usd2(bal), r30 != null ? esc(t("dfsLasts", Math.max(1, Math.round(r30)), Math.round(r7 ?? r30))) : ""],
+      ["", t("dfs30"), fmtUSD(l30.total), esc(t("dfsAvg", usd2(rr.avg30), usd2(rr.avg7)))],
+      ["", t("dfsMonth"), fmtUSD(rr.octoberToDate), esc(t("dfsProj", fmtUSD(rr.projectedMonth)))],
+      ["", t("dfsDep"), fmtUSD(d.deposited), esc(t("dfsSpent", fmtUSD(d.lifetimeSpent), fmtUSD(d.coverage?.netCost)))],
+    ];
+    $("#dfsStats").innerHTML = st.map(([c, l, v, x]) => `<div class="kpi ${c}"><div class="caption">${esc(l)}</div><div class="v">${v}</div><div class="d">${x}</div></div>`).join("");
+    // daily bars: SERP vs other APIs, spikes marked
+    const dl = d.daily || [], spikes = new Set((d.spikes || []).map((x) => x.date));
+    const W = 1000, H = 190, Lm = 40, top = 12, bot = 24, n = dl.length || 1, bw = (W - Lm - 6) / n, mx = Math.max(...dl.map((x) => x[1]), 1);
+    const step = mx > 100 ? 50 : mx > 40 ? 20 : 10, ymax = Math.ceil(mx / step) * step, y = (v) => top + (1 - v / ymax) * (H - top - bot);
+    let g = "";
+    for (let v = 0; v <= ymax; v += step) g += `<line class="g" x1="${Lm}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${Lm - 6}" y="${y(v) + 4}" text-anchor="end">$${v}</text>`;
+    dl.forEach(([date, cost, serp], i) => { const x = Lm + i * bw, oth = Math.max(0, cost - serp);
+      if (date.endsWith("-01")) g += `<line class="g" x1="${x}" x2="${x}" y1="${top}" y2="${H - bot}"/><text x="${x + 3}" y="${H - 8}">${esc(new Date(date + "T00:00:00Z").toLocaleDateString(LOC(), { month: "short", timeZone: "UTC" }))}</text>`;
+      g += `<g><title>${esc(fmtD(date))}: ${usd2(cost)}${spikes.has(date) ? " · " + esc(t("dfsSpikeL")) : ""}</title><rect class="serp" x="${x + .5}" y="${y(Math.max(0, serp))}" width="${Math.max(1, bw - 1)}" height="${Math.max(0, y(0) - y(Math.max(0, serp)))}"/>${oth > 0 ? `<rect class="oth" x="${x + .5}" y="${y(Math.max(0, serp) + oth)}" width="${Math.max(1, bw - 1)}" height="${y(0) - y(oth)}"/>` : ""}${spikes.has(date) ? `<circle class="spk" cx="${x + bw / 2}" cy="${y(cost) - 6}" r="2.6"/>` : ""}</g>`; });
+    if (rr.avg30) { const x0 = Lm + Math.max(0, n - 30) * bw; g += `<line class="avg" x1="${x0}" x2="${W}" y1="${y(rr.avg30)}" y2="${y(rr.avg30)}"/>`; }
+    $("#dfsChart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("dfsDaily"))}">${g}</svg>`;
+    $("#dfsLegend").innerHTML = `<span><i style="background:var(--accent)"></i>SERP</span><span><i style="background:var(--info)"></i>${esc(t("dfsOtherL"))}</span><span><i style="background:var(--crit);border-radius:50%"></i>${esc(t("dfsSpikeL"))}</span><span><i style="background:var(--warn);height:2px;vertical-align:3px"></i>${esc(t("dfsAvgL"))}</span>`;
+    const bars = (el, rows) => { const m = Math.max(...rows.map((r) => r.v), 1); $(el).innerHTML = rows.map((r) => `<div class="hb" title="${esc(r.title || r.name)}: ${usd2(r.v)}"><span class="nm">${r.html || esc(r.name)}</span><span class="track"><span class="fill ${r.cls || ""}" style="width:${(r.v / m) * 100}%"></span></span><span class="num">${fmtUSD(r.v)}</span></div>`).join(""); };
+    const ms = d.monthly || [], last = ms.length - 1;
+    bars("#dfsMonths", ms.map((m, i) => ({ name: new Date(m.month + "-01T00:00:00Z").toLocaleDateString(LOC(), { month: "short", year: "numeric", timeZone: "UTC" }) + (i === last ? " · " + t("dfsMtd") : ""), v: m.cost, cls: i === last ? "mute" : "" })));
+    bars("#dfsEps", (l30.byEndpoint || []).slice(0, 8).map((e) => ({ name: epName(e.endpoint), title: e.endpoint, v: e.cost })));
+    bars("#dfsClients", (l30.byClient || []).slice(0, 10).map((c) => { const un = c.client.startsWith("("), cl = !un && S.clients.find((x) => x.domain && c.client.replace(/^www\./, "") === x.domain.replace(/^www\./, ""));
+      return { name: un ? (LANG === "he" && c.he) || c.client : cl ? clientName(cl.key) : c.client, html: cl ? cname(cl.key, 16) : null, title: c.client, v: c.cost, cls: un ? "warn" : "" }; }));
+    $("#dfsFind").innerHTML = (d.findings || []).map((f) => { const s = (LANG === "he" && f.he) || f.en, i = s.indexOf(". "); return `<li>${i > 0 ? `<b>${esc(s.slice(0, i + 1))}</b>${esc(s.slice(i + 1))}` : esc(s)}</li>`; }).join("");
+    const h = (d.balanceHistory || []).filter((x) => x.balance != null);
+    $("#dfsHist").innerHTML = h.length >= 2 ? spark(h.map((x) => x.balance), 600, 60) + `<div class="note">${h.slice(-6).map((x) => `${esc(fmtD(x.at))} ${usd2(x.balance)}`).join(" · ")}</div>` : `<p class="note" style="margin:0">${h.length ? esc(fmtD(h[0].at)) + ": " + usd2(h[0].balance) + ". " : ""}${esc(t("dfsHistNote"))}</p>`;
+    const cv = d.coverage || {};
+    $("#dfsCov").textContent = t("dfsCov", fmtD(cv.from), fmtD(cv.to), (cv.tasks || 0).toLocaleString("en-US"), usd2(cv.netCost));
+  }
   function renderTools() {
-    renderWeekly();
+    renderWeekly(); renderDfs();
     const tools = S.tools, sp = S.meta?.spend || {};
     const paid = tools.filter((x) => x.paying && x.yearlyCost).sort((a, b) => b.yearlyCost - a.yearlyCost);
     const top = paid.slice(0, 10), rest = paid.slice(10).reduce((s, x) => s + x.yearlyCost, 0);
@@ -1220,6 +1301,7 @@ ${context()}`;
     db.doc("meta/state").onSnapshot((s) => { S.meta = s.exists ? s.data() : null; syncShards(S.meta?.shards); showRefresh(); render(); }, err);
     db.doc("briefing/latest").onSnapshot((s) => { S.briefing = s.exists ? s.data() : null; render(); }, err);
     db.doc("sources/toolchecks").onSnapshot((s) => { const d = s.exists ? s.data() : {}; S.toolchecks = Object.fromEntries((d.items || []).filter((x) => x.checkedAt).map((x) => [slug(x.tool || ""), x])); S.toolcheckAt = d.checkedAt || null; S.toolPlan = d.plan || []; render(); }, err);
+    db.doc("snapshot/dataforseo").onSnapshot((s) => { S.dfs = s.exists ? s.data() : null; render(); }, err);
     db.doc("snapshot/favicons").onSnapshot((s) => { S.icons = (s.exists && s.data().icons) || {}; render(); }, err);
     db.collection("acks").limit(1000).onSnapshot(async (q) => {
       S.acks = Object.fromEntries(q.docs.map((d) => [d.id, d.data()]));

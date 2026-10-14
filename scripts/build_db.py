@@ -487,6 +487,83 @@ def build():
         a = alerts["agency-weekly-tool-check"]
         a["he"] = {"title": he(a["title"]), "detail": he(a["detail"])}
 
+    # DataForSEO spend: compact history for the page (from data/dataforseo_usage.json, rebuilt weekly from the free
+    # id_list endpoint) plus a balance series that grows by one point per refresh (data/dfs_balance.json).
+    dfs_doc = None
+    usage = load("dataforseo_usage.json", None)
+    lc = {slug(x.get("tool")): x for x in load("livechecks.json", [])}.get("dataforseo-api")
+    hist = load("dfs_balance.json", []) or []
+    if lc and lc.get("value") is not None and not any(h.get("at") == lc.get("checkedAt") for h in hist):
+        hist.append({"at": lc.get("checkedAt"), "balance": lc.get("value"), "deposited": lc.get("deposited"), "spentToday": lc.get("spentToday")})
+    hist = sorted(hist, key=lambda h: h.get("at") or "")[-400:]
+    with open(os.path.join(DATA, "dfs_balance.json"), "w") as f:
+        json.dump(hist, f)
+    prev_dfs = load("dfs_prev.json", None)  # the stored snapshot/dataforseo, used when no new usage file was built this run
+    if not usage and prev_dfs:
+        bal = (lc or {}).get("value", prev_dfs.get("balance"))
+        dep = (lc or {}).get("deposited", prev_dfs.get("deposited"))
+        dfs_doc = dict(prev_dfs, balance=bal, deposited=dep, lifetimeSpent=round((dep or 0) - (bal or 0), 2), balanceHistory=hist, updatedAt=NOW)
+        rr = prev_dfs.get("runRate") or {}
+        for f in dfs_doc.get("findings") or []:
+            he(f.get("en"))
+        for c in (dfs_doc.get("last30") or {}).get("byClient") or []:
+            if c["client"].startswith("("):
+                he(c["client"])
+        avg30, avg7 = rr.get("avg30") or 0, rr.get("avg7") or 0
+        if bal is not None and avg30 and bal / avg30 < 14:
+            alert("tool-dataforseo-runway", "high" if bal / avg30 < 7 else "medium", "tools",
+                  f"DataForSEO: the ${bal:,.2f} balance covers about {bal/avg30:.0f}-{(bal/avg7 if avg7 else bal/avg30):.0f} days",
+                  f"Spend averaged ${avg30:.2f}/day over 30 days and ${avg7:.2f}/day over 7 (as of the last spend analysis, {str(prev_dfs.get('asOf'))[:10]}). Top up before the rank trackers stop, and decide which jobs should keep running (Tools → DataForSEO spend).",
+                  source="DataForSEO API (user_data + id_list)")
+            alerts["tool-dataforseo-runway"]["he"] = {"title": he(alerts["tool-dataforseo-runway"]["title"]), "detail": he(alerts["tool-dataforseo-runway"]["detail"])}
+        top = ((prev_dfs.get("last30") or {}).get("byClient") or [{}])[0]
+        if top.get("client", "").startswith("(unattributed") and (top.get("share") or 0) >= 0.3:
+            alert("tool-dataforseo-unowned", "medium", "tools",
+                  f"DataForSEO: {top['share']*100:.0f}% of the last 30 days' spend has no owner",
+                  f"{top['client'][1:].split(')')[0].capitalize()}: {top['client'].split(') ', 1)[-1]}, ${top['cost']:,.2f} over 30 days ({top.get('tasks', 0):,} tasks). Its keywords match no client. Find out who runs it and whether it still needs to run.",
+                  source="DataForSEO id_list")
+            alerts["tool-dataforseo-unowned"]["he"] = {"title": he(alerts["tool-dataforseo-unowned"]["title"]), "detail": he(alerts["tool-dataforseo-unowned"]["detail"])}
+    if usage:
+        l30, rr, acc = usage.get("last30") or {}, usage.get("runRate") or {}, usage.get("account") or {}
+        bal = (lc or {}).get("value", acc.get("balance"))
+        dep = (lc or {}).get("deposited", acc.get("deposited"))
+        clients_ = [dict(c, he=he(c["client"]) if c["client"].startswith("(") else None) for c in (l30.get("byClient") or [])[:12]]
+        dfs_doc = {
+            "asOf": usage.get("asOf"), "balance": bal, "deposited": dep, "lifetimeSpent": round((dep or 0) - (bal or 0), 2) if dep else acc.get("lifetimeSpent"),
+            "coverage": {k: (usage.get("coverage") or {}).get(k) for k in ("from", "to", "tasks", "netCost", "note")},
+            "daily": [[d["date"], d["cost"], (d.get("byApi") or {}).get("serp", 0)] for d in usage.get("daily", [])],
+            "monthly": [{"month": m["month"], "cost": m["cost"], "tasks": m.get("tasks"), "byApi": m.get("byApi")} for m in usage.get("monthly", [])],
+            "runRate": {k: rr.get(k) for k in ("avg7", "avg30", "projectedMonth", "octoberToDate", "method")},
+            "last30": {"total": l30.get("total"), "window": l30.get("window"), "byEndpoint": (l30.get("byEndpoint") or [])[:10], "byClient": clients_,
+                       "byLocation": (l30.get("byLocation") or [])[:8], "topTargets": (l30.get("topTargets") or [])[:10],
+                       "duplicates": {k: (l30.get("duplicates") or {}).get(k) for k in ("cost", "tasks")}},
+            "spikes": usage.get("spikes", []), "spikeRule": usage.get("spikeRule"),
+            "findings": [{"en": f, "he": he(f)} for f in usage.get("findings", [])],
+            "balanceHistory": hist, "updatedAt": NOW,
+        }
+        avg30, avg7 = rr.get("avg30") or 0, rr.get("avg7") or 0
+        if bal is not None and avg30:
+            run30, run7 = bal / avg30, (bal / avg7 if avg7 else None)
+            if run30 < 14:
+                alert("tool-dataforseo-runway", "high" if run30 < 7 else "medium", "tools",
+                      f"DataForSEO: the ${bal:,.2f} balance covers about {run30:.0f}-{(run7 or run30):.0f} days",
+                      f"Spend averaged ${avg30:.2f}/day over 30 days and ${avg7:.2f}/day over 7. One weekly SERP batch costs more than the balance. Top up before the rank trackers stop, and decide which jobs should keep running (Tools → DataForSEO spend).",
+                      source="DataForSEO API (user_data + id_list)")
+        top = (l30.get("byClient") or [{}])[0]
+        if top.get("client", "").startswith("(unattributed") and (top.get("share") or 0) >= 0.3:
+            alert("tool-dataforseo-unowned", "medium", "tools",
+                  f"DataForSEO: {top['share']*100:.0f}% of the last 30 days' spend has no owner",
+                  f"{top['client'][1:].split(')')[0].capitalize()}: {top['client'].split(') ', 1)[-1]}, ${top['cost']:,.2f} over 30 days ({top.get('tasks', 0):,} tasks). Its keywords match no client. Find out who runs it and whether it still needs to run.",
+                  source="DataForSEO id_list")
+        recent = [x for x in usage.get("spikes", []) if x.get("date") and (TODAY - dt.date.fromisoformat(x["date"])).days <= 7]
+        if recent:
+            x = max(recent, key=lambda x: x["cost"])
+            alert("tool-dataforseo-spike", "low", "tools", f"DataForSEO: ${x['cost']:,.2f} spent on {dt.date.fromisoformat(x["date"]):%d %b %Y}",
+                  f"More than twice the 30-day median. Driver: {x.get('driver', '')[:220]}", due=x["date"], source="DataForSEO id_list")
+        for aid in ("tool-dataforseo-runway", "tool-dataforseo-unowned", "tool-dataforseo-spike"):
+            if aid in alerts:
+                alerts[aid]["he"] = {"title": he(alerts[aid]["title"]), "detail": he(alerts[aid]["detail"])}
+
     order = {"high": 0, "medium": 1, "low": 2}
     sev_counts = {s: sum(1 for a in alerts.values() if a["severity"] == s) for s in order}
     # refresh history: last 12 runs with the sources that succeeded or failed (source_status.json "failed")
@@ -545,7 +622,10 @@ def build():
     fav = load("favicons.json", {})
     if fav:
         put("snapshot", "favicons", {"icons": fav, "updatedAt": NOW})
+    if dfs_doc:
+        put("snapshot", "dataforseo", dfs_doc)
     meta["shards"] = shards
+
     put("meta", "state", meta)
     if briefing:
         put("briefing", "latest", dict(briefing, generatedAt=briefing.get("generatedAt") or NOW))
@@ -581,7 +661,7 @@ def build():
     live = {f"{w['collection']}/{w['doc_id']}" for w in writes}
     for key, ver in versions.items():  # shards that no longer exist
         col, did = key.split("/", 1)
-        if col in ("snapshot", "sources") and key not in live and ((col == "snapshot" and did != "favicons") or did.startswith("tm-")):
+        if col in ("snapshot", "sources") and key not in live and ((col == "snapshot" and did not in ("favicons", "dataforseo")) or did.startswith("tm-")):
             writes.append({"op": "delete", "collection": col, "doc_id": did, "if_version": int(ver)})
     with open(os.path.join(OUT, "writes.json"), "w") as f:
         json.dump(writes, f, indent=1)
