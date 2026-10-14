@@ -139,6 +139,9 @@ def build_tools():
     hdr_i = next(i for i, r in enumerate(rows) if r and r[0].strip() == "Name")
     hdr = rows[hdr_i]
     live = {slug(x.get("tool")): x for x in load("livechecks.json", [])}
+    # weekly browser checks (Claude in Chrome on the owner's machine) write sources/toolchecks
+    tc = load("toolchecks.json", {})
+    browser = {slug(x.get("tool")): x for x in (tc.get("items", []) if isinstance(tc, dict) else tc)}
     for r in rows[hdr_i + 1:]:
         if not r or not r[0].strip():
             continue
@@ -167,7 +170,7 @@ def build_tools():
             "nextRenewal": nxt.isoformat() if nxt else None, "daysToRenewal": days, "renewalDateStale": stale,
             "autoRenew": auto, "plan": d.get("Plan Name", "").strip() or None, "notes": notes or None,
             "learningHub": d.get("Tool Learning Hub", "").strip() or None,
-            "live": live.get(tid),
+            "live": live.get(tid), "browserCheck": browser.get(tid),
         }
         tools[tid] = t
         cost = f"${yearly:,.0f}/yr" if yearly else "cost not set"
@@ -189,6 +192,11 @@ def build_tools():
                   f"Notes: {notes or 'none'}. Confirm the subscription is cancelled at the vendor so it does not charge again.", source=src)
         if "not clear" in notes.lower() or "will be charged" in notes.lower():
             alert(f"tool-{tid}-billing-unclear", "low", "tools", f"{name}: billing behaviour unclear", notes, source=src)
+        bc = t["browserCheck"] or {}
+        if bc.get("status") in ("low", "critical") or bc.get("loginOk") is False:
+            alert(f"tool-{tid}-browser", "high" if bc.get("status") == "critical" else "medium", "tools",
+                  f"{name}: {bc.get('headline') or ('login failed' if bc.get('loginOk') is False else 'needs attention')}",
+                  bc.get("detail") or "", source="Weekly browser check")
         lv = t["live"] or {}
         if lv.get("status") in ("low", "critical"):
             alert(f"tool-{tid}-live", "high" if lv["status"] == "critical" else "medium", "tools",
@@ -323,15 +331,26 @@ def build():
             alert(f"brain-{key}-{slug(a.get('title', i))[:40]}", a.get("severity", "medium"), "clients",
                   f"{disp}: {a.get('title')}", a.get("detail", ""), client=key, source=a.get("source") or "Client brain",
                   source_url=b.get("brainFolderUrl"))
+        if p and not b:
+            alert(f"brain-{key}-missing", "low", "clients", f"{disp}: no client brain yet",
+                  "Active in SurgeOS but there is no 00. AI Brain folder for this client in Drive, so the dashboard has no relationship context for it.",
+                  client=key, source="Drive search")
+        lbu = iso(b.get("lastBrainUpdate"))
+        if b and not b.get("sharedBrainOf") and lbu and (TODAY - lbu).days > 14:
+            alert(f"brain-{key}-stale", "medium", "clients", f"{disp}: client brain not updated since {lbu:%d %b %Y}",
+                  "The brain's harvest routine has not written anything for over two weeks, so its context here may be out of date. Check the routine on the owner's laptop.",
+                  client=key, due=lbu, source="Client brain", source_url=b.get("brainFolderUrl"))
         if not c.get("contract") and key not in NOT_CLIENTS and p:
             alert(f"contract-{key}-missing", "medium", "contracts", f"{disp}: no contract found in Drive",
                   "Active in SurgeOS but no signed agreement was found. Add the contract to the client folder so its end date can be tracked.",
                   client=key, source="Drive search")
         sev = [a["severity"] for a in alerts.values() if a.get("client") == key]
         health = p.get("health")
-        if "high" in sev or health == "risk":
+        kst = (c.get("contract") or {}).get("status")
+        # at risk = performance at risk, contract expired/ending within 30 days, or several urgent alerts
+        if health == "risk" or kst in ("expired", "critical") or sev.count("high") >= 2:
             status = "risk"
-        elif "medium" in sev or health == "watch":
+        elif "high" in sev or "medium" in sev or health == "watch":
             status = "watch"
         else:
             status = "good"
@@ -346,6 +365,7 @@ def build():
             "perf": {k2: p.get(k2) for k2 in ("w7", "w28", "w90", "spark28", "health", "wins", "okrs", "openTasks",
                                                "overdueTasks", "hoursUsed", "hoursBudget", "surgeosId")},
             "contract": c.get("contract"), "alertCount": len(sev), "updatedAt": NOW,
+            "brainFullRead": bool(b.get("fullRead")),
         }
 
     # Hebrew fields (UI falls back to English where a string is not translated yet)
@@ -371,12 +391,39 @@ def build():
         "monthly": round(sum(t["monthlyCost"] or 0 for t in paying)),
         "paying": len(paying), "total": len(tools),
     }
+    # contracted revenue: each latest agreement counted once (one contract can cover several SurgeOS
+    # projects, e.g. Kikar Group -> Kikar, Srugim, babli), per currency; unsigned ones are pipeline
+    seen, revenue = set(), {"active": {}, "pipeline": {}, "atRisk": {}, "clientsAtRisk": 0}
+    for cd in client_docs.values():
+        k = cd.get("contract") or {}
+        fee, cur = k.get("monthlyFee"), k.get("currency") or "ILS"
+        ident = k.get("url") or k.get("title")
+        if not fee or not ident or ident in seen or k.get("status") == "expired":
+            continue
+        seen.add(ident)
+        signed = next((x.get("signed") for x in contract_docs.values() if (x.get("url") or x.get("title")) == ident), None)
+        bucket = "pipeline" if signed is False else "active"
+        revenue[bucket][cur] = revenue[bucket].get(cur, 0) + fee
+        if bucket == "active" and cd["status"] == "risk":
+            revenue["atRisk"][cur] = revenue["atRisk"].get(cur, 0) + fee
+            revenue["clientsAtRisk"] += 1
+
+    tcl = load("toolchecks.json", {})
+    last_tc = iso((tcl or {}).get("checkedAt")) if isinstance(tcl, dict) else None
+    if not last_tc or (TODAY - last_tc).days > 9:
+        alert("agency-weekly-tool-check", "low", "agency", "Agency: weekly browser check of the tools is " + ("overdue" if last_tc else "not set up yet"),
+              "Usage, credits and last-login data for tools without an API come from a weekly Claude in Chrome check on the owner's computer (BROWSER-CHECK.md in the repo).",
+              due=last_tc, source="Weekly browser check")
+        a = alerts["agency-weekly-tool-check"]
+        a["he"] = {"title": he(a["title"]), "detail": he(a["detail"])}
+
     order = {"high": 0, "medium": 1, "low": 2}
     sev_counts = {s: sum(1 for a in alerts.values() if a["severity"] == s) for s in order}
     meta = {
         "updatedAt": NOW, "today": TODAY.isoformat(), "dataThrough": perf.get("dataThrough"),
         "counts": {"clients": len(client_docs), "contracts": len(contract_docs), "tools": len(tools), "alerts": sev_counts},
-        "spend": spend, "portfolio": perf.get("portfolio"),
+        "spend": spend, "portfolio": perf.get("portfolio"), "revenue": revenue,
+        "sourceStatus": load("source_status.json", {}),
         "agency": {k2: (agency_brain or {}).get(k2) for k2 in ("summary", "keyFacts", "upcoming", "brainFolderUrl", "lastBrainUpdate")},
         "sources": {
             "toolsSheet": "https://docs.google.com/spreadsheets/d/1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU/edit",
@@ -414,6 +461,9 @@ def build():
     put_items("contracts", [dict(v, id=k) for k, v in sorted(contract_docs.items())])
     put_items("tools", [dict(v, id=k) for k, v in sorted(tools.items())])
     put_items("alerts", [dict(v, id=k) for k, v in sorted(alerts.items())])
+    fav = load("favicons.json", {})
+    if fav:
+        put("snapshot", "favicons", {"icons": fav, "updatedAt": NOW})
     meta["shards"] = shards
     put("meta", "state", meta)
     if briefing:
@@ -448,7 +498,7 @@ def build():
     live = {f"{w['collection']}/{w['doc_id']}" for w in writes}
     for key, ver in versions.items():  # shards that no longer exist
         col, did = key.split("/", 1)
-        if col in ("snapshot", "sources") and key not in live and (col == "snapshot" or did.startswith("tm-")):
+        if col in ("snapshot", "sources") and key not in live and ((col == "snapshot" and did != "favicons") or did.startswith("tm-")):
             writes.append({"op": "delete", "collection": col, "doc_id": did, "if_version": int(ver)})
     with open(os.path.join(OUT, "writes.json"), "w") as f:
         json.dump(writes, f, indent=1)

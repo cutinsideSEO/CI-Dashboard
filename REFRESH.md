@@ -20,6 +20,8 @@ ArtifactData list  url=<artifact>  collection=sources   out_dir=prev
 1. The tool result prints each document's `version`. Write them to `prev/versions.json`, for example `{"meta/state": 4, "snapshot/clients": 4, ...}`.
 2. Copy `prev/sources/brains.json`, `prev/sources/contracts.json` and `prev/sources/performance.json` into `data/` as the starting points. For brains and contracts, unwrap `{items: [...]}` into the plain array.
 3. Merge `prev/sources/tm.json` and any `tm-N.json` shards (each `{items: [{en, he}]}`) into `data/tm.json` as one `{english: hebrew}` object. This is the Hebrew translation memory.
+4. Copy `prev/sources/toolchecks.json` (the weekly browser check, see BROWSER-CHECK.md) to `data/toolchecks.json` if it exists.
+5. Copy `prev/snapshot/favicons.json`, taking its `icons` object, to `data/favicons.json` if it exists.
 
 ## 1. Tools sheet → `data/tools.csv`
 
@@ -40,7 +42,9 @@ ArtifactData list  url=<artifact>  collection=sources   out_dir=prev
 
 Write each check as `{tool, metric, value, unit, status, headline, detail, checkedAt, method}`. `tool` must equal the Name in the sheet, for example "DataForSEO API".
 
-Tools with no API or connector (Ahrefs, SE Ranking, Screaming Frog, Claude seats and the rest) are not checked live. Don't guess their usage.
+Tools with no API or connector (Ahrefs, SE Ranking, Claude seats and the rest) are covered by the weekly browser check on the owner's computer (BROWSER-CHECK.md). It writes `sources/toolchecks` itself. If that document is missing or older than `meta/state.updatedAt`, also look in Drive for a Doc titled `Control Room tool checks`, and use its JSON as `data/toolchecks.json`. Don't guess usage.
+
+**Favicons.** Run `python3 scripts/fetch_favicons.py`. It fetches only domains that are missing. It needs network access to www.google.com; if that is blocked it reports the failures, and the page keeps showing letter tiles.
 
 ## 3. Performance → `data/performance.json`
 
@@ -87,6 +91,10 @@ Brains are markdown files in each client's `00. AI Brain` folder: the `AGENTS.md
 ```
 
 3. Compute `endDate` from start + term when only the term is given, and say so in `notes`.
+
+## 5b. Source freshness
+
+Write `data/source_status.json` as `{"sheet": "<ISO time the sheet was read>", "drive": "<ISO time brains/contracts were checked>", "dataforseo": "<ISO time of the balance check>"}`. Use only the sources that actually succeeded this run, and keep the previous value for any that failed. The page shows these times at the bottom of the overview.
 
 ## 6. Build
 

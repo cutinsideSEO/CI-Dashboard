@@ -109,12 +109,13 @@ main { padding-block: 32px 80px; }
 @media (max-width: 720px) { .brief { grid-template-columns: minmax(0, 1fr); padding: 24px 20px; } }
 
 /* KPI stat blocks */
-.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .kpi { background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; padding: 20px; min-width: 0; box-shadow: var(--shadow-card); }
-.kpi .v { font: 700 30px/1 var(--f-display); color: var(--accent-text); margin-top: 10px; font-variant-numeric: tabular-nums; }
+.kpi .v { font: 700 30px/1.05 var(--f-display); overflow-wrap: anywhere; color: var(--accent-text); margin-top: 10px; font-variant-numeric: tabular-nums; }
+.kpi .v .v2 { display: block; font-size: 18px; margin-top: 4px; opacity: .85; }
 .kpi .d { font-size: 12px; color: var(--ink-3); margin-top: 8px; }
 .up { color: var(--good); } .down { color: var(--crit); }
-@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi .v { font-size: 26px; } }
 
 /* alerts */
@@ -131,6 +132,7 @@ main { padding-block: 32px 80px; }
 .alert .am { display: flex; gap: 6px 12px; flex-wrap: wrap; font-size: 11.5px; color: var(--ink-3); margin-top: 8px; align-items: center; }
 .alert .side { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
 .alert.acked { opacity: .45; }
+@media (max-width: 560px) { .alert { grid-template-columns: minmax(0, 1fr); } .alert > .pill { justify-self: start; } .alert .side { flex-direction: row; gap: 16px; align-items: center; } }
 .pill { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1 var(--f-body); padding: 5px 10px; border-radius: 9999px; white-space: nowrap; background: var(--tag); color: var(--ink-2); }
 .pill.pd::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .pill.crit, .pill.high, .pill.risk, .pill.expired, .pill.critical { background: var(--crit-bg); color: var(--crit); }
@@ -154,6 +156,14 @@ main { padding-block: 32px 80px; }
 .tl rect.bar { cursor: pointer; }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); margin-top: 12px; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-inline-end: 6px; vertical-align: -1px; }
+
+/* client logos: favicon when stored, else a brand-colour letter tile */
+.lg { display: inline-grid; place-items: center; flex: none; width: var(--lg, 20px); height: var(--lg, 20px); border-radius: 25%; overflow: hidden; background: var(--lgbg, #e0f4f4); color: var(--ink-on-light); font: 700 calc(var(--lg, 20px) * .52)/1 var(--f-display); vertical-align: middle; }
+.lg.img { background: #ffffff; padding: 12%; }
+.lg img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cname { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.srcline { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--ink-3); padding: 4px 2px; }
+.srcline b { color: var(--ink-2); font-weight: 600; }
 
 /* client cards */
 .cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
@@ -295,6 +305,7 @@ tbody tr:hover { background: var(--line-subtle); }
       <div class="card-h"><h2 data-i18n="health">Portfolio health</h2><span class="sub" data-i18n="healthSub">Organic clicks, last 28 days vs the 28 before (Search Console via SurgeOS)</span></div>
       <div class="card-b"><div class="cgrid" id="healthGrid"></div></div>
     </div>
+    <div class="srcline" id="srcline"></div>
   </section>
 
   <section class="panel" data-panel="alerts" hidden>
@@ -408,6 +419,10 @@ tbody tr:hover { background: var(--line-subtle); }
       rNotConnected: "Connect Claude Code Remote in claude.ai Settings → Connectors to refresh from here.", rReauth: "Reconnect Claude Code Remote in claude.ai Settings → Connectors.", rNotAllowed: "Refreshing isn't allowed for this view.",
       signIn: "Sign in to Claude to acknowledge alerts.", viewOnly: "You have view-only access, so you can't acknowledge alerts.", saveFail: "Couldn't save that. Try again.", teammate: "a teammate", you: "you",
       writtenBy: "Written by {0} from the latest refresh", lang: "עברית", langTitle: "החלפה לעברית",
+      kMrr: "Contracted revenue / month", kMrrSub: "+ {0} pending signature", kMrrNone: "from signed contracts", kRisk: "Revenue at risk / month", kRiskSub: "{0} clients at risk", kRiskNone: "no at-risk client with a fee on file",
+      srcTitle: "Sources", srcSheet: "Tools sheet", srcDrive: "Drive brains and contracts", srcSurge: "SurgeOS data through", srcDfs: "DataForSEO checked",
+      tUsage: "Usage (last check)", lastUsed: "last used {0}", notChecked: "Not checked yet", srcBrowser: "Weekly browser check",
+      dFee: "Monthly fee", brainFull: "Whole brain read", brainSummary: "Summary of the brain's main files", sharedBrain: "Covered by the {0} brain",
     },
     he: {
       appName: "חדר בקרה", waiting: "ממתין לנתונים…", refreshNow: "רענון עכשיו", askOpus: "שאל את Opus",
@@ -460,6 +475,10 @@ tbody tr:hover { background: var(--line-subtle); }
       rNotConnected: "חברו את Claude Code Remote ב-claude.ai, בהגדרות → Connectors, כדי לרענן מכאן.", rReauth: "חברו מחדש את Claude Code Remote ב-claude.ai, בהגדרות → Connectors.", rNotAllowed: "אין הרשאה לרענן מהתצוגה הזו.",
       signIn: "התחברו ל-Claude כדי לסמן התראות.", viewOnly: "יש לכם הרשאת צפייה בלבד, ולכן אי אפשר לסמן התראות.", saveFail: "השמירה נכשלה. נסו שוב.", teammate: "חבר צוות", you: "את/ה",
       writtenBy: "נכתב ע\"י {0} מהרענון האחרון", lang: "English", langTitle: "Switch to English",
+      kMrr: "הכנסה חוזית / חודש", kMrrSub: "+ {0} ממתין לחתימה", kMrrNone: "מחוזים חתומים", kRisk: "הכנסה בסיכון / חודש", kRiskSub: "{0} לקוחות בסיכון", kRiskNone: "אין לקוח בסיכון עם תשלום בתיק",
+      srcTitle: "מקורות", srcSheet: "גיליון הכלים", srcDrive: "brains וחוזים ב-Drive", srcSurge: "נתוני SurgeOS עד", srcDfs: "DataForSEO נבדק",
+      tUsage: "שימוש (בדיקה אחרונה)", lastUsed: "שימוש אחרון {0}", notChecked: "עוד לא נבדק", srcBrowser: "בדיקת דפדפן שבועית",
+      dFee: "תשלום חודשי", brainFull: "ה-brain נקרא במלואו", brainSummary: "תקציר של קבצי ה-brain העיקריים", sharedBrain: "מכוסה ע\"י ה-brain של {0}",
     },
   };
   let LANG = "en";
@@ -468,7 +487,17 @@ tbody tr:hover { background: var(--line-subtle); }
   const L = (o, f) => (LANG === "he" && o?.he?.[f]) || o?.[f];   // localized data field with English fallback
   const LOC = () => (LANG === "he" ? "he-IL" : "en-GB");
 
-  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {} };
+  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {}, icons: {}, toolchecks: {}, toolcheckAt: null };
+  const TILE = ["#e0f4f4", "#fad05d", "#f7caf1", "#c5e9e6", "#7dcdc7", "#f3d9c6"];
+  const logo = (key, size = 20) => {
+    const c = S.clients.find((x) => x.key === key), dom = c?.domain, icon = dom && S.icons[dom];
+    const name = c ? c.name : String(key || "?");
+    if (icon) return `<span class="lg img" style="--lg:${size}px" aria-hidden="true"><img src="${esc(icon)}" alt=""></span>`;
+    let h = 0; for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    const letter = (name.match(/[A-Za-z0-9\u0590-\u05FF]/) || ["?"])[0].toUpperCase();
+    return `<span class="lg" style="--lg:${size}px;--lgbg:${TILE[h % TILE.length]}" aria-hidden="true">${esc(letter)}</span>`;
+  };
+  const cname = (key, size = 18, label) => `<span class="cname">${logo(key, size)}<span>${esc(label ?? clientName(key))}</span></span>`;
   const UI = { tab: "overview", alertCat: "all", alertSev: "all", showAcked: false, clientFilter: "all", toolFilter: "attention", contractSort: "daysLeft", toolSort: "daysToRenewal" };
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -507,7 +536,7 @@ tbody tr:hover { background: var(--line-subtle); }
   let raf = 0;
   const render = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderAll(); }); };
   function renderAll() {
-    renderFresh(); renderCounts(); renderBrief(); renderKpis(); renderTopAlerts(); renderUpcoming(); renderTimeline(); renderHealth();
+    renderFresh(); renderSources(); renderCounts(); renderBrief(); renderKpis(); renderTopAlerts(); renderUpcoming(); renderTimeline(); renderHealth();
     if (UI.tab === "alerts") renderAlerts();
     if (UI.tab === "clients") renderClients();
     if (UI.tab === "contracts") renderContracts();
@@ -518,6 +547,11 @@ tbody tr:hover { background: var(--line-subtle); }
     const m = S.meta; if (!m) return;
     const stale = Date.now() - new Date(m.updatedAt) > 14 * 36e5;
     $("#fresh").innerHTML = `<span class="dot ${stale ? "stale" : ""}"></span><span>${esc(t("updated", ago(m.updatedAt)))}</span><span>· ${esc(t("gscThrough", fmtD(m.dataThrough)))}</span>`;
+  }
+  function renderSources() {
+    const m = S.meta, ss = m?.sourceStatus || {}; if (!m) return;
+    const it = [[t("srcSheet"), ss.sheet && ago(ss.sheet)], [t("srcDrive"), ss.drive && ago(ss.drive)], [t("srcSurge"), m.dataThrough && fmtD(m.dataThrough)], [t("srcDfs"), ss.dataforseo && ago(ss.dataforseo)], [t("srcBrowser"), S.toolcheckAt ? ago(S.toolcheckAt) : t("notChecked")]].filter((x) => x[1]);
+    $("#srcline").innerHTML = it.length ? `<span><b>${esc(t("srcTitle"))}</b></span>` + it.map(([l, v]) => `<span>${esc(l)}: ${esc(v)}</span>`).join("") : "";
   }
   function renderCounts() {
     const open = S.alerts.filter((a) => !isAcked(a)), hi = open.filter((a) => a.severity === "high").length;
@@ -574,6 +608,13 @@ tbody tr:hover { background: var(--line-subtle); }
       [t("kRenewals"), S.tools.length ? ren30 : "—", esc(t("kSubs"))],
       [t("kUrgent"), S.alerts.filter((a) => a.severity === "high" && !isAcked(a)).length, esc(t("kAcked", S.alerts.filter(isAcked).length))],
     ];
+    const rv = m?.revenue, ent = (o) => Object.entries(o || {}).sort((a) => (a[0] === "ILS" ? -1 : 1));
+    const money = (o) => ent(o).map(([c, v]) => fmtMoney(v, c)).join(" + ");
+    const moneyBig = (o) => ent(o).map(([c, v], i) => (i ? `<span class="v2">+ ${fmtMoney(v, c)}</span>` : fmtMoney(v, c))).join("");
+    if (rv) {
+      k.splice(1, 0, [t("kMrr"), moneyBig(rv.active) || "—", Object.keys(rv.pipeline || {}).length ? esc(t("kMrrSub", money(rv.pipeline))) : esc(t("kMrrNone"))]);
+      k.splice(2, 0, [t("kRisk"), moneyBig(rv.atRisk) || "—", rv.clientsAtRisk ? `<span class="down">${esc(t("kRiskSub", rv.clientsAtRisk))}</span>` : esc(t("kRiskNone"))]);
+    }
     $("#kpis").innerHTML = k.map(([l, v, d]) => `<div class="kpi"><div class="caption">${esc(l)}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
   }
   function alertRow(a) {
@@ -583,7 +624,7 @@ tbody tr:hover { background: var(--line-subtle); }
     const src = a.sourceUrl ? `<a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.source || t("source"))}</a>` : esc(a.source || "");
     return `<div class="alert ${esc(a.severity)} ${acked ? "acked" : ""}"><span class="pill pd ${esc(a.severity)}">${esc(t(SEVL[a.severity] || "sevLow"))}</span>
       <div style="min-width:0"><div class="t">${esc(L(a, "title"))}</div><div class="dt">${esc(L(a, "detail"))}</div>
-      <div class="am"><span class="pill mute">${esc(t(CATL[a.category] || a.category))}</span>${due}${src ? `<span>${src}</span>` : ""}${a.client ? `<button class="link-btn" data-client="${esc(a.client)}">${esc(t("openClient"))}</button>` : ""}${acked ? `<span>${esc(t("ackBy", by, ago(acked.at)))}</span>` : ""}</div></div>
+      <div class="am"><span class="pill mute">${esc(t(CATL[a.category] || a.category))}</span>${due}${src ? `<span>${src}</span>` : ""}${a.client ? `<button class="link-btn" data-client="${esc(a.client)}">${cname(a.client, 16)}</button>` : ""}${acked ? `<span>${esc(t("ackBy", by, ago(acked.at)))}</span>` : ""}</div></div>
       <div class="side"><button class="link-btn" data-ack="${esc(a.id)}">${esc(acked ? t("reopen") : t("acknowledge"))}</button><button class="link-btn" data-askalert="${esc(a.id)}">${esc(t("askOpus"))}</button></div></div>`;
   }
   const sortAlerts = (l) => l.slice().sort((a, b) => (SEV[a.severity] ?? 3) - (SEV[b.severity] ?? 3) || String(a.dueDate || "9").localeCompare(String(b.dueDate || "9")));
@@ -601,7 +642,7 @@ tbody tr:hover { background: var(--line-subtle); }
     });
     S.tools.filter((x) => x.paying && x.nextRenewal).forEach((x) => { const d = days(x.nextRenewal); if (d != null && d >= 0 && d <= 90) items.push({ d, date: x.nextRenewal, kind: t("uTool"), name: x.name, what: x.autoRenew ? t("uRenews", fmtUSD(x.yearlyCost)) : t("uExpires"), sev: !x.autoRenew || d <= 7 ? "crit" : "info" }); });
     items.sort((a, b) => a.d - b.d);
-    $("#upcoming").innerHTML = items.length ? `<div class="tbl-wrap"><table><tbody>${items.slice(0, 12).map((i) => `<tr><td style="white-space:nowrap"><span class="num" style="font-weight:700">${esc(fmtD(i.date))}</span><div class="sub">${esc(i.d < 0 ? t("daysAgoLong", -i.d) : i.d === 0 ? t("today") : t("inDaysLong", i.d))}</div></td><td>${i.client ? `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(i.client)}">${esc(i.name)}</button>` : `<strong>${esc(i.name)}</strong>`}<div class="sub">${esc(i.what)}</div></td><td style="text-align:end"><span class="pill ${i.sev}">${esc(i.kind)}</span></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">${esc(t("nothing90"))}</div>`;
+    $("#upcoming").innerHTML = items.length ? `<div class="tbl-wrap"><table><tbody>${items.slice(0, 12).map((i) => `<tr><td style="white-space:nowrap"><span class="num" style="font-weight:700">${esc(fmtD(i.date))}</span><div class="sub">${esc(i.d < 0 ? t("daysAgoLong", -i.d) : i.d === 0 ? t("today") : t("inDaysLong", i.d))}</div></td><td>${i.client ? `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(i.client)}">${cname(i.client, 18, i.name)}</button>` : `<strong>${esc(i.name)}</strong>`}<div class="sub">${esc(i.what)}</div></td><td style="text-align:end"><span class="pill ${i.sev}">${esc(i.kind)}</span></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">${esc(t("nothing90"))}</div>`;
   }
   function renderTimeline() {
     const rows = S.contracts.filter((k) => k.isLatest).map((k) => ({ k, d: days(k.endDate) })).sort((a, b) => (a.d ?? 9999) - (b.d ?? 9999));
@@ -620,7 +661,9 @@ tbody tr:hover { background: var(--line-subtle); }
     rows.forEach(({ k, d }, i) => {
       const y = top + i * rh, name = clientName(k.client);
       const col = d == null ? "var(--info)" : d <= 30 ? "var(--crit)" : d <= 90 ? "var(--warn)" : "var(--accent)";
-      g += `<text class="lbl" x="${Lm - 12}" y="${y + 16}" text-anchor="end">${esc(name.length > 22 ? name.slice(0, 21) + "…" : name)}</text>`;
+      const icon = S.icons[S.clients.find((x) => x.key === k.client)?.domain];
+      g += `<text class="lbl" x="${Lm - 34}" y="${y + 16}" text-anchor="end">${esc(name.length > 20 ? name.slice(0, 19) + "…" : name)}</text>`;
+      g += icon ? `<rect x="${Lm - 28}" y="${y + 3}" width="20" height="20" rx="5" fill="#ffffff"/><image href="${esc(icon)}" x="${Lm - 25}" y="${y + 6}" width="14" height="14"/>` : `<rect x="${Lm - 28}" y="${y + 3}" width="20" height="20" rx="5" fill="${TILE[[...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 0) % TILE.length]}"/><text x="${Lm - 18}" y="${y + 17.5}" text-anchor="middle" style="fill:#1a1a18;font:700 11px var(--f-display)">${esc((name.match(/[A-Za-z0-9]/) || ["?"])[0].toUpperCase())}</text>`;
       if (d == null) {
         g += `<rect class="bar" data-client="${esc(k.client)}" x="${tx}" y="${y + 7}" width="56" height="12" rx="4" fill="${col}" opacity=".45"><title>${esc(name)}: ${esc(t("noEnd"))}</title></rect><text x="${tx + 64}" y="${y + 17}">${esc(t("noEnd"))}</text>`;
       } else {
@@ -643,7 +686,7 @@ tbody tr:hover { background: var(--line-subtle); }
   function clientCard(c) {
     const w = c.perf?.w28 || {}, k = c.contract, kd = k?.endDate ? days(k.endDate) : null;
     const kchip = !k ? `<span class="pill mute">${esc(t("noContract"))}</span>` : kd == null ? `<span class="pill unknown">${esc(t("contractNoEnd"))}</span>` : `<span class="pill ${kd < 0 ? "expired" : kd <= 30 ? "critical" : kd <= 90 ? "soon" : "ok"}">${esc(kd < 0 ? t("contractEnded") : t("contractDays", kd))}</span>`;
-    return `<button class="cl" data-client="${esc(c.key)}"><div class="top"><div style="min-width:0"><div class="nm">${esc(L(c, "name") || c.name)}</div><div class="dom">${esc(c.domain || "")}</div></div><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span></div>
+    return `<button class="cl" data-client="${esc(c.key)}"><div class="top"><div style="min-width:0;display:flex;gap:12px;align-items:center">${logo(c.key, 36)}<div style="min-width:0"><div class="nm">${esc(L(c, "name") || c.name)}</div><div class="dom">${esc(c.domain || "")}</div></div></div><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span></div>
       <div class="hl">${esc(L(c, "headline") || L(c, "summary") || "")}</div>
       <div class="stats"><div><div class="num">${fmtN(w.clicks)}</div><div class="note">${pct(w.clicksChangePct) || esc(t("d28"))} · ${esc(t("clicks"))}</div></div>${spark(c.perf?.spark28)}</div>
       <div class="foot">${kchip}${c.alertCount ? `<span class="pill mute">${esc(c.alertCount > 1 ? t("alertsNs", c.alertCount) : t("alertsN", 1))}</span>` : ""}</div></button>`;
@@ -682,8 +725,9 @@ tbody tr:hover { background: var(--line-subtle); }
     const facts = L(c, "keyFacts") || [], upc = L(c, "upcoming") || [], wins = (LANG === "he" && c.he?.wins) || p.wins || [];
     const okl = { on_track: ["good", "okOn"], at_risk: ["warn", "okAt"], off_track: ["crit", "okOff"] };
     $("#drawer").innerHTML = `<button class="btn close" data-close>${esc(t("close"))}</button>
-      <div><div class="eyebrow ltr" style="direction:ltr;text-align:start">${esc(c.domain || "")}</div><h2 style="margin-top:6px">${esc(nm)}</h2><div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span>${(c.services || []).map((s) => `<span class="pill mute">${esc(s)}</span>`).join("")}</div></div>
-      ${L(c, "summary") ? `<div><h3>${esc(t("dBrain"))}</h3><p style="margin:0;color:var(--ink-2)">${esc(L(c, "summary"))}</p>${c.lastBrainUpdate ? `<p class="note" style="margin:6px 0 0">${esc(t("dBrainUpdated", fmtD(c.lastBrainUpdate)))}</p>` : ""}</div>` : `<p class="note">${esc(t("dNoBrain"))}</p>`}
+      <div><div class="eyebrow ltr" style="direction:ltr;text-align:start">${esc(c.domain || "")}</div><h2 style="margin-top:8px;display:flex;gap:14px;align-items:center">${logo(key, 44)}<span>${esc(nm)}</span></h2><div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span>${(c.services || []).map((s) => `<span class="pill mute">${esc(s)}</span>`).join("")}</div></div>
+      ${L(c, "summary") ? `<div><h3>${esc(t("dBrain"))}</h3><p style="margin:0;color:var(--ink-2)">${esc(L(c, "summary"))}</p><p class="note" style="margin:6px 0 0">${[c.lastBrainUpdate ? t("dBrainUpdated", fmtD(c.lastBrainUpdate)) : "", c.sharedBrainOf ? t("sharedBrain", c.sharedBrainOf) : c.brainFullRead ? t("brainFull") : t("brainSummary")].filter(Boolean).map(esc).join(" · ")}</p></div>` : `<p class="note">${esc(t("dNoBrain"))}</p>`}
+      ${c.contract?.monthlyFee ? `<div class="mgrid"><div class="m"><div class="l">${esc(t("dFee"))}</div><div class="v">${fmtMoney(c.contract.monthlyFee, c.contract.currency)}</div></div></div>` : ""}
       <div><button class="btn primary" data-askclient="${esc(key)}">${esc(t("dAskAbout", nm))}</button></div>
       ${p.w28 ? `<div><h3>${esc(t("dOrganic"))}</h3><div class="mgrid">${win(p.w7, t("d7"))}${win(p.w28, t("d28l"))}${win(p.w90, t("d90"))}</div>${p.spark28 ? `<div style="margin-top:10px">${spark(p.spark28, 580, 64)}</div>` : ""}${L(c, "headline") ? `<p style="margin:8px 0 0;color:var(--ink-2)">${esc(L(c, "headline"))}</p>` : ""}</div>` : ""}
       ${al.length ? `<div><h3>${esc(t("dAlerts"))}</h3><div class="alist">${al.map(alertRow).join("")}</div></div>` : ""}
@@ -710,7 +754,7 @@ tbody tr:hover { background: var(--line-subtle); }
     if (!S.contracts.length) { $("#contractTable").innerHTML = `<tbody><tr><td class="empty">${esc(t("noContracts"))}</td></tr></tbody>`; return; }
     const CS = { expired: "csExpired", critical: "csCritical", soon: "csSoon", ok: "csOk", renewed: "csRenewed", unknown: "csUnknown" };
     $("#contractTable").innerHTML = sortable([
-      { key: "client", label: "cClient", sortVal: (k) => clientName(k.client), render: (k) => `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(k.client)}">${esc(clientName(k.client))}</button>${k.isLatest ? "" : `<div class="sub">${esc(t("older"))}</div>`}` },
+      { key: "client", label: "cClient", sortVal: (k) => clientName(k.client), render: (k) => `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(k.client)}">${cname(k.client, 18)}</button>${k.isLatest ? "" : `<div class="sub">${esc(t("older"))}</div>`}` },
       { key: "title", label: "cDoc", render: (k) => `${k.url ? `<a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.title)}</a>` : esc(k.title)}<div class="sub">${esc(k.type || "")}${k.scope ? " · " + esc(k.scope) : ""}</div>` },
       { key: "status", label: "cStatus", render: (k) => `<span class="pill pd ${esc(k.status)}">${esc(t(CS[k.status] || "csUnknown"))}</span>${k.confidence && k.confidence !== "high" ? `<div class="sub">${esc(t("conf", k.confidence))}</div>` : ""}` },
       { key: "endDate", label: "cEnds", render: (k) => `${esc(fmtD(k.endDate))}${k.notes && /infer/i.test(k.notes) ? `<div class="sub">${esc(t("inferred"))}</div>` : ""}` },
@@ -721,14 +765,15 @@ tbody tr:hover { background: var(--line-subtle); }
     ], "contractSort", S.contracts);
   }
   const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const bcOf = (x) => x.browserCheck || S.toolchecks[slug(x.name)];
   function renderTools() {
     const tools = S.tools, sp = S.meta?.spend || {};
     const paid = tools.filter((x) => x.paying && x.yearlyCost).sort((a, b) => b.yearlyCost - a.yearlyCost);
     const top = paid.slice(0, 10), rest = paid.slice(10).reduce((s, x) => s + x.yearlyCost, 0);
     const gl = top.map((x) => [x.name, x.yearlyCost]).concat(rest ? [[t("otherTools", paid.length - 10), rest]] : []), gmax = Math.max(...gl.map((g) => g[1]), 1);
     $("#spendBars").innerHTML = gl.length ? gl.map(([g, v]) => `<div class="hb" title="${esc(g)}: ${fmtUSD(v)}"><span class="nm">${esc(g)}</span><span class="track"><span class="fill" style="width:${(v / gmax) * 100}%"></span></span><span class="num">${fmtUSD(v)}</span></div>`).join("") + `<p class="note" style="margin:8px 0 0">${esc(t("spendTotal", fmtUSD(sp.yearly), sp.paying))} ${paid[0] ? esc(t("spendTop", paid[0].name, Math.round((paid[0].yearlyCost / sp.yearly) * 100))) : ""}</p>` : `<div class="empty">${esc(t("noCost"))}</div>`;
-    const live = tools.filter((x) => x.live);
-    $("#liveChecks").innerHTML = live.length ? live.map((x) => { const l = x.live; return `<div class="lv"><div><div style="font-weight:600">${esc(x.name)}</div><div class="note">${esc(l.headline || "")}</div><div class="note">${esc(t("checked", ago(l.checkedAt), l.method || "API"))}</div></div><div style="text-align:end"><div class="v">${l.unit === "USD" ? fmtUSD(l.value) : esc(l.value)}</div><span class="pill pd ${l.status === "critical" ? "crit" : l.status === "low" ? "warn" : "good"}">${esc(l.status || "ok")}</span></div></div>`; }).join("") : `<div class="empty">${esc(t("noLive"))}</div>`;
+    const live = tools.filter((x) => x.live || bcOf(x));
+    $("#liveChecks").innerHTML = live.length ? live.map((x) => { const l = x.live || bcOf(x); return `<div class="lv"><div><div style="font-weight:600">${esc(x.name)}</div><div class="note">${esc(l.headline || "")}</div><div class="note">${esc(t("checked", ago(l.checkedAt), l.method || "API"))}${l.lastUsed ? " · " + esc(t("lastUsed", fmtD(l.lastUsed))) : ""}</div></div><div style="text-align:end"><div class="v">${l.unit === "USD" ? fmtUSD(l.value) : esc(l.value ?? "")}</div><span class="pill pd ${l.status === "critical" ? "crit" : l.status === "low" ? "warn" : "good"}">${esc(l.status || "ok")}</span></div></div>`; }).join("") : `<div class="empty">${esc(t("noLive"))}</div>`;
     $("#toolFilters").innerHTML = [["attention", "tfAttention"], ["paying", "tfPaying"], ["all", "tfAll"], ["cancelled", "tfCancelled"]].map(([k, l]) => `<button class="chip" data-tf="${k}" aria-pressed="${UI.toolFilter === k}">${esc(t(l))}</button>`).join("");
     const flagged = new Set(S.alerts.filter((a) => a.category === "tools").map((a) => a.id.replace(/^tool-/, "").replace(/-(expired|renewal|stale|autorenew-on|billing-unclear|live)$/, "")));
     const rows = tools.filter((x) => UI.toolFilter === "all" || (UI.toolFilter === "paying" && x.paying) || (UI.toolFilter === "cancelled" && !x.paying) || (UI.toolFilter === "attention" && flagged.has(slug(x.name))));
@@ -741,7 +786,8 @@ tbody tr:hover { background: var(--line-subtle); }
       { key: "daysToRenewal", label: "tRenewal", render: (x) => (x.nextRenewal ? `${esc(fmtD(x.nextRenewal))}<div class="sub">${esc(x.daysToRenewal < 0 ? t("lapsed", -x.daysToRenewal) : t("inDays", x.daysToRenewal))}${x.renewalDateStale ? " · " + esc(t("projected")) : ""}</div>` : "—") },
       { key: "autoRenew", label: "tAuto", render: (x) => esc(x.autoRenew ? t("on") : t("off")) },
       { key: "admin", label: "tAdmin", render: (x) => `<span class="ltr">${esc(x.admin || "—")}</span>` },
-      { key: "notes", label: "tNotes", render: (x) => `<span class="sub">${esc(x.notes || "")}</span>${x.live ? `<div style="margin-top:4px"><span class="pill ${x.live.status === "critical" ? "crit" : "warn"}">${esc(x.live.headline)}</span></div>` : ""}` },
+      { key: "usage", label: "tUsage", sortVal: (x) => bcOf(x)?.checkedAt || x.live?.checkedAt || null, render: (x) => { const b = x.live || bcOf(x); return b ? `<span class="pill ${b.status === "critical" ? "crit" : b.status === "low" ? "warn" : "good"}">${esc(b.headline || b.status)}</span><div class="sub">${esc(t("checked", ago(b.checkedAt), b.method || "browser"))}${b.lastUsed ? " · " + esc(t("lastUsed", fmtD(b.lastUsed))) : ""}</div>` : `<span class="sub">${esc(t("notChecked"))}</span>`; } },
+      { key: "notes", label: "tNotes", render: (x) => `<span class="sub">${esc(x.notes || "")}</span>` },
     ], "toolSort", rows) : `<tbody><tr><td class="empty">${esc(t("noTools"))}</td></tr></tbody>`;
   }
 
@@ -888,6 +934,8 @@ ${context()}`;
     };
     db.doc("meta/state").onSnapshot((s) => { S.meta = s.exists ? s.data() : null; syncShards(S.meta?.shards); showRefresh(); render(); }, err);
     db.doc("briefing/latest").onSnapshot((s) => { S.briefing = s.exists ? s.data() : null; render(); }, err);
+    db.doc("sources/toolchecks").onSnapshot((s) => { const d = s.exists ? s.data() : {}; S.toolchecks = Object.fromEntries((d.items || []).map((x) => [slug(x.tool || ""), x])); S.toolcheckAt = d.checkedAt || null; render(); }, err);
+    db.doc("snapshot/favicons").onSnapshot((s) => { S.icons = (s.exists && s.data().icons) || {}; render(); }, err);
     db.collection("acks").limit(1000).onSnapshot(async (q) => {
       S.acks = Object.fromEntries(q.docs.map((d) => [d.id, d.data()]));
       const ids = [...new Set(Object.values(S.acks).map((a) => a.by).filter((x) => x && x.startsWith("u_")))];

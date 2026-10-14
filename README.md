@@ -24,6 +24,14 @@ The "Control Room refresh" routine (`trig_01WDH93AGHQEqNsCiNghRytm`) runs twice 
 
 The page itself never changes. Data lives in the artifact database: `meta/state`, `briefing/latest`, `snapshot/{clients,contracts,tools,alerts}` and `sources/*`. Acknowledgements live in `acks` and are kept across refreshes.
 
+## Weekly browser check of the tools
+
+Tools with no API (Ahrefs, SE Ranking, Claude seats, peec.ai and the rest) are checked once a week by Claude in Chrome on the owner's computer, signed in to each tool. The check reads plan, usage, credits and last activity, and writes them to `sources/toolchecks`. See [BROWSER-CHECK.md](BROWSER-CHECK.md) for setup.
+
+## Client logos
+
+`scripts/fetch_favicons.py` stores each client domain's favicon in `snapshot/favicons`; until a favicon is fetched, the page shows a letter tile. It needs network access to `www.google.com` from the cloud environment.
+
 ## Design and language
 
 The page follows the [Cut Inside design system](https://claude.ai/artifact/KtDR5tusYbobTc3GPFATnN):
