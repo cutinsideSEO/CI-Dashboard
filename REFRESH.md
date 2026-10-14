@@ -105,6 +105,26 @@ The previous state is in `sources/meetings`. Copy it to `data/meetings/` in step
 2. For each client that had a meeting, add it to `meetings` and drop the oldest past 6. Refresh `themes`, `highlights` and `relationship` if the meeting changed them.
 3. Add Hebrew for every new string to `tm`. Read only: never edit Drive, Calendar or Gmail.
 
+## 4c. Slack → `data/slack.json` (read-only)
+
+Read the channels in the last 30 days with the Slack connector: `slack_list_user_channels`, `slack_read_channel` and `slack_read_thread`. **Never post, react, draft or schedule anything**, leave out HR and personal matters, and never quote DMs. A background agent works well for this. The shape is:
+- `channels[]`: `{id, name, client, kind, lastMessageAt, lastClientMessageAt, messages7d, messages30d, summary, highlights, openAsks[{date, from, ask, status, url}], mood, moodWhy}`
+- `clients{key: {lastClientMessageAt, messages30d, openAsks, mood, summary}}`
+- `team{announcements[], kudos[], who_is_out[], summary}`
+- `tm{english: hebrew}`
+
+Channel → client mapping as of 14 Oct 2026:
+- **Zengo:** #zengo-cutinside, #zengo-cutinside-content-uplaod, #seo-zengo, #seo-zengo-new-pages-prosses, #prediction-seo
+- **BOG:** #bog-cutinside, #bog-cutinside-content
+- **Fiverr:** #fiverr-ci-main
+- **Yad2:** #yad2-geo, #yad2_releases, #realestate_seo, #y2_geo-task-force, #y2_mark-partner-limy20251222, #y2_partner-axioma, and #knowledge-center in Yad2's own Slack
+- **PAC:** #seo-pac
+- **Internal:** #seo-western-digital-sandisk
+- **Team:** #all-cut-inside, #seo-professional
+- **Vendor:** #cutinside-limy
+
+Each open ask becomes an alert. A one-off finding with no structured source (for example a security issue seen in a channel) goes into `data/extra_alerts.json` as `{id, severity, category, title, detail, source, due, he{title, detail}}`. Remove it from that file once it has been handled.
+
 ## 5. Contracts → `data/contracts.json` (incremental)
 
 1. **Drive.** Search for new or changed agreements since the last run. Search titles and full text for: contract, agreement, SOW, addendum, renewal, PO, הסכם, חוזה, תוספת, הצעת מחיר, signed.

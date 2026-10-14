@@ -280,6 +280,15 @@ tbody tr:hover { background: var(--line-subtle); }
 .finder input::placeholder { color: var(--ink-3); }
 @media (max-width: 720px) { .finder { display: none; } }
 .more-row { margin-top: 10px; }
+.tnews { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.tnews li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; font-size: 13px; color: var(--ink-2); }
+.tnews .dd { font: 600 12px var(--f-display); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.slk { display: grid; gap: 10px; }
+.slk .ch { border: 1px solid var(--line-subtle); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
+.slk .chh { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 12px; color: var(--ink-3); }
+.slk .chh b { color: var(--ink); font: 600 13px var(--f-body); }
+.slk ul { margin: 0; padding-inline-start: 18px; font-size: 13px; color: var(--ink-2); }
+.ask { font-size: 13px; color: var(--ink); background: var(--warn-bg); border-radius: 8px; padding: 8px 12px; }
 .changes { margin-top: 10px; font-size: 12.5px; color: var(--ink-2); }
 .changes .link-btn { font-size: 12.5px; }
 .changes ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
@@ -421,6 +430,10 @@ tbody tr:hover { background: var(--line-subtle); }
         <div class="card">
           <div class="card-h"><h2 data-i18n="upcomingTitle">Coming up</h2><span class="sub" data-i18n="next90">Renewals and contract ends, next 90 days</span></div>
           <div class="card-b"><div id="upcoming"></div></div>
+        </div>
+        <div class="card" id="teamCard" hidden>
+          <div class="card-h"><h2 data-i18n="teamTitle">Team news</h2><span class="sub" data-i18n="teamSub">From #all-cut-inside and the team channels in Slack, last 14 days</span></div>
+          <div class="card-b"><div id="team"></div></div>
         </div>
         <div class="card">
           <div class="card-h"><h2 data-i18n="feedTitle">Latest client meetings</h2><span class="sub" data-i18n="feedSub">What was discussed with clients recently, from the client brains, meeting notes and calendar</span></div>
@@ -589,6 +602,7 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
       covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
+      teamTitle: "Team news", teamSub: "From #all-cut-inside and the team channels in Slack, last 14 days", whoOut: "Out of office", dSlack: "From Slack", slackLast: "Client last wrote {0}", slackMsgs: "{0} messages in 30 days", slackAsk: "Open ask", noClientSlack: "No messages from the client in this channel in 30 days.",
       newB: "New", openFor: "open {0}d", chSince: "Since the {0} refresh:", chNew: "{0} new", chRes: "{0} resolved", chShow: "Show resolved", chHide: "Hide resolved", fNew: "New since last refresh",
       aheadTitle: "Client meetings this week", aheadSub: "From Google Calendar and the client brains. Prep asks Opus for a one-page brief.", prep: "Prep", internalM: "internal", approxM: "this week", allDay: "—", fromBrain: "from the brain",
       askPrep: "Prepare me for this meeting: {0} — \"{1}\" on {2}. Give a one-page brief: where the relationship stands, what we promised and still owe, what changed in performance since the last meeting and why, contract and commercial points, risks to raise or avoid, and a suggested agenda with 3-5 points. Use the client brain and recent meetings; look up SurgeOS if needed.",
@@ -672,6 +686,7 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
       covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
+      teamTitle: "חדשות הצוות", teamSub: "מ-#all-cut-inside ומערוצי הצוות ב-Slack, 14 הימים האחרונים", whoOut: "לא במשרד", dSlack: "מ-Slack", slackLast: "הלקוח כתב לאחרונה {0}", slackMsgs: "{0} הודעות ב-30 יום", slackAsk: "בקשה פתוחה", noClientSlack: "אין הודעות מהלקוח בערוץ הזה ב-30 יום.",
       newB: "חדש", openFor: "פתוח {0} ימים", chSince: "מאז הרענון של {0}:", chNew: "{0} חדשות", chRes: "{0} נסגרו", chShow: "הצג מה נסגר", chHide: "הסתר", fNew: "חדשות מאז הרענון הקודם",
       aheadTitle: "פגישות לקוחות השבוע", aheadSub: "מ-Google Calendar ומה-client brains. \"הכנה\" מבקש מ-Opus תדריך של עמוד אחד.", prep: "הכנה", internalM: "פנימית", approxM: "השבוע", allDay: "—", fromBrain: "מה-brain",
       askPrep: "תכין אותי לפגישה הזו: {0} — \"{1}\" ב-{2}. תן תדריך של עמוד אחד: איפה עומדים היחסים, מה הבטחנו ועוד חייבים, מה השתנה בביצועים מאז הפגישה הקודמת ולמה, נקודות חוזה ומסחריות, סיכונים שכדאי להעלות או להימנע מהם, ואג'נדה מוצעת של 3-5 נקודות. תשתמש ב-client brain ובפגישות האחרונות; תבדוק ב-SurgeOS אם צריך.",
@@ -954,8 +969,14 @@ tbody tr:hover { background: var(--line-subtle); }
     });
     $("#ahead").innerHTML = html;
   }
+  function renderTeam() {
+    const tm = S.meta?.team, card = $("#teamCard"); card.hidden = !tm; if (!tm) return;
+    const recent = (tm.announcements || []).map((x, i) => ({ ...x, he: tm.he?.announcements?.[i] })).filter((x) => days(x.date) >= -14).slice(0, 5);
+    const out = (tm.who_is_out || []).filter((x) => days(x.to) >= 0);
+    $("#team").innerHTML = `${(LANG === "he" && tm.he?.summary) || tm.summary ? `<p style="margin:0 0 12px;color:var(--ink-2);font-size:13px">${esc((LANG === "he" && tm.he?.summary) || tm.summary)}</p>` : ""}<ul class="tnews">${recent.map((x) => `<li><span class="dd">${esc(fmtD(x.date).replace(/ \d{4}$/, ""))}</span><span>${esc((LANG === "he" && x.he) || x.text)}</span></li>`).join("")}</ul>${out.length ? `<div class="caption" style="margin-top:14px">${esc(t("whoOut"))}</div><ul class="tnews" style="margin-top:6px">${out.map((x) => `<li><span class="dd">${esc(fmtD(x.to).replace(/ \d{4}$/, ""))}</span><span>${esc(x.who)} · ${esc(fmtD(x.from))} → ${esc(fmtD(x.to))}</span></li>`).join("")}</ul>` : ""}`;
+  }
   function renderHealth() {
-    renderFeed(); renderAhead();
+    renderFeed(); renderAhead(); renderTeam();
     if (!S.clients.length) { $("#radar").innerHTML = `<tbody><tr><td class="empty">${esc(t("loading"))}</td></tr></tbody>`; return; }
     const open = S.alerts.filter((a) => !isAcked(a) && !isHygiene(a));
     const cnt = (k) => { const l = open.filter((a) => a.client === k); return [l.length, l.filter((a) => a.severity === "high").length]; };
@@ -1039,6 +1060,9 @@ tbody tr:hover { background: var(--line-subtle); }
         <div class="m"><div class="l">${esc(t("qContract"))}</div><div class="v sm">${esc(kv)}</div>${kd != null && kd >= 0 ? `<div class="l">${esc(rel(kd))}</div>` : ""}</div>
         <div class="m"><div class="l">${esc(t("qMeet"))}</div><div class="v sm">${c.intel?.lastMeeting ? esc(fmtD(c.intel.lastMeeting)) : "—"}</div>${c.intel?.lastMeeting ? `<div class="l">${esc(rel(days(c.intel.lastMeeting)))}</div>` : ""}</div></div>`; })()}
       ${al.length ? `<div><h3>${esc(t("dAlerts"))}</h3><div class="alist">${al.map((a) => alertRow(a, false, true)).join("")}</div></div>` : ""}
+      ${c.slack ? `<div><h3>${esc(t("dSlack"))}</h3>${(LANG === "he" && c.slack.he?.summary) || c.slack.summary ? `<p style="margin:0 0 10px;color:var(--ink-2)">${moodTag(c.slack.mood)} ${esc((LANG === "he" && c.slack.he?.summary) || c.slack.summary)}</p>` : ""}<div class="slk">${(c.slack.channels || []).filter((ch) => ch.messages30d || (ch.openAsks || []).length).map((ch) => `<div class="ch"><div class="chh"><b class="ltr">${esc(ch.name)}</b><span>${esc(t("slackMsgs", ch.messages30d || 0))}</span><span>${ch.lastClientMessageAt ? esc(t("slackLast", rel(days(ch.lastClientMessageAt)))) : esc(t("noClientSlack"))}</span></div>
+        ${(ch.openAsks || []).map((a, i) => `<div class="ask"><b>${esc(t("slackAsk"))} · ${esc(fmtD(a.date))} · ${esc(a.from || "")}</b><br>${esc((LANG === "he" && ch.he?.asks?.[i]) || a.ask)}</div>`).join("")}
+        ${((LANG === "he" && ch.he?.highlights) || ch.highlights || []).length ? `<ul>${((LANG === "he" && ch.he?.highlights) || ch.highlights).map((h) => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}</div>`).join("")}</div></div>` : ""}
       ${c.intel ? (() => { const it = c.intel, h = IL(c), mt = it.meetings || [], hl = h.highlights || it.highlights || [];
         return `${it.relationship?.mood ? `<div><h3>${esc(t("iRelationship"))}</h3><p style="margin:0;color:var(--ink-2)">${moodTag(it.relationship.mood)} ${esc(h.why || it.relationship.why || "")}</p>${it.sharedFrom ? `<p class="note" style="margin:4px 0 0">${esc(t("iShared", clientName(it.sharedFrom)))}</p>` : ""}</div>` : ""}
         ${hl.length ? `<div><h3>${esc(t("iHighlights"))}</h3><ul class="hl-list">${hl.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}

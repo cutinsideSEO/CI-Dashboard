@@ -236,6 +236,50 @@ def build():
                 cm = [x.get("date") for x in m.get("meetings") or [] if x.get("type") != "internal" and x.get("date")]
                 m["lastMeeting"] = max(cm) if cm else None
                 intel[m.get("client") or fn[:-5]] = m
+    # Slack (read-only): per-client channel activity, open client asks, mood; team news (data/slack.json)
+    slack = load("slack.json", {}) or {}
+    TM.update(slack.pop("tm", {}) or {})
+    disp_of = {b.get("client"): b.get("displayName") for b in (load("brains.json", []) or []) if isinstance(b, dict)}
+    slack_by_client = {}
+    for ch in slack.get("channels") or []:
+        k = ch.get("client")
+        if not k:
+            continue
+        roll = slack_by_client.setdefault(k, dict((slack.get("clients") or {}).get(k) or {}, channels=[]))
+        roll["channels"].append({x: ch.get(x) for x in ("id", "name", "kind", "lastMessageAt", "lastClientMessageAt", "messages30d", "summary", "highlights", "openAsks", "mood", "moodWhy")})
+        for ask in ch.get("openAsks") or []:
+            d0 = iso(ask.get("date"))
+            age = (TODAY - d0).days if d0 else 0
+            nm = disp_of.get(k) or k
+            short = ask["ask"] if len(ask["ask"]) <= 90 else ask["ask"][:88].rsplit(" ", 1)[0] + "…"
+            st = {"answered-no-delivery": ("acknowledged, not delivered", "אושר, טרם נמסר"), "unanswered": ("no reply yet", "עדיין אין תשובה"),
+                  "in progress": ("in progress", "בטיפול")}.get(ask.get("status"), (ask.get("status") or "open", ask.get("status") or "פתוח"))
+            title = f"{nm}: Slack ask from {ask.get('from', 'the client')}: {short}"
+            detail = f"Asked in {ch.get('name')} on {d0:%d %b %Y}. Status in Slack: {st[0]}." if d0 else ask["ask"]
+            ask_he = TM.get(ask["ask"])
+            if ask_he:
+                sh = ask_he if len(ask_he) <= 90 else ask_he[:88].rsplit(" ", 1)[0] + "…"
+                TM.setdefault(title, f"{TM.get(nm, nm)}: בקשה ב-Slack מ-{ask.get('from', 'הלקוח')}: {sh}")
+            if d0:
+                TM.setdefault(detail, f"נשאל ב-{ch.get('name')} ב-{d0.day} ב{['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'][d0.month-1]} {d0.year}. סטטוס ב-Slack: {st[1]}.")
+            alert(f"slack-{k}-{ask.get('date')}-{slug(ask['ask'])[:24]}", "medium" if age > 5 or ask.get("status") == "unanswered" else "low", "clients",
+                  title, detail, client=k, due=d0, source=f"Slack {ch.get('name')}", source_url=ask.get("url"))
+    for c in slack_by_client.values():
+        c["he"] = {"summary": he(c.get("summary"))}
+        for ch in c["channels"]:
+            ch["he"] = {"summary": he(ch.get("summary")), "highlights": he_list(ch.get("highlights")), "moodWhy": he(ch.get("moodWhy")),
+                        "asks": [he(a.get("ask")) for a in ch.get("openAsks") or []]}
+    team = slack.get("team") or None
+    if team:
+        team = dict(team, checkedAt=slack.get("checkedAt"))
+        team["he"] = {"summary": he(team.get("summary")), "announcements": [he(x.get("text")) for x in team.get("announcements") or []],
+                      "kudos": [he(x.get("text")) for x in team.get("kudos") or []]}
+    # one-off findings from the refresh routine (e.g. a security issue spotted in Slack): data/extra_alerts.json
+    for x in load("extra_alerts.json", []) or []:
+        alert(x["id"], x.get("severity", "medium"), x.get("category", "agency"), x["title"], x.get("detail", ""), client=x.get("client"),
+              due=x.get("due"), source=x.get("source"), source_url=x.get("sourceUrl"))
+        if x.get("he"):
+            TM.update({x["title"]: x["he"].get("title"), x.get("detail", ""): x["he"].get("detail")})
     tools = build_tools()
     perf = load("performance.json", {})
     brains = load("brains.json", [])
@@ -417,6 +461,7 @@ def build():
             "perf": {k2: p.get(k2) for k2 in ("w7", "w28", "w90", "spark28", "health", "wins", "okrs", "openTasks",
                                                "overdueTasks", "hoursUsed", "hoursBudget", "surgeosId")},
             "contract": c.get("contract"), "alertCount": len(sev), "updatedAt": NOW,
+            "slack": slack_by_client.get(key),
             "brainFullRead": bool(b.get("fullRead")),
             "intel": ({k2: it.get(k2) for k2 in ("lastMeeting", "relationship", "meetings", "themes", "highlights", "updatedAt")}
                       | ({"sharedFrom": it.get("client")} if shared_intel else {})) if it else None,
@@ -655,6 +700,7 @@ def build():
             "surgeos": "SurgeOS (Search Console BigQuery mirror, GA4, Peec)", "drive": "Google Drive client folders",
         },
         "meetingsAhead": ahead,
+        "team": team,
         "changes": changes,
         "schedule": os.environ.get("SCHEDULE", "Twice a day, ~07:00 and ~15:00 Israel time"),
         "triggerId": os.environ.get("TRIGGER_ID", "trig_01WDH93AGHQEqNsCiNghRytm"),
