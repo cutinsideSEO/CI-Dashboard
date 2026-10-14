@@ -1,0 +1,818 @@
+<title>Cut Inside Control Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky command bar + tab rail; each tab is a working panel. Summary first (briefing, counts), detail after (tables, drawers). */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --sunken: #e9eeec;
+  --line: #d5dedb;
+  --ink: #12211f;
+  --ink-2: #44575a;
+  --ink-3: #6f8285;
+  --accent: #0d6b67;
+  --accent-ink: #ffffff;
+  --accent-soft: #d9ecea;
+  --crit: #c2362f;
+  --crit-soft: #fbe5e3;
+  --warn: #a86400;
+  --warn-soft: #fbedd6;
+  --good: #23784a;
+  --good-soft: #def1e5;
+  --info: #2f5f9e;
+  --info-soft: #e2eaf6;
+  --shadow: 0 1px 2px rgba(18, 33, 31, .06), 0 6px 24px -12px rgba(18, 33, 31, .18);
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1716; --surface: #13201f; --sunken: #0a1312; --line: #24363a;
+    --ink: #e4eeec; --ink-2: #a9bcbc; --ink-3: #7d9294;
+    --accent: #4fc3b9; --accent-ink: #062321; --accent-soft: #143a37;
+    --crit: #ff7b70; --crit-soft: #3a1c1a; --warn: #f1b04c; --warn-soft: #382a12;
+    --good: #5fcf8d; --good-soft: #15301f; --info: #8fb4ec; --info-soft: #1a2940;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1716; --surface: #13201f; --sunken: #0a1312; --line: #24363a;
+  --ink: #e4eeec; --ink-2: #a9bcbc; --ink-3: #7d9294;
+  --accent: #4fc3b9; --accent-ink: #062321; --accent-soft: #143a37;
+  --crit: #ff7b70; --crit-soft: #3a1c1a; --warn: #f1b04c; --warn-soft: #382a12;
+  --good: #5fcf8d; --good-soft: #15301f; --info: #8fb4ec; --info-soft: #1a2940;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 14px/1.5 var(--f-body); }
+a { color: var(--accent); text-underline-offset: 2px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; letter-spacing: -.01em; text-wrap: balance; margin: 0; }
+.eyebrow { font: 500 11px/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); }
+.wrap { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* command bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.bar-row { display: flex; align-items: center; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand h1 { font-size: 21px; }
+.brand .cut { display: inline-block; width: 18px; height: 18px; border-radius: 4px; background: linear-gradient(135deg, var(--accent) 0 49%, transparent 49% 51%, var(--ink) 51%); align-self: center; }
+.freshness { display: flex; gap: 8px; align-items: center; color: var(--ink-2); font-size: 12.5px; flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
+.dot.stale { background: var(--warn); }
+.spacer { flex: 1; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:disabled { opacity: .55; cursor: default; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { border: 0; background: none; padding: 10px 14px 11px; cursor: pointer; color: var(--ink-2); font-weight: 500; border-bottom: 2px solid transparent; white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab .ct { font: 500 11px var(--f-mono); padding: 1px 6px; border-radius: 99px; background: var(--sunken); color: var(--ink-2); }
+.tab .ct.hot { background: var(--crit-soft); color: var(--crit); }
+
+main { padding-block: 22px 60px; }
+.panel { display: grid; gap: 22px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); min-width: 0; }
+.card-h { display: flex; align-items: baseline; gap: 10px; padding: 14px 18px 0; flex-wrap: wrap; }
+.card-h h2 { font-size: 17px; }
+.card-h .sub { color: var(--ink-3); font-size: 12.5px; }
+.card-b { padding: 14px 18px 18px; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 960px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+/* briefing */
+.brief { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; padding: 20px 22px; }
+.brief h2 { font-size: 26px; line-height: 1.15; margin-bottom: 8px; }
+.brief .text { color: var(--ink-2); max-width: 75ch; }
+.brief .text p { margin: 0 0 8px; }
+.brief .meta { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+.sevstack { display: grid; grid-template-columns: repeat(3, auto); gap: 8px; align-content: start; }
+.sev { padding: 10px 14px; border-radius: 8px; min-width: 92px; cursor: pointer; border: 1px solid transparent; text-align: left; }
+.sev b { display: block; font: 600 26px/1 var(--f-mono); }
+.sev span { font-size: 12px; }
+.sev.high { background: var(--crit-soft); color: var(--crit); }
+.sev.medium { background: var(--warn-soft); color: var(--warn); }
+.sev.low { background: var(--info-soft); color: var(--info); }
+@media (max-width: 720px) { .brief { grid-template-columns: minmax(0, 1fr); } }
+
+/* KPI strip */
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--line); border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); }
+.kpi { background: var(--surface); padding: 14px 16px; min-width: 0; }
+.kpi .v { font: 600 24px/1.1 var(--f-mono); margin-top: 6px; }
+.kpi .d { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+.up { color: var(--good); } .down { color: var(--crit); }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* alerts */
+.filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; color: var(--ink-2); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.alist { display: grid; }
+.alert { display: grid; grid-template-columns: 4px minmax(0, 1fr) auto; gap: 0 14px; padding: 12px 0; border-top: 1px solid var(--line); }
+.alert:first-child { border-top: 0; }
+.alert .stripe { border-radius: 4px; background: var(--info); }
+.alert.high .stripe { background: var(--crit); }
+.alert.medium .stripe { background: var(--warn); }
+.alert .t { font-weight: 600; }
+.alert .dt { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.alert .am { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--ink-3); margin-top: 6px; align-items: center; }
+.alert .side { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.alert.acked { opacity: .5; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font: 500 11px/1 var(--f-mono); padding: 4px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.crit, .pill.high, .pill.risk, .pill.expired, .pill.critical { background: var(--crit-soft); color: var(--crit); }
+.pill.warn, .pill.medium, .pill.watch, .pill.soon { background: var(--warn-soft); color: var(--warn); }
+.pill.good, .pill.ok, .pill.renewed { background: var(--good-soft); color: var(--good); }
+.pill.low, .pill.info, .pill.unknown { background: var(--info-soft); color: var(--info); }
+.pill.mute { background: var(--sunken); color: var(--ink-3); }
+.link-btn { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
+
+/* timeline */
+.tl { overflow-x: auto; }
+.tl svg { display: block; min-width: 640px; width: 100%; height: auto; }
+.tl text { fill: var(--ink-2); font: 11px var(--f-mono); }
+.tl .lbl { fill: var(--ink); font: 500 12px var(--f-body); }
+.tl .grid { stroke: var(--line); }
+.tl .today { stroke: var(--accent); stroke-dasharray: 3 3; }
+.tl rect.bar { cursor: pointer; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); margin-top: 10px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+/* client grid */
+.cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.cl { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; cursor: pointer; display: grid; gap: 8px; min-width: 0; }
+.cl:hover { border-color: var(--accent); }
+.cl .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.cl .nm { font: 700 16px var(--f-display); }
+.cl .dom { font-size: 12px; color: var(--ink-3); }
+.cl .hl { font-size: 12.5px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.9em; }
+.cl .stats { display: flex; justify-content: space-between; align-items: end; gap: 8px; }
+.cl .stats .num { font-size: 13px; }
+.cl .foot { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11.5px; color: var(--ink-3); }
+.spark { display: block; }
+.spark .area { fill: var(--accent-soft); }
+.spark .ln { fill: none; stroke: var(--accent); stroke-width: 1.75; }
+.spark .end { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.search { flex: 1 1 220px; min-width: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 12px; font: inherit; color: var(--ink); }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font: 500 11px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; cursor: pointer; user-select: none; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; }
+td .sub { color: var(--ink-3); font-size: 12px; }
+tbody tr:hover { background: var(--sunken); }
+
+/* bars */
+.hbars { display: grid; gap: 9px; }
+.hb { display: grid; grid-template-columns: minmax(0, 160px) minmax(0, 1fr) 72px; gap: 10px; align-items: center; font-size: 12.5px; }
+.hb .track { height: 10px; background: var(--sunken); border-radius: 4px; overflow: hidden; }
+.hb .fill { height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.hb .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* drawer */
+.scrim { position: fixed; inset: 0; background: rgba(5, 15, 14, .45); z-index: 40; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100%); background: var(--surface); z-index: 41; overflow-y: auto; border-left: 1px solid var(--line); padding: calc(20px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) 22px; display: grid; gap: 18px; align-content: start; }
+.drawer h2 { font-size: 26px; }
+.drawer h3 { font-size: 14px; margin-bottom: 6px; }
+.drawer ul { margin: 0; padding-left: 18px; color: var(--ink-2); }
+.drawer li { margin: 3px 0; }
+.mgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.m { background: var(--sunken); border-radius: 8px; padding: 10px 12px; }
+.m .v { font: 600 17px var(--f-mono); }
+.m .l { font-size: 11.5px; color: var(--ink-3); }
+.close { position: sticky; top: 0; justify-self: end; }
+
+/* chat */
+.chat { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 560px; }
+.msgs { padding: 6px 18px 18px; display: grid; gap: 14px; align-content: start; overflow-y: auto; max-height: 64vh; }
+.msg { max-width: 860px; }
+.msg.me { justify-self: end; background: var(--accent-soft); padding: 10px 14px; border-radius: 12px 12px 2px 12px; }
+.msg.ai { color: var(--ink); }
+.msg.ai .who { font: 500 11px var(--f-mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.msg.ai p { margin: 0 0 8px; }
+.msg.ai ul, .msg.ai ol { margin: 0 0 8px; padding-left: 20px; }
+.msg.ai h4 { font: 700 15px var(--f-display); margin: 10px 0 4px; }
+.msg.ai code { font-family: var(--f-mono); font-size: 12.5px; background: var(--sunken); padding: 1px 4px; border-radius: 4px; }
+.msg.ai table { margin: 6px 0 10px; font-size: 12.5px; }
+.steps { font: 12px var(--f-mono); color: var(--ink-3); display: grid; gap: 2px; margin-top: 6px; }
+.compose { display: flex; gap: 8px; padding: 12px 18px 16px; border-top: 1px solid var(--line); align-items: flex-end; }
+.compose textarea { flex: 1; min-width: 0; resize: vertical; min-height: 46px; max-height: 200px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 10px 12px; font: inherit; }
+.suggest { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 18px 0; }
+.empty { color: var(--ink-3); padding: 18px; text-align: center; font-size: 13px; }
+.note { font-size: 12px; color: var(--ink-3); }
+.toast { position: fixed; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 14px; border-radius: 8px; z-index: 60; font-size: 13px; max-width: calc(100% - 32px); }
+.live { display: grid; gap: 10px; }
+.lv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 14px; border-radius: 8px; background: var(--sunken); }
+.lv .v { font: 600 20px var(--f-mono); }
+@media (prefers-reduced-motion: no-preference) { .drawer { animation: slide .18s ease-out; } @keyframes slide { from { transform: translateX(24px); opacity: .6; } } }
+</style>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="bar-row">
+      <div class="brand"><span class="cut" aria-hidden="true"></span><h1>Control Room</h1><span class="eyebrow">Cut Inside</span></div>
+      <div class="freshness" id="fresh"><span class="dot stale"></span><span>Waiting for data…</span></div>
+      <div class="spacer"></div>
+      <button class="btn" id="refreshBtn" hidden title="Run the refresh routine now">Refresh now</button>
+      <button class="btn primary" id="askTop">Ask Opus</button>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+      <button class="tab" role="tab" data-tab="alerts">Alerts <span class="ct" id="ct-alerts">0</span></button>
+      <button class="tab" role="tab" data-tab="clients">Clients <span class="ct" id="ct-clients">0</span></button>
+      <button class="tab" role="tab" data-tab="contracts">Contracts <span class="ct" id="ct-contracts">0</span></button>
+      <button class="tab" role="tab" data-tab="tools">Tools <span class="ct" id="ct-tools">0</span></button>
+      <button class="tab" role="tab" data-tab="ask">Ask Opus</button>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+  <!-- OVERVIEW -->
+  <section class="panel" data-panel="overview">
+    <div class="card brief">
+      <div>
+        <div class="eyebrow" id="briefDate">Agency briefing</div>
+        <h2 id="briefTitle">The briefing appears after the first refresh</h2>
+        <div class="text" id="briefText"><p>Twice a day a routine reads every client brain and contract in Google Drive, the tools sheet and SurgeOS performance data, then writes what needs attention here.</p></div>
+        <div class="meta" id="briefMeta"></div>
+      </div>
+      <div class="sevstack" id="sevstack"></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2>Needs attention</h2><span class="sub">Highest severity first. Acknowledge what you've handled.</span></div>
+        <div class="card-b"><div class="alist" id="topAlerts"><div class="empty">No alerts yet.</div></div>
+          <div style="margin-top:10px"><button class="link-btn" data-goto="alerts">See all alerts</button></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>Renewals and contract ends</h2><span class="sub">Next 90 days</span></div>
+        <div class="card-b"><div id="upcoming"><div class="empty">Nothing scheduled.</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Contract runway</h2><span class="sub">Each client's latest agreement, from today to its end date</span></div>
+      <div class="card-b"><div class="tl" id="timeline"><div class="empty">Contracts appear here once found in Drive.</div></div>
+        <div class="legend"><span><i style="background:var(--crit)"></i>Ends within 30 days or expired</span><span><i style="background:var(--warn)"></i>31–90 days</span><span><i style="background:var(--good)"></i>More than 90 days</span><span><i style="background:var(--info)"></i>No end date found</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Portfolio health</h2><span class="sub">Organic clicks, last 28 days vs the 28 before (Search Console via SurgeOS)</span></div>
+      <div class="card-b"><div class="cgrid" id="healthGrid"><div class="empty">Client data loads here.</div></div></div>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <section class="panel" data-panel="alerts" hidden>
+    <div class="card">
+      <div class="card-h"><h2>All alerts</h2><span class="sub" id="alertsSub"></span></div>
+      <div class="card-b">
+        <div class="filters" id="alertFilters" style="margin-bottom:10px"></div>
+        <div class="alist" id="allAlerts"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTS -->
+  <section class="panel" data-panel="clients" hidden>
+    <div class="toolbar">
+      <input class="search" id="clientSearch" type="search" placeholder="Search clients, domains, issues…" aria-label="Search clients">
+      <div class="filters" id="clientFilters"></div>
+    </div>
+    <div class="cgrid" id="clientGrid"></div>
+  </section>
+
+  <!-- CONTRACTS -->
+  <section class="panel" data-panel="contracts" hidden>
+    <div class="card">
+      <div class="card-h"><h2>Contracts</h2><span class="sub">Found in Google Drive. End dates marked "inferred" were computed from start date + term.</span></div>
+      <div class="card-b tbl-wrap"><table id="contractTable"></table></div>
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section class="panel" data-panel="tools" hidden>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2>Where the money goes</h2><span class="sub">Top paid tools by yearly cost, from the Tools Database sheet</span></div>
+        <div class="card-b"><div class="hbars" id="spendBars"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>Live checks</h2><span class="sub">Balances and usage read from the tools themselves</span></div>
+        <div class="card-b"><div class="live" id="liveChecks"></div>
+          <p class="note" style="margin:10px 0 0">Tools without an API or connector can't be checked automatically yet. Their usage is tracked from the sheet.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>All tools</h2><span class="sub" id="toolsSub"></span>
+        <span class="spacer"></span><a id="sheetLink" href="https://docs.google.com/spreadsheets/d/1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU/edit" target="_blank" rel="noopener">Open the sheet</a></div>
+      <div class="card-b">
+        <div class="filters" id="toolFilters" style="margin-bottom:8px"></div>
+        <div class="tbl-wrap"><table id="toolTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASK -->
+  <section class="panel" data-panel="ask" hidden>
+    <div class="card chat">
+      <div>
+        <div class="card-h"><h2>Ask Opus</h2><span class="sub" id="askSub">Answers from the dashboard data, with live lookups in SurgeOS and Google Drive when needed.</span></div>
+        <div class="suggest" id="suggest"></div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <form class="compose" id="compose">
+        <textarea id="q" rows="2" placeholder="e.g. Which clients are at risk of churning this quarter, and why?" aria-label="Your question"></textarea>
+        <button class="btn" type="button" id="stopBtn" hidden>Stop</button>
+        <button class="btn primary" type="submit" id="sendBtn">Send</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-modal="true" role="dialog"></aside>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {} };
+  const UI = { tab: "overview", alertCat: "all", alertSev: "all", showAcked: false, clientFilter: "all", toolFilter: "attention", contractSort: "daysLeft", toolSort: "daysToRenewal" };
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const SEV = { high: 0, medium: 1, low: 2 };
+  const CAT = { contracts: "Contracts", clients: "Client brain", performance: "Performance", tools: "Tools", agency: "Agency ops" };
+  let db = null, user = null, mcp = null, sample = null, myId = null;
+  try { const t = localStorage.getItem("ci.tab"); if (t) UI.tab = t; } catch (e) {}
+  if (location.hash && /^#[a-z]+$/.test(location.hash)) UI.tab = location.hash.slice(1);
+
+  const today = () => new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
+  const parse = (d) => (d ? new Date(String(d).slice(0, 10) + "T00:00:00Z") : null);
+  const days = (d) => { const x = parse(d); return x ? Math.round((x - today()) / 864e5) : null; };
+  const fmtD = (d) => { const x = parse(d); return x ? x.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : "—"; };
+  const fmtN = (n) => (n == null ? "—" : n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "K" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(Math.round(n)));
+  const fmtUSD = (n) => (n == null ? "—" : "$" + Math.round(n).toLocaleString("en-US"));
+  const fmtMoney = (n, c) => (n == null ? "—" : ({ ILS: "₪", USD: "$", EUR: "€" }[c] || (c ? c + " " : "")) + Math.round(n).toLocaleString("en-US"));
+  const pct = (p) => (p == null ? "" : `<span class="${p >= 0 ? "up" : "down"}">${p >= 0 ? "▲" : "▼"} ${Math.abs(p).toFixed(1)}%</span>`);
+  const ago = (iso) => { if (!iso) return ""; const m = Math.round((Date.now() - new Date(iso)) / 6e4); return m < 2 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+  const ackKey = (id) => id;
+  const isAcked = (a) => !!S.acks[ackKey(a.id)];
+  const toast = (msg) => { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 3200); };
+
+  // ---------- render scheduling
+  let raf = 0;
+  const render = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderAll(); }); };
+
+  function renderAll() {
+    renderFresh(); renderCounts(); renderBrief(); renderKpis(); renderTopAlerts(); renderUpcoming(); renderTimeline(); renderHealth();
+    if (UI.tab === "alerts") renderAlerts();
+    if (UI.tab === "clients") renderClients();
+    if (UI.tab === "contracts") renderContracts();
+    if (UI.tab === "tools") renderTools();
+    if (UI.tab === "ask") renderSuggest();
+  }
+
+  function renderFresh() {
+    const m = S.meta, el = $("#fresh");
+    if (!m) return;
+    const stale = Date.now() - new Date(m.updatedAt) > 14 * 36e5;
+    el.innerHTML = `<span class="dot ${stale ? "stale" : ""}"></span><span>Updated ${esc(ago(m.updatedAt))}</span><span class="mono">· GSC data through ${esc(fmtD(m.dataThrough))}</span><span>· ${esc(m.schedule || "twice daily")}</span>`;
+  }
+  function renderCounts() {
+    const open = S.alerts.filter((a) => !isAcked(a));
+    const hi = open.filter((a) => a.severity === "high").length;
+    const c = $("#ct-alerts"); c.textContent = open.length; c.classList.toggle("hot", hi > 0);
+    $("#ct-clients").textContent = S.clients.length;
+    $("#ct-contracts").textContent = S.contracts.filter((k) => k.isLatest).length;
+    $("#ct-tools").textContent = S.tools.length;
+  }
+
+  // ---------- markdown (small, safe)
+  function md(src) {
+    const lines = String(src || "").replace(/\r/g, "").split("\n");
+    let out = "", list = null, table = null;
+    const inline = (s) => esc(s)
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>")
+      .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    const flushList = () => { if (list) { out += `</${list}>`; list = null; } };
+    const flushTable = () => { if (table) { out += `<div class="tbl-wrap"><table>${table.join("")}</table></div>`; table = null; } };
+    for (const raw of lines) {
+      const l = raw.trimEnd();
+      if (/^\|.*\|$/.test(l.trim())) {
+        flushList();
+        if (/^\|\s*:?-{2,}/.test(l.trim())) continue;
+        const cells = l.trim().slice(1, -1).split("|").map((c) => inline(c.trim()));
+        if (!table) { table = [`<thead><tr>${cells.map((c) => `<th>${c}</th>`).join("")}</tr></thead>`]; }
+        else table.push(`<tr>${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`);
+        continue;
+      }
+      flushTable();
+      let m;
+      if ((m = l.match(/^#{1,4}\s+(.*)/))) { flushList(); out += `<h4>${inline(m[1])}</h4>`; }
+      else if ((m = l.match(/^\s*[-*•]\s+(.*)/))) { if (list !== "ul") { flushList(); out += "<ul>"; list = "ul"; } out += `<li>${inline(m[1])}</li>`; }
+      else if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== "ol") { flushList(); out += "<ol>"; list = "ol"; } out += `<li>${inline(m[1])}</li>`; }
+      else if (!l.trim()) { flushList(); }
+      else { flushList(); out += `<p>${inline(l)}</p>`; }
+    }
+    flushList(); flushTable();
+    return out;
+  }
+
+  // ---------- overview
+  function renderBrief() {
+    const b = S.briefing;
+    const open = S.alerts.filter((a) => !isAcked(a));
+    $("#sevstack").innerHTML = ["high", "medium", "low"].map((s) => `<button class="sev ${s}" data-sev="${s}"><b>${open.filter((a) => a.severity === s).length}</b><span>${{ high: "Urgent", medium: "Watch", low: "FYI" }[s]}</span></button>`).join("");
+    if (!b) return;
+    $("#briefDate").textContent = "Agency briefing · " + new Date(b.generatedAt).toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    $("#briefTitle").textContent = b.title || "Today at Cut Inside";
+    $("#briefText").innerHTML = md(b.text);
+    $("#briefMeta").textContent = b.by ? `Written by ${b.by} from the latest refresh` : "";
+  }
+  function renderKpis() {
+    const m = S.meta;
+    const latest = S.contracts.filter((k) => k.isLatest);
+    const ending = latest.filter((k) => k.daysLeft != null && k.daysLeft >= 0 && k.daysLeft <= 90).length;
+    const expired = latest.filter((k) => k.status === "expired").length;
+    const ren30 = S.tools.filter((t) => t.paying && t.daysToRenewal != null && t.daysToRenewal >= 0 && t.daysToRenewal <= 30).length;
+    const risk = S.clients.filter((c) => c.status === "risk").length;
+    let clicks = 0, prev = 0;
+    S.clients.forEach((c) => { const w = c.perf?.w28; if (w?.clicks != null && w.clicksChangePct != null) { clicks += w.clicks; prev += w.clicks / (1 + w.clicksChangePct / 100); } });
+    const pc = prev ? ((clicks - prev) / prev) * 100 : null;
+    const sp = m?.spend || {};
+    const k = [
+      ["Active clients", S.clients.length || "—", `${risk} at risk`],
+      ["Contracts ending ≤90d", latest.length ? ending : "—", expired ? `<span class="down">${expired} already expired</span>` : `${latest.length} on file`],
+      ["Organic clicks · 28d", clicks ? fmtN(clicks) : "—", pc == null ? "portfolio total" : pct(pc) + " vs prior 28d"],
+      ["Tool spend / year", sp.yearly ? fmtUSD(sp.yearly) : "—", sp.monthly ? `${fmtUSD(sp.monthly)} per month` : "from the tools sheet"],
+      ["Renewals ≤30d", S.tools.length ? ren30 : "—", "tool subscriptions"],
+      ["Urgent alerts", S.alerts.filter((a) => a.severity === "high" && !isAcked(a)).length, `${S.alerts.filter(isAcked).length} acknowledged`],
+    ];
+    $("#kpis").innerHTML = k.map(([l, v, d]) => `<div class="kpi"><div class="eyebrow">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+  }
+  function alertRow(a) {
+    const acked = S.acks[a.id];
+    const by = acked ? (S.names[acked.by] || "a teammate") : "";
+    const due = a.dueDate ? `<span class="mono">${esc(fmtD(a.dueDate))}${days(a.dueDate) != null ? ` (${days(a.dueDate) >= 0 ? "in " + days(a.dueDate) + "d" : -days(a.dueDate) + "d ago"})` : ""}</span>` : "";
+    const src = a.sourceUrl ? `<a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.source || "Source")}</a>` : esc(a.source || "");
+    const client = a.client ? `<button class="link-btn" data-client="${esc(a.client)}">Open client</button>` : "";
+    return `<div class="alert ${esc(a.severity)} ${acked ? "acked" : ""}"><div class="stripe"></div>
+      <div style="min-width:0"><div class="t">${esc(a.title)}</div><div class="dt">${esc(a.detail)}</div>
+      <div class="am"><span class="pill mute">${esc(CAT[a.category] || a.category)}</span>${due}${src ? `<span>${src}</span>` : ""}${client}${acked ? `<span>Acknowledged by ${esc(by)} · ${esc(ago(acked.at))}</span>` : ""}</div></div>
+      <div class="side"><span class="pill ${esc(a.severity)}">${esc({ high: "Urgent", medium: "Watch", low: "FYI" }[a.severity] || a.severity)}</span>
+      <button class="link-btn" data-ack="${esc(a.id)}">${acked ? "Reopen" : "Acknowledge"}</button>
+      <button class="link-btn" data-askalert="${esc(a.id)}">Ask Opus</button></div></div>`;
+  }
+  const sortAlerts = (l) => l.slice().sort((a, b) => (SEV[a.severity] ?? 3) - (SEV[b.severity] ?? 3) || String(a.dueDate || "9").localeCompare(String(b.dueDate || "9")));
+  function renderTopAlerts() {
+    const l = sortAlerts(S.alerts.filter((a) => !isAcked(a))).slice(0, 7);
+    $("#topAlerts").innerHTML = l.length ? l.map(alertRow).join("") : `<div class="empty">${S.alerts.length ? "Everything is acknowledged." : "No alerts yet."}</div>`;
+  }
+  function renderUpcoming() {
+    const items = [];
+    S.contracts.filter((k) => k.isLatest && k.endDate).forEach((k) => { const d = days(k.endDate); if (d != null && d >= -30 && d <= 90) items.push({ d, date: k.endDate, kind: "Contract", name: clientName(k.client), what: d < 0 ? "ended" : "ends", sev: d <= 30 ? "crit" : "warn", client: k.client }); if (k.noticeDeadline) { const n = days(k.noticeDeadline); if (n != null && n >= 0 && n <= 90) items.push({ d: n, date: k.noticeDeadline, kind: "Notice", name: clientName(k.client), what: "notice deadline", sev: n <= 30 ? "crit" : "warn", client: k.client }); } });
+    S.tools.filter((t) => t.paying && t.nextRenewal).forEach((t) => { const d = days(t.nextRenewal); if (d != null && d >= 0 && d <= 90) items.push({ d, date: t.nextRenewal, kind: "Tool", name: t.name, what: t.autoRenew ? `renews · ${fmtUSD(t.yearlyCost)}/yr` : "expires · auto-renew off", sev: !t.autoRenew || d <= 7 ? "crit" : "info" }); });
+    items.sort((a, b) => a.d - b.d);
+    $("#upcoming").innerHTML = items.length ? `<div class="tbl-wrap"><table><tbody>${items.slice(0, 12).map((i) => `<tr><td class="num mono" style="text-align:left;white-space:nowrap">${esc(fmtD(i.date))}<div class="sub">${i.d < 0 ? -i.d + " days ago" : i.d === 0 ? "today" : "in " + i.d + " days"}</div></td><td>${i.client ? `<button class="link-btn" style="font-size:13px" data-client="${esc(i.client)}">${esc(i.name)}</button>` : esc(i.name)}<div class="sub">${esc(i.what)}</div></td><td><span class="pill ${i.sev}">${esc(i.kind)}</span></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">Nothing in the next 90 days.</div>`;
+  }
+  function clientName(key) { return S.clients.find((c) => c.key === key)?.name || key; }
+
+  function renderTimeline() {
+    const rows = S.contracts.filter((k) => k.isLatest).map((k) => ({ k, d: days(k.endDate) })).sort((a, b) => (a.d ?? 9999) - (b.d ?? 9999));
+    if (!rows.length) return;
+    const W = 1000, L = 170, R = 20, rh = 26, top = 30, H = top + rows.length * rh + 10;
+    const t0 = today(), span = 365 * 864e5, x = (dt) => L + Math.max(0, Math.min(1, (dt - t0 + 30 * 864e5) / (span + 30 * 864e5))) * (W - L - R);
+    let g = "";
+    for (let m = 0; m <= 12; m++) {
+      const d = new Date(Date.UTC(t0.getUTCFullYear(), t0.getUTCMonth() + m, 1));
+      if (d - t0 < -30 * 864e5 || d - t0 > span) continue;
+      const xx = x(d);
+      g += `<line class="grid" x1="${xx}" x2="${xx}" y1="${top - 6}" y2="${H - 6}"/><text x="${xx + 3}" y="${top - 12}">${d.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })}${d.getUTCMonth() === 0 ? " " + d.getUTCFullYear() : ""}</text>`;
+    }
+    const tx = x(t0);
+    g += `<line class="today" x1="${tx}" x2="${tx}" y1="${top - 6}" y2="${H - 6}"/>`;
+    rows.forEach(({ k, d }, i) => {
+      const y = top + i * rh;
+      const col = d == null ? "var(--info)" : d <= 30 ? "var(--crit)" : d <= 90 ? "var(--warn)" : "var(--good)";
+      const name = clientName(k.client);
+      g += `<text class="lbl" x="${L - 10}" y="${y + 15}" text-anchor="end">${esc(name.length > 22 ? name.slice(0, 21) + "…" : name)}</text>`;
+      if (d == null) {
+        g += `<rect class="bar" data-client="${esc(k.client)}" x="${tx}" y="${y + 6}" width="60" height="12" rx="4" fill="${col}" opacity=".35"><title>${esc(name)}: no end date in the contract</title></rect><text x="${tx + 66}" y="${y + 16}">end date unknown</text>`;
+      } else {
+        const ex = x(parse(k.endDate)), x1 = Math.min(tx, ex), w = Math.max(4, Math.abs(ex - tx));
+        g += `<rect class="bar" data-client="${esc(k.client)}" x="${x1}" y="${y + 6}" width="${w}" height="12" rx="4" fill="${col}"><title>${esc(name)}: ${esc(k.title || "contract")} ends ${esc(fmtD(k.endDate))} (${d < 0 ? -d + " days ago" : d + " days"})</title></rect>`;
+        const right = Math.max(ex, tx), lx = right > W - 140 ? x1 - 6 : right + 6;
+        g += `<text x="${lx}" y="${y + 16}" text-anchor="${right > W - 140 ? "end" : "start"}">${esc(fmtD(k.endDate))}${d < 0 ? " · expired " + -d + " days ago" : ""}</text>`;
+      }
+    });
+    $("#timeline").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Contract end dates over the next 12 months">${g}</svg>`;
+  }
+
+  function spark(vals, w = 120, h = 34) {
+    if (!vals || vals.length < 2) return "";
+    const mn = Math.min(...vals), mx = Math.max(...vals), r = mx - mn || 1;
+    const pts = vals.map((v, i) => [(i / (vals.length - 1)) * (w - 6) + 3, h - 4 - ((v - mn) / r) * (h - 10)]);
+    const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("");
+    const last = pts[pts.length - 1];
+    return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path class="area" d="${d}L${last[0]} ${h}L3 ${h}Z"/><path class="ln" d="${d}"/><circle class="end" cx="${last[0]}" cy="${last[1]}" r="3.5"/><title>Daily clicks, last ${vals.length} days. Latest ${fmtN(vals[vals.length - 1])}</title></svg>`;
+  }
+  function clientCard(c) {
+    const w = c.perf?.w28 || {};
+    const k = c.contract;
+    const kd = k?.endDate ? days(k.endDate) : null;
+    const kchip = !k ? `<span class="pill mute">No contract on file</span>` : kd == null ? `<span class="pill unknown">Contract · no end date</span>` : `<span class="pill ${kd < 0 ? "expired" : kd <= 30 ? "critical" : kd <= 90 ? "soon" : "ok"}">${kd < 0 ? "Contract ended" : "Contract " + kd + "d"}</span>`;
+    return `<button class="cl" data-client="${esc(c.key)}"><div class="top"><div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="dom">${esc(c.domain || "")}</div></div><span class="pill ${esc(c.status)}">${esc({ risk: "At risk", watch: "Watch", good: "Healthy" }[c.status] || c.status)}</span></div>
+      <div class="hl">${esc(c.headline || c.summary || "")}</div>
+      <div class="stats"><div><div class="num">${fmtN(w.clicks)} clicks</div><div class="note">${pct(w.clicksChangePct) || "28 days"}</div></div>${spark(c.perf?.spark28)}</div>
+      <div class="foot">${kchip}${c.alertCount ? `<span class="pill mute">${c.alertCount} alert${c.alertCount > 1 ? "s" : ""}</span>` : ""}</div></button>`;
+  }
+  function renderHealth() {
+    if (!S.clients.length) return;
+    const order = { risk: 0, watch: 1, good: 2 };
+    const l = S.clients.slice().sort((a, b) => (order[a.status] ?? 3) - (order[b.status] ?? 3) || (b.perf?.w28?.clicks || 0) - (a.perf?.w28?.clicks || 0));
+    $("#healthGrid").innerHTML = l.map(clientCard).join("");
+  }
+
+  // ---------- alerts tab
+  function renderAlerts() {
+    const cats = ["all", ...Object.keys(CAT)];
+    $("#alertFilters").innerHTML = cats.map((c) => `<button class="chip" data-acat="${c}" aria-pressed="${UI.alertCat === c}">${c === "all" ? "All" : CAT[c]} <span class="mono">${S.alerts.filter((a) => (c === "all" || a.category === c) && (UI.showAcked || !isAcked(a))).length}</span></button>`).join("")
+      + `<span style="width:10px"></span>` + ["all", "high", "medium", "low"].map((s) => `<button class="chip" data-asev="${s}" aria-pressed="${UI.alertSev === s}">${{ all: "Any severity", high: "Urgent", medium: "Watch", low: "FYI" }[s]}</button>`).join("")
+      + `<button class="chip" data-acked aria-pressed="${UI.showAcked}">Show acknowledged</button>`;
+    const l = sortAlerts(S.alerts.filter((a) => (UI.alertCat === "all" || a.category === UI.alertCat) && (UI.alertSev === "all" || a.severity === UI.alertSev) && (UI.showAcked || !isAcked(a))));
+    $("#allAlerts").innerHTML = l.length ? l.map(alertRow).join("") : `<div class="empty">No alerts match these filters.</div>`;
+    $("#alertsSub").textContent = `${S.alerts.length} total · ${S.alerts.filter(isAcked).length} acknowledged`;
+  }
+
+  // ---------- clients tab
+  function renderClients() {
+    const f = ["all", "risk", "watch", "good", "nocontract"];
+    $("#clientFilters").innerHTML = f.map((x) => `<button class="chip" data-cf="${x}" aria-pressed="${UI.clientFilter === x}">${{ all: "All", risk: "At risk", watch: "Watch", good: "Healthy", nocontract: "No contract" }[x]}</button>`).join("");
+    const q = ($("#clientSearch").value || "").toLowerCase();
+    const l = S.clients.filter((c) => (UI.clientFilter === "all" || (UI.clientFilter === "nocontract" ? !c.contract : c.status === UI.clientFilter)) && (!q || JSON.stringify([c.name, c.domain, c.summary, c.headline, c.issues]).toLowerCase().includes(q)))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    $("#clientGrid").innerHTML = l.length ? l.map(clientCard).join("") : `<div class="empty">No clients match.</div>`;
+  }
+  function openClient(key) {
+    const c = S.clients.find((x) => x.key === key); if (!c) return;
+    const p = c.perf || {}, k = c.contract;
+    const win = (w, l) => w ? `<div class="m"><div class="l">${l}</div><div class="v">${fmtN(w.clicks)}</div><div class="l">${pct(w.clicksChangePct) || "clicks"} · pos ${w.position != null ? w.position.toFixed(1) : "—"}</div></div>` : "";
+    const al = sortAlerts(S.alerts.filter((a) => a.client === key));
+    const kc = S.contracts.filter((x) => x.client === key);
+    $("#drawer").innerHTML = `<button class="btn close" data-close>Close</button>
+      <div><div class="eyebrow">${esc(c.domain || "")}</div><h2>${esc(c.name)}</h2><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill ${esc(c.status)}">${esc({ risk: "At risk", watch: "Watch", good: "Healthy" }[c.status] || c.status)}</span>${(c.services || []).map((s) => `<span class="pill mute">${esc(s)}</span>`).join("")}</div></div>
+      ${c.summary ? `<div><h3>From the client brain</h3><p style="margin:0;color:var(--ink-2)">${esc(c.summary)}</p>${c.lastBrainUpdate ? `<p class="note">Brain last updated ${esc(fmtD(c.lastBrainUpdate))}</p>` : ""}</div>` : `<p class="note">No client brain found in Drive for this client yet.</p>`}
+      <div><button class="btn primary" data-askclient="${esc(key)}">Ask Opus about ${esc(c.name)}</button></div>
+      ${p.w28 ? `<div><h3>Organic search</h3><div class="mgrid">${win(p.w7, "Last 7 days")}${win(p.w28, "Last 28 days")}${win(p.w90, "Last 90 days")}</div>${p.spark28 ? `<div style="margin-top:8px">${spark(p.spark28, 560, 60)}</div>` : ""}${c.headline ? `<p style="margin:6px 0 0;color:var(--ink-2)">${esc(c.headline)}</p>` : ""}</div>` : ""}
+      ${al.length ? `<div><h3>Alerts</h3><div class="alist">${al.map(alertRow).join("")}</div></div>` : ""}
+      ${(p.wins || []).length ? `<div><h3>Wins</h3><ul>${p.wins.map((w) => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+      ${(p.okrs || []).length ? `<div><h3>OKRs</h3><ul>${p.okrs.map((o) => `<li>${esc(o.name)} — <span class="mono">${o.progressPct != null ? o.progressPct + "%" : "—"}</span> <span class="pill ${o.status === "on_track" ? "good" : o.status === "off_track" ? "crit" : o.status === "at_risk" ? "warn" : "mute"}">${esc((o.status || "unknown").replace("_", " "))}</span></li>`).join("")}</ul></div>` : ""}
+      ${p.openTasks != null || p.hoursBudget ? `<div><h3>Delivery</h3><div class="mgrid"><div class="m"><div class="l">Open tasks</div><div class="v">${p.openTasks ?? "—"}</div></div><div class="m"><div class="l">Overdue</div><div class="v">${p.overdueTasks ?? "—"}</div></div><div class="m"><div class="l">Hours used / budget</div><div class="v">${p.hoursUsed ?? "—"} / ${p.hoursBudget ?? "—"}</div></div></div></div>` : ""}
+      <div><h3>Contract</h3>${kc.length ? `<div class="tbl-wrap"><table><tbody>${kc.map((x) => `<tr><td>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>` : esc(x.title)}<div class="sub">${esc(x.type || "")} · ${esc(fmtD(x.startDate))} → ${esc(fmtD(x.endDate))}${x.autoRenew ? " · auto-renews" : ""}${x.noticeDays ? ` · ${x.noticeDays}d notice` : ""}</div>${x.notes ? `<div class="sub">${esc(x.notes)}</div>` : ""}</td><td class="num mono">${fmtMoney(x.monthlyFee, x.currency)}${x.monthlyFee ? "/mo" : ""}</td></tr>`).join("")}</tbody></table></div>` : `<p class="note" style="margin:0">No contract found in Drive.</p>`}</div>
+      ${(c.keyFacts || []).length ? `<div><h3>Key facts</h3><ul>${c.keyFacts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul></div>` : ""}
+      ${(c.upcoming || []).length ? `<div><h3>Coming up</h3><ul>${c.upcoming.map((f) => `<li>${esc(f)}</li>`).join("")}</ul></div>` : ""}
+      ${(c.contacts || []).length ? `<div><h3>People</h3><ul>${c.contacts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul></div>` : ""}
+      ${(c.brainDocs || []).length || c.brainFolderUrl ? `<div><h3>Brain documents</h3><ul>${(c.brainDocs || []).map((d) => `<li><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a> <span class="note">${esc(fmtD(d.modified))}</span></li>`).join("")}</ul>${c.brainFolderUrl ? `<p style="margin:8px 0 0"><a href="${esc(c.brainFolderUrl)}" target="_blank" rel="noopener">Open the brain folder</a>${c.driveFolderUrl ? ` · <a href="${esc(c.driveFolderUrl)}" target="_blank" rel="noopener">Client folder</a>` : ""}</p>` : ""}</div>` : ""}`;
+    $("#drawer").hidden = false; $("#scrim").hidden = false; $("#drawer").scrollTop = 0;
+    $("[data-close]", $("#drawer")).focus();
+  }
+  const closeDrawer = () => { $("#drawer").hidden = true; $("#scrim").hidden = true; };
+
+  // ---------- contracts tab
+  function sortable(cols, sortKey, rows) {
+    const s = UI[sortKey];
+    const v = (r, c) => (c.sortVal ? c.sortVal(r) : r[c.key]);
+    const sorted = rows.slice().sort((a, b) => { const c = cols.find((x) => x.key === s) || cols[0]; const x = v(a, c), y = v(b, c); if (x == null) return 1; if (y == null) return -1; return typeof x === "number" ? x - y : String(x).localeCompare(String(y)); });
+    return `<thead><tr>${cols.map((c) => `<th class="${c.num ? "num" : ""}" data-sort="${sortKey}:${c.key}">${c.label}${s === c.key ? " ↑" : ""}</th>`).join("")}</tr></thead><tbody>${sorted.map((r) => `<tr>${cols.map((c) => `<td class="${c.num ? "num mono" : ""}">${c.render(r)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  }
+  function renderContracts() {
+    const rows = S.contracts.slice();
+    if (!rows.length) { $("#contractTable").innerHTML = `<tbody><tr><td class="empty">No contracts found yet.</td></tr></tbody>`; return; }
+    const st = (k) => ({ expired: "Expired", critical: "≤30 days", soon: "≤90 days", ok: "Active", renewed: "Auto-renewed", unknown: "No end date" }[k.status] || k.status);
+    $("#contractTable").innerHTML = sortable([
+      { key: "client", label: "Client", render: (k) => `<button class="link-btn" style="font-size:13px" data-client="${esc(k.client)}">${esc(clientName(k.client))}</button>${k.isLatest ? "" : `<div class="sub">older agreement</div>`}`, sortVal: (k) => clientName(k.client) },
+      { key: "title", label: "Document", render: (k) => `${k.url ? `<a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.title)}</a>` : esc(k.title)}<div class="sub">${esc(k.type || "")}${k.scope ? " · " + esc(k.scope) : ""}</div>` },
+      { key: "status", label: "Status", render: (k) => `<span class="pill ${esc(k.status)}">${esc(st(k))}</span>${k.confidence && k.confidence !== "high" ? `<div class="sub">${esc(k.confidence)} confidence</div>` : ""}` },
+      { key: "endDate", label: "Ends", render: (k) => `${esc(fmtD(k.endDate))}${k.notes && /infer/i.test(k.notes) ? `<div class="sub">inferred</div>` : ""}` },
+      { key: "daysLeft", label: "Days left", num: true, render: (k) => (k.daysLeft == null ? "—" : k.daysLeft) },
+      { key: "noticeDeadline", label: "Notice by", render: (k) => (k.noticeDeadline ? esc(fmtD(k.noticeDeadline)) : k.noticeDays ? `${k.noticeDays}d` : "—") },
+      { key: "autoRenew", label: "Auto-renew", render: (k) => (k.autoRenew == null ? "—" : k.autoRenew ? "Yes" : "No") },
+      { key: "monthlyFee", label: "Fee / month", num: true, render: (k) => (k.monthlyFee ? fmtMoney(k.monthlyFee, k.currency) : k.totalValue ? fmtMoney(k.totalValue, k.currency) + " total" : "—") },
+    ], "contractSort", rows);
+  }
+
+  // ---------- tools tab
+  function renderTools() {
+    const tools = S.tools, sp = S.meta?.spend || {};
+    const paid = tools.filter((t) => t.paying && t.yearlyCost).sort((a, b) => b.yearlyCost - a.yearlyCost);
+    const top = paid.slice(0, 10), rest = paid.slice(10).reduce((s, t) => s + t.yearlyCost, 0);
+    const gl = top.map((t) => [t.name, t.yearlyCost]).concat(rest ? [[`${paid.length - 10} other tools`, rest]] : []), gmax = Math.max(...gl.map((g) => g[1]), 1);
+    $("#spendBars").innerHTML = gl.length ? gl.map(([g, v]) => `<div class="hb" title="${esc(g)}: ${fmtUSD(v)} per year"><span class="nm">${esc(g)}</span><span class="track"><span class="fill" style="display:block;width:${(v / gmax) * 100}%"></span></span><span class="mono" style="text-align:right">${fmtUSD(v)}</span></div>`).join("") + `<p class="note" style="margin:6px 0 0">Total ${fmtUSD(sp.yearly)} per year across ${sp.paying} paid tools. ${paid[0] ? `${esc(paid[0].name)} alone is ${Math.round((paid[0].yearlyCost / sp.yearly) * 100)}% of it.` : ""}</p>` : `<div class="empty">No cost data.</div>`;
+    const live = tools.filter((t) => t.live);
+    $("#liveChecks").innerHTML = live.length ? live.map((t) => { const l = t.live; return `<div class="lv"><div><div style="font-weight:600">${esc(t.name)}</div><div class="note">${esc(l.headline || "")}</div><div class="note">Checked ${esc(ago(l.checkedAt))} via ${esc(l.method || "API")}</div></div><div style="text-align:right"><div class="v">${l.unit === "USD" ? fmtUSD(l.value) : esc(l.value)}</div><span class="pill ${l.status === "critical" ? "crit" : l.status === "low" ? "warn" : "good"}">${esc(l.status || "ok")}</span></div></div>`; }).join("") : `<div class="empty">No live checks yet.</div>`;
+    const f = [["attention", "Needs attention"], ["paying", "Paying"], ["all", "All"], ["cancelled", "Not paying"]];
+    $("#toolFilters").innerHTML = f.map(([k, l]) => `<button class="chip" data-tf="${k}" aria-pressed="${UI.toolFilter === k}">${l}</button>`).join("");
+    const flagged = new Set(S.alerts.filter((a) => a.category === "tools").map((a) => a.id.replace(/^tool-/, "").replace(/-(expired|renewal|stale|autorenew-on|billing-unclear|live)$/, "")));
+    const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const rows = tools.filter((t) => UI.toolFilter === "all" || (UI.toolFilter === "paying" && t.paying) || (UI.toolFilter === "cancelled" && !t.paying) || (UI.toolFilter === "attention" && flagged.has(slug(t.name))));
+    $("#toolsSub").textContent = `${tools.length} tools · ${sp.paying || 0} paid · ${fmtUSD(sp.monthly)} per month`;
+    $("#toolTable").innerHTML = rows.length ? sortable([
+      { key: "name", label: "Tool", render: (t) => `<strong>${esc(t.name)}</strong><div class="sub">${esc([t.group, t.plan].filter(Boolean).join(" · "))}</div>` },
+      { key: "paying", label: "Status", render: (t) => `<span class="pill ${t.paying ? "good" : "mute"}">${t.paying ? "Paying" : "Not paying"}</span>`, sortVal: (t) => (t.paying ? 0 : 1) },
+      { key: "yearlyCost", label: "Per year", num: true, render: (t) => fmtUSD(t.yearlyCost), sortVal: (t) => (t.yearlyCost == null ? null : -t.yearlyCost) },
+      { key: "frequency", label: "Billing", render: (t) => `${esc(t.frequency || "—")}<div class="sub">${esc(t.model || "")}</div>` },
+      { key: "daysToRenewal", label: "Next renewal", render: (t) => (t.nextRenewal ? `${esc(fmtD(t.nextRenewal))}<div class="sub">${t.daysToRenewal < 0 ? "lapsed " + -t.daysToRenewal + "d ago" : "in " + t.daysToRenewal + "d"}${t.renewalDateStale ? " · projected" : ""}</div>` : "—") },
+      { key: "autoRenew", label: "Auto-renew", render: (t) => (t.autoRenew ? "On" : "Off") },
+      { key: "admin", label: "Admin", render: (t) => esc(t.admin || "—") },
+      { key: "notes", label: "Notes", render: (t) => `<span class="sub">${esc(t.notes || "")}</span>${t.live ? `<div><span class="pill ${t.live.status === "critical" ? "crit" : "warn"}">${esc(t.live.headline)}</span></div>` : ""}` },
+    ], "toolSort", rows) : `<tbody><tr><td class="empty">No tools match.</td></tr></tbody>`;
+  }
+
+  // ---------- Ask Opus
+  const MODEL = "claude-opus-5-5";
+  const SURGE_TOOLS = ["portfolio_overview", "get_weekly_digest", "get_client_overview", "gsc_timeseries", "gsc_breakdown", "get_tasks", "get_okrs", "get_peec_trend", "search_gsc_queries", "search_gsc_pages", "get_annotations"];
+  const chat = { turns: [], ctl: null, busy: false };
+  const SUGGEST = [
+    "What are the 5 most important things I should deal with this week?",
+    "Which contracts end in the next 90 days and what's the renewal risk for each?",
+    "Which clients look at risk of churning, based on the brains and the performance data?",
+    "Where are we overspending on tools? What could we cancel or downgrade?",
+    "Why did the clients with the biggest click drops this month drop? Check SurgeOS.",
+  ];
+  function renderSuggest() { $("#suggest").innerHTML = SUGGEST.map((s) => `<button class="chip" data-suggest="${esc(s)}">${esc(s)}</button>`).join(""); }
+  function context() {
+    const c = S.clients.map((x) => ({ key: x.key, name: x.name, domain: x.domain, status: x.status, headline: x.headline, summary: x.summary, issues: (x.issues || []).map((i) => `${i.severity}: ${i.title} — ${i.detail}`), upcoming: x.upcoming, w28: x.perf?.w28 && { clicks: x.perf.w28.clicks, chg: x.perf.w28.clicksChangePct, pos: x.perf.w28.position }, okrs: x.perf?.okrs, contract: x.contract && { end: x.contract.endDate, daysLeft: x.contract.daysLeft, status: x.contract.status, fee: x.contract.monthlyFee, cur: x.contract.currency, autoRenew: x.contract.autoRenew, notice: x.contract.noticeDeadline } }));
+    const k = S.contracts.map((x) => ({ client: x.client, title: x.title, type: x.type, start: x.startDate, end: x.endDate, daysLeft: x.daysLeft, status: x.status, autoRenew: x.autoRenew, noticeDays: x.noticeDays, monthlyFee: x.monthlyFee, currency: x.currency, hours: x.hoursPerMonth, latest: x.isLatest, notes: x.notes, url: x.url }));
+    const t = S.tools.map((x) => ({ name: x.name, group: x.group, paying: x.paying, yearly: x.yearlyCost, monthly: x.monthlyCost, billing: x.frequency, model: x.model, nextRenewal: x.nextRenewal, daysToRenewal: x.daysToRenewal, autoRenew: x.autoRenew, admin: x.admin, plan: x.plan, notes: x.notes, live: x.live && x.live.headline }));
+    const a = sortAlerts(S.alerts).map((x) => ({ sev: x.severity, cat: x.category, client: x.client, title: x.title, detail: x.detail, due: x.dueDate, acked: !!S.acks[x.id] }));
+    return JSON.stringify({ today: new Date().toISOString().slice(0, 10), refreshedAt: S.meta?.updatedAt, gscDataThrough: S.meta?.dataThrough, spend: S.meta?.spend, briefing: S.briefing?.text, alerts: a, clients: c, contracts: k, tools: t }).slice(0, 200000);
+  }
+  const RULES = () => `You are the AI chief of staff inside the Cut Inside Control Room, the operations dashboard of Cut Inside, an SEO and GEO agency in Israel. The person asking runs or manages the agency. Answer in English unless they write in another language, then answer in that language.
+Ground every claim in the DASHBOARD DATA below or in a tool result. Cite where a fact comes from (client brain, contract, Tools sheet, SurgeOS) and give dates and numbers. If the data does not cover something, say so plainly and, when it helps, look it up with the tools: "surgeos" for live search performance, tasks and OKRs, "drive_search" + "drive_read" for client brains, contracts and meeting notes in Google Drive, and "get_client" for one client's full record. Use tools only when the dashboard data is not enough; keep tool calls few and targeted.
+Be direct and practical: lead with the answer, then the reasons, then concrete next steps with owners where known. Use short headings, bullets and small markdown tables. No filler.
+
+DASHBOARD DATA (JSON, refreshed twice daily):
+${context()}`;
+  function chatTools() {
+    const tools = [{
+      name: "get_client", description: "Full dashboard record for one client: brain summary, key facts, issues, upcoming items, contacts, brain document links, performance windows, OKRs, contract. Pass the client key or name.",
+      inputSchema: { type: "object", properties: { client: { type: "string" } }, required: ["client"] },
+      execute: ({ client }) => { const q = String(client || "").toLowerCase(); const c = S.clients.find((x) => x.key.toLowerCase() === q || x.name.toLowerCase() === q) || S.clients.find((x) => (x.key + " " + x.name + " " + (x.domain || "")).toLowerCase().includes(q)); if (!c) throw new Error("No client matches " + client); return JSON.stringify(c).slice(0, 30000); },
+    }];
+    if (mcp) {
+      tools.push({
+        name: "surgeos", description: `Call a read-only SurgeOS tool (Cut Inside's SEO data platform: Search Console BigQuery mirror, GA4, Peec AI visibility, tasks, OKRs). tool is one of: ${SURGE_TOOLS.join(", ")}. args is that tool's input object; most take {client} (SurgeOS name, e.g. "BOG", "MO", "Ynet") and optional startDate/endDate YYYY-MM-DD, compare "previous_period"|"previous_year". portfolio_overview takes {window:"w7"|"w28"|"w90"|"w365"}. Returns JSON.`,
+        inputSchema: { type: "object", properties: { tool: { type: "string", enum: SURGE_TOOLS }, args: { type: "object" } }, required: ["tool"] },
+        execute: async ({ tool, args }, ctx) => { if (!SURGE_TOOLS.includes(String(tool))) throw new Error("Tool not allowed"); step(`SurgeOS · ${tool}${args?.client ? " · " + args.client : ""}`); const r = await mcp.callTool("SurgeOS", String(tool), args || {}, { signal: ctx.signal }); return JSON.stringify(r.payload ?? r.content).slice(0, 30000); },
+      }, {
+        name: "drive_search", description: "Search Cut Inside's Google Drive. query uses Drive syntax, e.g. \"title contains 'Zengo' and title contains 'contract'\" or \"fullText contains 'renewal'\" or \"parentId = '<folderId>'\". Returns file ids, titles, links and short snippets.",
+        inputSchema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] },
+        execute: async ({ query }, ctx) => { step(`Drive search · ${query}`); const r = await mcp.callTool("Google Drive", "search_files", { query: String(query), pageSize: 12, snippetVerbosity: "BRIEF" }, { signal: ctx.signal }); return JSON.stringify(r.payload ?? r.content).slice(0, 24000); },
+      }, {
+        name: "drive_read", description: "Read the text of one Google Drive file (Docs, Sheets, PDFs, Word) by its file id from drive_search or from a document link in the data.",
+        inputSchema: { type: "object", properties: { fileId: { type: "string" } }, required: ["fileId"] },
+        execute: async ({ fileId }, ctx) => { step(`Drive read · ${fileId}`); const r = await mcp.callTool("Google Drive", "read_file_content", { fileId: String(fileId) }, { signal: ctx.signal }); const p = r.payload; return (typeof p === "string" ? p : JSON.stringify(p ?? r.content)).slice(0, 30000); },
+      });
+    }
+    return tools;
+  }
+  let stepEl = null;
+  const step = (t) => { if (stepEl) stepEl.insertAdjacentHTML("beforeend", `<div>→ ${esc(t)}</div>`); };
+  function addMsg(role, html) {
+    const d = document.createElement("div"); d.className = "msg " + role;
+    d.innerHTML = role === "ai" ? `<div class="who">Opus</div><div class="body">${html}</div><div class="steps"></div>` : html;
+    $("#msgs").appendChild(d); $("#msgs").scrollTop = $("#msgs").scrollHeight; return d;
+  }
+  async function ask(text) {
+    text = String(text || "").trim(); if (!text || chat.busy) return;
+    gotoTab("ask");
+    if (!sample) { addMsg("ai", `<p>Asking Opus isn't available in this view. Open the dashboard inside Claude while signed in.</p>`); return; }
+    chat.busy = true; $("#sendBtn").disabled = true; $("#stopBtn").hidden = false; $("#q").value = "";
+    addMsg("me", esc(text));
+    chat.turns.push({ role: "user", content: text });
+    const box = addMsg("ai", `<p class="note">Thinking…</p>`); const body = $(".body", box); stepEl = $(".steps", box);
+    chat.ctl = new AbortController();
+    let canTools = false; try { canTools = !!(await sample.limits()).tools; } catch (e) {}
+    const turns = chat.turns.slice(-12);
+    try {
+      const res = await sample([{ role: "user", content: RULES() }, ...turns], {
+        model: MODEL, modelTier: "complex", cache: false, signal: chat.ctl.signal,
+        tools: canTools ? chatTools() : undefined,
+        onText: ({ text }) => { body.innerHTML = md(text); $("#msgs").scrollTop = $("#msgs").scrollHeight; },
+      });
+      body.innerHTML = md(res.text) + (res.truncated ? `<p class="note">The answer was cut short. Ask a narrower question for the rest.</p>` : "");
+      chat.turns.push({ role: "assistant", content: res.text });
+      if (res.modelApplied !== MODEL) stepEl.insertAdjacentHTML("beforeend", `<div>Answered by the ${esc(res.modelTierApplied)} model tier (Opus wasn't available for this account).</div>`);
+    } catch (e) {
+      const copy = { not_granted: "Claude access wasn't allowed for this page, so Opus can't answer here.", sampling_disabled: "Claude isn't available for this account.", rate_limited: "You've hit a usage limit. Try again in a few minutes.", session_expired: "Your session expired. Sign in to Claude again.", prompt_too_large: "The question plus the dashboard data is too large. Ask about fewer clients at once.", refused: "Opus declined that request. Rephrase it.", cancelled: "Stopped." }[e?.code] || "Something interrupted the answer. Send it again.";
+      body.innerHTML = (e?.text && e.code !== "refused" ? md(e.text) : "") + `<p class="note">${esc(copy)}</p>`;
+      if (e?.text) chat.turns.push({ role: "assistant", content: e.text });
+    } finally {
+      chat.busy = false; $("#sendBtn").disabled = false; $("#stopBtn").hidden = true; stepEl = null;
+    }
+  }
+
+  // ---------- tabs and events
+  function gotoTab(t) {
+    UI.tab = t; try { localStorage.setItem("ci.tab", t); } catch (e) {}
+    $$(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t)));
+    $$("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== t));
+    renderAll();
+    if (t === "ask") setTimeout(() => $("#q").focus(), 0);
+  }
+  document.addEventListener("click", async (e) => {
+    const t = e.target.closest("button, [data-client]"); if (!t) return;
+    if (t.dataset.tab) return gotoTab(t.dataset.tab);
+    if (t.dataset.goto) return gotoTab(t.dataset.goto);
+    if (t.dataset.sev) { UI.alertSev = t.dataset.sev; UI.alertCat = "all"; return gotoTab("alerts"); }
+    if (t.dataset.acat) { UI.alertCat = t.dataset.acat; return renderAlerts(); }
+    if (t.dataset.asev) { UI.alertSev = t.dataset.asev; return renderAlerts(); }
+    if ("acked" in t.dataset) { UI.showAcked = !UI.showAcked; return renderAlerts(); }
+    if (t.dataset.cf) { UI.clientFilter = t.dataset.cf; return renderClients(); }
+    if (t.dataset.tf) { UI.toolFilter = t.dataset.tf; return renderTools(); }
+    if (t.dataset.ack) return toggleAck(t.dataset.ack);
+    if (t.dataset.askalert) { const a = S.alerts.find((x) => x.id === t.dataset.askalert); closeDrawer(); return ask(`Help me handle this alert: "${a.title}" — ${a.detail}. What's the context, how serious is it, and what exactly should I do next?`); }
+    if (t.dataset.askclient) { const c = S.clients.find((x) => x.key === t.dataset.askclient); closeDrawer(); return ask(`Give me a full status brief on ${c.name}: relationship health, performance and why, contract status, open risks, and the 3 things we should do next.`); }
+    if (t.dataset.suggest) return ask(t.dataset.suggest);
+    if ("close" in t.dataset) return closeDrawer();
+    if (t.dataset.client) return openClient(t.dataset.client);
+  });
+  document.addEventListener("click", (e) => { const th = e.target.closest("th[data-sort]"); if (!th) return; const [k, col] = th.dataset.sort.split(":"); UI[k] = col; k === "contractSort" ? renderContracts() : renderTools(); });
+  $("#scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#drawer").hidden) closeDrawer(); });
+  $("#askTop").addEventListener("click", () => gotoTab("ask"));
+  $("#clientSearch").addEventListener("input", renderClients);
+  $("#compose").addEventListener("submit", (e) => { e.preventDefault(); ask($("#q").value); });
+  $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask($("#q").value); } });
+  $("#stopBtn").addEventListener("click", () => chat.ctl?.abort());
+  $("#refreshBtn").addEventListener("click", async () => {
+    const id = S.meta?.triggerId; if (!mcp || !id) return;
+    const b = $("#refreshBtn"); b.disabled = true; b.textContent = "Starting…";
+    try { await mcp.callTool("Claude Code Remote", "fire_trigger", { trigger_id: id }); toast("Refresh started. New data lands here in about 20–40 minutes."); b.textContent = "Refresh running"; }
+    catch (err) { b.disabled = false; b.textContent = "Refresh now"; toast({ server_not_connected: "Connect Claude Code Remote in claude.ai Settings → Connectors to refresh from here.", needs_reauth: "Reconnect Claude Code Remote in claude.ai Settings → Connectors.", not_in_manifest: "Refreshing isn't allowed for this view." }[err?.code] || "Couldn't start the refresh. Try again."); }
+  });
+
+  async function toggleAck(id) {
+    if (!db) return toast("Sign in to Claude to acknowledge alerts.");
+    const ref = db.doc("acks/" + id);
+    try {
+      if (S.acks[id]) await ref.delete();
+      else await ref.set({ by: myId || "unknown", at: new Date().toISOString() });
+    } catch (e) { toast(e?.code === "invalid_argument" ? "You have view-only access, so you can't acknowledge alerts." : "Couldn't save that. Try again."); }
+  }
+
+  // ---------- boot
+  gotoTab(UI.tab);
+  (async () => {
+    db = await claude.use("db");
+    if (!db) { $("#fresh").innerHTML = `<span class="dot stale"></span><span>Open this dashboard in Claude, signed in, to load agency data.</span>`; return; }
+    const err = (e) => console.warn("db", e?.code, e?.message);
+    // snapshot/<name>[-N] docs hold {items:[...]}; meta/state.shards lists them
+    const subs = {}, parts = {};
+    const syncShards = (shards) => {
+      const want = new Set();
+      Object.entries(shards || {}).forEach(([name, ids]) => ids.forEach((id) => want.add(name + "|" + id)));
+      Object.keys(subs).forEach((k) => { if (!want.has(k)) { subs[k](); delete subs[k]; delete parts[k]; } });
+      want.forEach((k) => {
+        if (subs[k]) return;
+        const id = k.split("|")[1];
+        subs[k] = db.doc("snapshot/" + id).onSnapshot((s) => {
+          parts[k] = s.exists ? s.data().items || [] : [];
+          ["clients", "contracts", "tools", "alerts"].forEach((name) => { S[name] = Object.entries(parts).filter(([kk]) => kk.startsWith(name + "|")).flatMap(([, v]) => v); });
+          render();
+        }, err);
+      });
+    };
+    db.doc("meta/state").onSnapshot((s) => { S.meta = s.exists ? s.data() : null; syncShards(S.meta?.shards); if (S.meta?.triggerId && mcp) $("#refreshBtn").hidden = !(user?.canEdit?.() ?? false); render(); }, err);
+    db.doc("briefing/latest").onSnapshot((s) => { S.briefing = s.exists ? s.data() : null; render(); }, err);
+    db.collection("acks").limit(1000).onSnapshot(async (q) => {
+      S.acks = Object.fromEntries(q.docs.map((d) => [d.id, d.data()]));
+      const ids = [...new Set(Object.values(S.acks).map((a) => a.by).filter((x) => x && x.startsWith("u_")))];
+      if (user && ids.length) { try { const ps = await user.profiles(ids); ids.forEach((i) => (S.names[i] = (myId === i ? "you" : ps[i]?.name) || "a teammate")); } catch (e) {} }
+      render();
+    }, err);
+  })();
+  (async () => { user = await claude.use("user"); if (user) { try { myId = await user.id(); } catch (e) {} if (S.meta?.triggerId && mcp) $("#refreshBtn").hidden = !user.canEdit(); } })();
+  (async () => { mcp = await claude.use("mcp"); if (mcp && S.meta?.triggerId) $("#refreshBtn").hidden = !(user?.canEdit?.() ?? false); })();
+  (async () => { sample = await claude.use("sample"); if (!sample) $("#askSub").textContent = "Asking Opus needs this page open inside Claude while signed in."; })();
+})();
+</script>
