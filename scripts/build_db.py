@@ -482,11 +482,22 @@ def build():
 
     order = {"high": 0, "medium": 1, "low": 2}
     sev_counts = {s: sum(1 for a in alerts.values() if a["severity"] == s) for s in order}
+    # refresh history: last 12 runs with the sources that succeeded or failed (source_status.json "failed")
+    prev_meta = {}
+    for a in sys.argv[1:]:
+        if a.startswith("--prev-meta=") and os.path.exists(a.split("=", 1)[1]):
+            prev_meta = json.load(open(a.split("=", 1)[1]))
+    ss = load("source_status.json", {})
+    runs = (prev_meta.get("runs") or [])[-11:] + [{
+        "at": NOW, "by": os.environ.get("RUN_BY", "refresh"), "failed": ss.get("failed") or [],
+        "ok": [k for k in ("sheet", "drive", "gmail", "surgeos", "dataforseo", "meetings") if ss.get(k) and k not in (ss.get("failed") or [])],
+        "alerts": None}]
     meta = {
         "updatedAt": NOW, "today": TODAY.isoformat(), "dataThrough": perf.get("dataThrough"),
         "counts": {"clients": len(client_docs), "contracts": len(contract_docs), "tools": len(tools), "alerts": sev_counts},
         "spend": spend, "portfolio": perf.get("portfolio"), "revenue": revenue,
         "sourceStatus": load("source_status.json", {}),
+        "runs": [dict(r, alerts=r.get("alerts") or sev_counts) for r in runs],
         "agency": {k2: (agency_brain or {}).get(k2) for k2 in ("summary", "keyFacts", "upcoming", "brainFolderUrl", "lastBrainUpdate")},
         "sources": {
             "toolsSheet": "https://docs.google.com/spreadsheets/d/1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU/edit",

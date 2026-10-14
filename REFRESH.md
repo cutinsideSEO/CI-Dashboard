@@ -113,12 +113,12 @@ The previous state is in `sources/meetings`. Copy it to `data/meetings/` in step
 
 ## 5b. Source freshness
 
-Write `data/source_status.json` as `{"sheet": "<ISO time the sheet was read>", "drive": "<ISO time brains/contracts were checked>", "dataforseo": "<ISO time of the balance check>"}`. Use only the sources that actually succeeded this run, and keep the previous value for any that failed. The page shows these times at the bottom of the overview.
+Write `data/source_status.json` as `{"sheet": "<ISO>", "drive": "<ISO>", "gmail": "<ISO>", "surgeos": "<ISO>", "dataforseo": "<ISO>", "meetings": "<ISO>", "failed": ["<source>", ...]}`. Each value is the time that source was last read successfully. `failed` lists the sources that errored this run. The build appends this run to `meta/state.runs`, which keeps the last 12, and the page shows that history. Use only the sources that actually succeeded this run, and keep the previous value for any that failed. The page shows these times at the bottom of the overview.
 
 ## 6. Build
 
 ```bash
-python3 scripts/build_db.py --versions=prev/versions.json     # TODAY defaults to the current date
+python3 scripts/build_db.py --versions=prev/versions.json --prev-meta=prev/meta/state.json     # TODAY defaults to the current date
 ```
 
 - The build writes `out/writes.json`: ArtifactData batch entries pinned with `if_version` from `prev/versions.json`.

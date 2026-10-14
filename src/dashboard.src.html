@@ -165,6 +165,16 @@ main { padding-block: 32px 80px; }
 .srcline { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--ink-3); padding: 4px 2px; }
 .srcline b { color: var(--ink-2); font-weight: 600; }
 
+.stale { margin-top: 16px; padding: 12px 16px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); font-size: 13px; }
+.cov td, .cov th { white-space: nowrap; }
+.cov .cell { display: inline-flex; align-items: center; gap: 6px; }
+.cov .dotc { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--ink-3); }
+.cov .ok .dotc { background: var(--good); } .cov .warn .dotc { background: var(--warn); } .cov .bad .dotc { background: var(--crit); }
+.runs { display: inline-flex; gap: 3px; vertical-align: middle; }
+.runs i { width: 8px; height: 14px; border-radius: 2px; background: var(--good); display: inline-block; }
+.runs i.partial { background: var(--warn); }
+.prov { font-size: 11.5px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
 /* client intelligence */
 .mood { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); }
 .mood i { width: 8px; height: 8px; border-radius: 50%; background: var(--info); display: inline-block; }
@@ -302,6 +312,7 @@ tbody tr:hover { background: var(--line-subtle); }
   </div>
 </div>
 
+<div class="wrap" id="staleBar" hidden><div class="stale"><b data-i18n="staleTitle">Data may be out of date.</b> <span id="staleText"></span></div></div>
 <main class="wrap">
   <section class="panel" data-panel="overview">
     <div class="card brief">
@@ -351,6 +362,10 @@ tbody tr:hover { background: var(--line-subtle); }
   <section class="panel" data-panel="clients" hidden>
     <div class="toolbar"><input class="search" id="clientSearch" type="search" data-i18n-ph="searchPh" placeholder="Search clients, domains, issues…" aria-label="Search clients"><div class="filters" id="clientFilters"></div></div>
     <div class="cgrid" id="clientGrid"></div>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="covTitle">Data coverage</h2><span class="sub" data-i18n="covSub">What the dashboard knows about each client, and how fresh it is</span></div>
+      <div class="card-b tbl-wrap"><table class="cov" id="covTable"></table></div>
+    </div>
   </section>
 
   <section class="panel" data-panel="contracts" hidden>
@@ -466,6 +481,10 @@ tbody tr:hover { background: var(--line-subtle); }
       feedTitle: "Latest client meetings", feedSub: "What was discussed with clients recently, from the client brains, meeting notes and calendar", noMeetings: "No meetings found yet.",
       iHighlights: "Highlights", iMeetings: "Recent meetings", iThemes: "Main topics", iRelationship: "Relationship", iDecisions: "Decisions and action items", iLastMeeting: "Last meeting {0}", iShared: "From the {0} meetings",
       moodPositive: "Positive", moodNeutral: "Neutral", moodStrained: "Strained", moodTense: "Tense", mClient: "Client", mInternal: "Internal", attendees: "With",
+      staleTitle: "Data may be out of date.", staleText: "The last refresh was {0}. The twice-daily refresh may have failed; the numbers below are from then.",
+      covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
+      covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
+      provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
       dFee: "Monthly fee", brainFull: "Whole brain read", brainSummary: "Summary of the brain's main files", sharedBrain: "Covered by the {0} brain",
     },
     he: {
@@ -529,6 +548,10 @@ tbody tr:hover { background: var(--line-subtle); }
       feedTitle: "פגישות אחרונות עם לקוחות", feedSub: "מה דובר עם לקוחות לאחרונה, מה-client brains, מסיכומי פגישות ומהיומן", noMeetings: "עדיין לא נמצאו פגישות.",
       iHighlights: "הדברים החשובים", iMeetings: "פגישות אחרונות", iThemes: "נושאים מרכזיים", iRelationship: "מצב היחסים", iDecisions: "החלטות ומשימות", iLastMeeting: "פגישה אחרונה {0}", iShared: "מתוך הפגישות של {0}",
       moodPositive: "חיובי", moodNeutral: "ניטרלי", moodStrained: "מתוח", moodTense: "מתוח", mClient: "לקוח", mInternal: "פנימי", attendees: "עם",
+      staleTitle: "ייתכן שהנתונים לא מעודכנים.", staleText: "הרענון האחרון היה {0}. ייתכן שהרענון הדו-יומי נכשל; הנתונים כאן הם מאותו זמן.",
+      covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
+      covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
+      provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
       dFee: "תשלום חודשי", brainFull: "ה-brain נקרא במלואו", brainSummary: "תקציר של קבצי ה-brain העיקריים", sharedBrain: "מכוסה ע\"י ה-brain של {0}",
     },
   };
@@ -602,8 +625,13 @@ tbody tr:hover { background: var(--line-subtle); }
   }
   function renderSources() {
     const m = S.meta, ss = m?.sourceStatus || {}; if (!m) return;
+    const staleH = (Date.now() - new Date(m.updatedAt)) / 36e5;
+    $("#staleBar").hidden = !(staleH > 14);
+    if (staleH > 14) $("#staleText").textContent = t("staleText", ago(m.updatedAt));
     const it = [[t("srcSheet"), ss.sheet && ago(ss.sheet)], [t("srcDrive"), ss.drive && ago(ss.drive)], [t("srcSurge"), m.dataThrough && fmtD(m.dataThrough)], [t("srcDfs"), ss.dataforseo && ago(ss.dataforseo)], [t("srcBrowser"), S.toolcheckAt ? ago(S.toolcheckAt) : t("notChecked")]].filter((x) => x[1]);
-    $("#srcline").innerHTML = it.length ? `<span><b>${esc(t("srcTitle"))}</b></span>` + it.map(([l, v]) => `<span>${esc(l)}: ${esc(v)}</span>`).join("") : "";
+    const runs = (m.runs || []).slice(-12);
+    $("#srcline").innerHTML = (it.length ? `<span><b>${esc(t("srcTitle"))}</b></span>` + it.map(([l, v]) => `<span>${esc(l)}: ${esc(v)}</span>`).join("") : "")
+      + (runs.length ? `<span>${esc(t("runsTitle"))}: <span class="runs">${runs.map((r) => `<i class="${(r.failed || []).length ? "partial" : ""}" title="${esc(new Date(r.at).toLocaleString(LOC()))}${(r.failed || []).length ? " · " + esc(t("runFailed", r.failed.join(", "))) : ""}"></i>`).join("")}</span></span>` : "");
   }
   function renderCounts() {
     const open = S.alerts.filter((a) => !isAcked(a)), hi = open.filter((a) => a.severity === "high").length;
@@ -780,6 +808,20 @@ tbody tr:hover { background: var(--line-subtle); }
     const q = ($("#clientSearch").value || "").toLowerCase();
     const l = S.clients.filter((c) => (UI.clientFilter === "all" || (UI.clientFilter === "nocontract" ? !c.contract : c.status === UI.clientFilter)) && (!q || JSON.stringify([c.name, c.domain, c.summary, c.headline, c.issues, c.he]).toLowerCase().includes(q))).sort((a, b) => a.name.localeCompare(b.name));
     $("#clientGrid").innerHTML = l.length ? l.map(clientCard).join("") : `<div class="empty">${esc(t("noClients"))}</div>`;
+    renderCoverage();
+  }
+  function renderCoverage() {
+    const cell = (cls, txt) => `<span class="cell ${cls}"><i class="dotc"></i>${esc(txt)}</span>`;
+    const rows = S.clients.slice().sort((a, b) => a.name.localeCompare(b.name)).map((c) => {
+      const bd = c.lastBrainUpdate ? days(c.lastBrainUpdate) : null;
+      const brain = c.sharedBrainOf ? cell("ok", t("covShared", c.sharedBrainOf.split(" (")[0])) : c.lastBrainUpdate ? cell(-bd > 14 ? "warn" : "ok", fmtD(c.lastBrainUpdate) + (-bd > 14 ? " · " + t("covStale") : "")) : cell("bad", t("covNone"));
+      const it = c.intel, meet = it?.sharedFrom ? cell("ok", t("covShared", clientName(it.sharedFrom))) : it?.lastMeeting ? cell(-days(it.lastMeeting) > 30 ? "warn" : "ok", fmtD(it.lastMeeting)) : cell(it ? "warn" : "bad", t("covNone"));
+      const k = c.contract, contract = !k ? cell("bad", t("covNone")) : cell(k.signed === false || k.status === "expired" || k.confidence === "low" ? "warn" : "ok", t("covConf", k.confidence || "?") + (k.sharedFrom ? " · " + t("covShared", clientName(k.sharedFrom)) : ""));
+      const perf = c.perf?.w28 ? cell("ok", fmtD(S.meta?.dataThrough)) : cell("bad", t("covNone"));
+      const lg = c.domain && S.icons[c.domain] ? cell("ok", t("covYes")) : cell("warn", t("covNone"));
+      return `<tr><td><button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(c.key)}">${cname(c.key, 18)}</button></td><td>${brain}</td><td>${meet}</td><td>${contract}</td><td>${perf}</td><td>${lg}</td></tr>`;
+    }).join("");
+    $("#covTable").innerHTML = `<thead><tr><th>${esc(t("cClient"))}</th><th>${esc(t("cBrain"))}</th><th>${esc(t("cMeet"))}</th><th>${esc(t("cContract"))}</th><th>${esc(t("cPerf"))}</th><th>${esc(t("cLogo"))}</th></tr></thead><tbody>${rows}</tbody>`;
   }
   const list = (arr) => `<ul>${arr.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
   function openClient(key) {
@@ -804,6 +846,7 @@ tbody tr:hover { background: var(--line-subtle); }
           ${m.url ? `<a class="note" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.source || t("source"))}</a>` : m.source ? `<span class="note">${esc(m.source)}</span>` : ""}</div>`; }).join("")}</div>` : ""}
         ${(it.themes || []).length ? `<div><h3>${esc(t("iThemes"))}</h3><div class="themes">${it.themes.map((x, i) => `<div class="theme"><b>${esc(h.themes?.[i]?.title || x.title)}</b><span>${esc(h.themes?.[i]?.detail || x.detail || "")}</span></div>`).join("")}</div></div>` : ""}`; })() : ""}
       <div><button class="btn primary" data-askclient="${esc(key)}">${esc(t("dAskAbout", nm))}</button></div>
+      <div class="prov"><b>${esc(t("provTitle"))}:</b>${c.lastBrainUpdate ? `<span>${esc(t("provBrain", fmtD(c.lastBrainUpdate)))}</span>` : ""}${c.intel?.updatedAt ? `<span>${esc(t("provMeet", fmtD(c.intel.updatedAt)))}</span>` : ""}${c.contract ? `<span>${esc(t("provContract", (c.contract.title || "").split(" (")[0].slice(0, 60), c.contract.confidence || "?"))}</span>` : ""}${c.perf?.w28 ? `<span>${esc(t("provPerf", fmtD(S.meta?.dataThrough)))}</span>` : ""}</div>
       ${p.w28 ? `<div><h3>${esc(t("dOrganic"))}</h3><div class="mgrid">${win(p.w7, t("d7"))}${win(p.w28, t("d28l"))}${win(p.w90, t("d90"))}</div>${p.spark28 ? `<div style="margin-top:10px">${spark(p.spark28, 580, 64)}</div>` : ""}${L(c, "headline") ? `<p style="margin:8px 0 0;color:var(--ink-2)">${esc(L(c, "headline"))}</p>` : ""}</div>` : ""}
       ${al.length ? `<div><h3>${esc(t("dAlerts"))}</h3><div class="alist">${al.map(alertRow).join("")}</div></div>` : ""}
       ${wins.length ? `<div><h3>${esc(t("dWins"))}</h3>${list(wins)}</div>` : ""}
