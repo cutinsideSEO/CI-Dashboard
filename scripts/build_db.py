@@ -292,7 +292,7 @@ def build():
         latest = next(d for d in contract_docs.values() if d["client"] == key and d["isLatest"])
         clients[key]["contract"] = {k2: latest.get(k2) for k2 in (
             "title", "url", "type", "startDate", "endDate", "daysLeft", "status", "autoRenew", "noticeDays",
-            "noticeDeadline", "monthlyFee", "totalValue", "currency", "hoursPerMonth", "confidence")}
+            "noticeDeadline", "monthlyFee", "totalValue", "currency", "hoursPerMonth", "confidence", "relationship", "signed")}
         disp = DISPLAY.get(key, key)
         end, days, url = iso(latest.get("endDate")), latest.get("daysLeft"), latest.get("url")
         fee = latest.get("monthlyFee")
@@ -309,6 +309,15 @@ def build():
             alert(f"contract-{key}-ending", sev, "contracts", f"{disp}: contract ends {end:%d %b %Y}",
                   f"{fee_s.lstrip(' ·')}{'. ' if fee_s else ''}" + ("Auto-renews unless notice is given." if latest.get("autoRenew") else "Does not auto-renew: start the renewal conversation."),
                   client=key, due=end, source=latest.get("title"), source_url=url)
+        rel = latest.get("relationship")
+        if rel in ("notice_given", "ended"):
+            alert(f"contract-{key}-{rel}", "high", "contracts",
+                  f"{disp}: " + ("client gave notice" if rel == "notice_given" else "engagement ended"),
+                  (latest.get("notes") or "See the source document.") + (f" ({fee_s.lstrip(' ·')})" if fee_s else ""),
+                  client=key, due=end, source=latest.get("title"), source_url=url)
+        elif rel == "paused":
+            alert(f"contract-{key}-paused", "medium", "contracts", f"{disp}: engagement paused",
+                  latest.get("notes") or "See the source document.", client=key, source=latest.get("title"), source_url=url)
         if latest.get("signed") is False:
             alert(f"contract-{key}-unsigned", "medium", "contracts", f"{disp}: latest agreement not signed",
                   f"\"{latest.get('title')}\"{fee_s} is still unsigned. Get it signed or confirm which terms apply.",
@@ -348,7 +357,7 @@ def build():
         health = p.get("health")
         kst = (c.get("contract") or {}).get("status")
         # at risk = performance at risk, contract expired/ending within 30 days, or several urgent alerts
-        if health == "risk" or kst in ("expired", "critical") or sev.count("high") >= 2:
+        if health == "risk" or kst in ("expired", "critical") or (c.get("contract") or {}).get("relationship") in ("notice_given", "ended") or sev.count("high") >= 2:
             status = "risk"
         elif "high" in sev or "medium" in sev or health == "watch":
             status = "watch"
@@ -398,7 +407,7 @@ def build():
         k = cd.get("contract") or {}
         fee, cur = k.get("monthlyFee"), k.get("currency") or "ILS"
         ident = k.get("url") or k.get("title")
-        if not fee or not ident or ident in seen or k.get("status") == "expired":
+        if not fee or not ident or ident in seen or k.get("status") == "expired" or k.get("relationship") in ("ended", "notice_given"):
             continue
         seen.add(ident)
         signed = next((x.get("signed") for x in contract_docs.values() if (x.get("url") or x.get("title")) == ident), None)

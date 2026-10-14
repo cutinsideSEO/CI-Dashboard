@@ -422,6 +422,7 @@ tbody tr:hover { background: var(--line-subtle); }
       kMrr: "Contracted revenue / month", kMrrSub: "+ {0} pending signature", kMrrNone: "from signed contracts", kRisk: "Revenue at risk / month", kRiskSub: "{0} clients at risk", kRiskNone: "no at-risk client with a fee on file",
       srcTitle: "Sources", srcSheet: "Tools sheet", srcDrive: "Drive brains and contracts", srcSurge: "SurgeOS data through", srcDfs: "DataForSEO checked",
       tUsage: "Usage (last check)", lastUsed: "last used {0}", notChecked: "Not checked yet", srcBrowser: "Weekly browser check",
+      relNotice: "Notice given", relEnded: "Ended", relPaused: "Paused", relPipeline: "Pipeline", unsigned: "Unsigned",
       dFee: "Monthly fee", brainFull: "Whole brain read", brainSummary: "Summary of the brain's main files", sharedBrain: "Covered by the {0} brain",
     },
     he: {
@@ -478,6 +479,7 @@ tbody tr:hover { background: var(--line-subtle); }
       kMrr: "הכנסה חוזית / חודש", kMrrSub: "+ {0} ממתין לחתימה", kMrrNone: "מחוזים חתומים", kRisk: "הכנסה בסיכון / חודש", kRiskSub: "{0} לקוחות בסיכון", kRiskNone: "אין לקוח בסיכון עם תשלום בתיק",
       srcTitle: "מקורות", srcSheet: "גיליון הכלים", srcDrive: "brains וחוזים ב-Drive", srcSurge: "נתוני SurgeOS עד", srcDfs: "DataForSEO נבדק",
       tUsage: "שימוש (בדיקה אחרונה)", lastUsed: "שימוש אחרון {0}", notChecked: "עוד לא נבדק", srcBrowser: "בדיקת דפדפן שבועית",
+      relNotice: "נמסרה הודעה", relEnded: "הסתיים", relPaused: "מושהה", relPipeline: "בצנרת", unsigned: "לא חתום",
       dFee: "תשלום חודשי", brainFull: "ה-brain נקרא במלואו", brainSummary: "תקציר של קבצי ה-brain העיקריים", sharedBrain: "מכוסה ע\"י ה-brain של {0}",
     },
   };
@@ -506,6 +508,7 @@ tbody tr:hover { background: var(--line-subtle); }
   const SEVL = { high: "sevHigh", medium: "sevMedium", low: "sevLow" };
   const CATL = { contracts: "catContracts", clients: "catClients", performance: "catPerformance", tools: "catTools", agency: "catAgency" };
   const STL = { risk: "stRisk", watch: "stWatch", good: "stGood" };
+  const REL = { notice_given: ["crit", "relNotice"], ended: ["crit", "relEnded"], paused: ["warn", "relPaused"], pipeline: ["info", "relPipeline"] };
   let db = null, user = null, mcp = null, sample = null, myId = null;
   try { const tb = localStorage.getItem("ci.tab"); if (tb) UI.tab = tb; } catch (e) {}
   if (location.hash && /^#[a-z]+$/.test(location.hash) && I18N.en["t" + location.hash[1].toUpperCase() + location.hash.slice(2)]) UI.tab = location.hash.slice(1);
@@ -756,7 +759,7 @@ tbody tr:hover { background: var(--line-subtle); }
     $("#contractTable").innerHTML = sortable([
       { key: "client", label: "cClient", sortVal: (k) => clientName(k.client), render: (k) => `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(k.client)}">${cname(k.client, 18)}</button>${k.isLatest ? "" : `<div class="sub">${esc(t("older"))}</div>`}` },
       { key: "title", label: "cDoc", render: (k) => `${k.url ? `<a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.title)}</a>` : esc(k.title)}<div class="sub">${esc(k.type || "")}${k.scope ? " · " + esc(k.scope) : ""}</div>` },
-      { key: "status", label: "cStatus", render: (k) => `<span class="pill pd ${esc(k.status)}">${esc(t(CS[k.status] || "csUnknown"))}</span>${k.confidence && k.confidence !== "high" ? `<div class="sub">${esc(t("conf", k.confidence))}</div>` : ""}` },
+      { key: "status", label: "cStatus", render: (k) => `<span class="pill pd ${esc(k.status)}">${esc(t(CS[k.status] || "csUnknown"))}</span>${REL[k.relationship] ? ` <span class="pill ${REL[k.relationship][0]}">${esc(t(REL[k.relationship][1]))}</span>` : ""}${k.signed === false ? ` <span class="pill warn">${esc(t("unsigned"))}</span>` : ""}${k.confidence && k.confidence !== "high" ? `<div class="sub">${esc(t("conf", k.confidence))}</div>` : ""}` },
       { key: "endDate", label: "cEnds", render: (k) => `${esc(fmtD(k.endDate))}${k.notes && /infer/i.test(k.notes) ? `<div class="sub">${esc(t("inferred"))}</div>` : ""}` },
       { key: "daysLeft", label: "cDays", num: true, render: (k) => (k.daysLeft == null ? "—" : k.daysLeft) },
       { key: "noticeDeadline", label: "cNotice", render: (k) => (k.noticeDeadline ? esc(fmtD(k.noticeDeadline)) : k.noticeDays ? esc(t("noticeD", k.noticeDays)) : "—") },

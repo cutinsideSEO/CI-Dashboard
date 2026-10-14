@@ -83,14 +83,15 @@ Brains are markdown files in each client's `00. AI Brain` folder: the `AGENTS.md
 
 ## 5. Contracts → `data/contracts.json` (incremental)
 
-1. Search Drive for new or changed agreements since the last run. Search titles and full text for: contract, agreement, SOW, הסכם, חוזה, הצעת מחיר, signed.
-2. Read each one and extract:
-
-```
-{client, displayName, title, url, type, startDate, endDate, termMonths, autoRenew, noticeDays, monthlyFee, totalValue, currency, hoursPerMonth, scope, signed, confidence, notes}
-```
-
-3. Compute `endDate` from start + term when only the term is given, and say so in `notes`.
+1. **Drive.** Search for new or changed agreements since the last run. Search titles and full text for: contract, agreement, SOW, addendum, renewal, PO, הסכם, חוזה, תוספת, הצעת מחיר, signed.
+2. **Gmail (read only).** Search messages since the last run for:
+   - signature completions: "PandaDoc" "completed", "DocuSign" "Completed", "signed", "נחתם";
+   - purchase orders and renewals;
+   - notice or termination: "terminate", "notice", "הפסקת התקשרות", "סיום".
+   Signed versions often exist only as email attachments or links.
+3. Read each new item and extract `{client, displayName, title, url, type, startDate, endDate, termMonths, autoRenew, noticeDays, monthlyFee, totalValue, currency, hoursPerMonth, scope, signed, confidence, notes, relationship}`. `relationship` is `active`, `notice_given`, `ended`, `paused` or `pipeline`, and is set only when there is evidence for it.
+4. Compute `endDate` from start + term when only the term is given, and say so in `notes`.
+5. Keep superseded agreements, and note what replaced them.
 
 ## 5b. Source freshness
 
