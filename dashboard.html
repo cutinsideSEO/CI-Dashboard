@@ -74,6 +74,12 @@ h3 { font-weight: 600; letter-spacing: 0; }
 .btn.primary:hover { opacity: .85; }
 .btn:disabled { opacity: .4; cursor: default; }
 .btn.lang { padding-inline: 14px; font-family: "Heebo", var(--f-body); }
+@media (max-width: 720px) {
+  .bar-row { gap: 10px; padding-block: 10px; flex-wrap: nowrap; }
+  .brand .div, .brand .name, .fresh { display: none; }
+  .brand img { height: 24px; }
+  .btn { padding: 7px 14px; } .btn.primary { font-size: 13px; }
+}
 .tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-block: 0 14px; }
 .tabs::-webkit-scrollbar { display: none; }
 .tab { border: 0; background: var(--tag); color: var(--ink-2); padding: 7px 16px; border-radius: 9999px; cursor: pointer; font: 500 13.5px var(--f-body); white-space: nowrap; display: inline-flex; gap: 8px; align-items: center; transition: background .15s var(--ease); }
@@ -388,7 +394,7 @@ tbody tr:hover { background: var(--line-subtle); }
       <div class="finder"><input id="finder" type="search" list="clientList" data-i18n-ph="findClient" placeholder="Jump to a client…" aria-label="Jump to a client" autocomplete="off"><datalist id="clientList"></datalist></div>
       <button class="btn lang" id="langBtn" lang="he" title="Switch language">עברית</button>
       <button class="btn" id="refreshBtn" hidden data-i18n="refreshNow">Refresh now</button>
-      <button class="btn primary" id="askTop" data-i18n="askOpus">Ask Opus</button>
+      <button class="btn primary" id="askTop" data-i18n="askOpus">Ask Opus 5.5</button>
     </div>
     <nav class="tabs" role="tablist" id="tabs">
       <button class="tab" role="tab" data-tab="overview" aria-selected="true"><span data-i18n="tOverview">Overview</span></button>
@@ -396,7 +402,7 @@ tbody tr:hover { background: var(--line-subtle); }
       <button class="tab" role="tab" data-tab="clients"><span data-i18n="tClients">Clients</span> <span class="ct" id="ct-clients">0</span></button>
       <button class="tab" role="tab" data-tab="contracts"><span data-i18n="tContracts">Contracts</span> <span class="ct" id="ct-contracts">0</span></button>
       <button class="tab" role="tab" data-tab="tools"><span data-i18n="tTools">Tools</span> <span class="ct" id="ct-tools">0</span></button>
-      <button class="tab" role="tab" data-tab="ask"><span data-i18n="askOpus">Ask Opus</span></button>
+      <button class="tab" role="tab" data-tab="ask"><span data-i18n="askOpus">Ask Opus 5.5</span></button>
     </nav>
   </div>
 </div>
@@ -516,7 +522,7 @@ tbody tr:hover { background: var(--line-subtle); }
   <section class="panel" data-panel="ask" hidden>
     <div class="card chat">
       <div>
-        <div class="card-h"><h2 data-i18n="askOpus">Ask Opus</h2><span class="sub" id="askSub" data-i18n="askSub">Answers from the dashboard data, with live lookups in SurgeOS and Google Drive when needed.</span></div>
+        <div class="card-h"><h2 data-i18n="askOpus">Ask Opus 5.5</h2><span class="sub" id="askSub" data-i18n="askSub">Answers from the dashboard data, with live lookups in SurgeOS and Google Drive when needed.</span></div>
         <div class="suggest" id="suggest"></div>
       </div>
       <div class="msgs" id="msgs"></div>
@@ -538,7 +544,7 @@ tbody tr:hover { background: var(--line-subtle); }
   // ---------------------------------------------------------------- i18n
   const I18N = {
     en: {
-      appName: "Control Room", waiting: "Waiting for data…", refreshNow: "Refresh now", askOpus: "Ask Opus",
+      appName: "Control Room", waiting: "Waiting for data…", refreshNow: "Refresh now", askOpus: "Ask {M}",
       tOverview: "Overview", tAlerts: "Alerts", tClients: "Clients", tContracts: "Contracts", tTools: "Tools",
       briefEyebrow: "Agency briefing", briefEmptyTitle: "The briefing appears after the first refresh",
       briefEmptyText: "Twice a day a routine reads every client brain and contract in Google Drive, the tools sheet and SurgeOS performance data, then writes what needs attention here.",
@@ -565,7 +571,7 @@ tbody tr:hover { background: var(--line-subtle); }
       alertsN: "{0} alert", alertsNs: "{0} alerts", clicks: "clicks", d28: "28 days",
       fAll: "All", fAnySev: "Any severity", fShowAcked: "Show acknowledged", alertsTotal: "{0} total · {1} acknowledged",
       fNoContract: "No contract", noClients: "No clients match.",
-      dBrain: "From the client brain", dBrainUpdated: "Brain last updated {0}", dNoBrain: "No client brain found in Drive for this client yet.", dAskAbout: "Ask Opus about {0}",
+      dBrain: "From the client brain", dBrainUpdated: "Brain last updated {0}", dNoBrain: "No client brain found in Drive for this client yet.", dAskAbout: "Ask {M} about {0}",
       dOrganic: "Organic search", d7: "Last 7 days", d28l: "Last 28 days", d90: "Last 90 days", pos: "pos", dAlerts: "Alerts", dWins: "Wins", dOkrs: "OKRs", dDelivery: "Delivery",
       dOpen: "Open tasks", dOverdue: "Overdue", dHours: "Hours used / budget", dContract: "Contract", dNoContract: "No contract found in Drive.", dFacts: "Key facts", dUpcoming: "Coming up", dPeople: "People",
       dDocs: "Brain documents", dBrainFolder: "Open the brain folder", dClientFolder: "Client folder", close: "Close", autoRenews: "auto-renews", noticeD: "{0}d notice", perMo: "/mo",
@@ -577,10 +583,10 @@ tbody tr:hover { background: var(--line-subtle); }
       paying: "Paying", notPaying: "Not paying", on: "On", off: "Off", lapsed: "lapsed {0}d ago", projected: "projected", noTools: "No tools match.",
       otherTools: "{0} other tools", spendTotal: "Total {0} per year across {1} paid tools.", spendTop: "{0} alone is {1}% of it.", noCost: "No cost data.", checked: "Checked {0} via {1}", noLive: "No live checks yet.",
       justNow: "just now", minAgo: "{0} min ago", hAgo: "{0} h ago", dAgo: "{0} d ago",
-      thinking: "Thinking…", who: "Opus", unavailable: "Asking Opus needs this page open inside Claude while signed in.",
-      eNotGranted: "Claude access wasn't allowed for this page, so Opus can't answer here.", eDisabled: "Claude isn't available for this account.", eRate: "You've hit a usage limit. Try again in a few minutes.",
-      eSession: "Your session expired. Sign in to Claude again.", eTooLarge: "The question plus the dashboard data is too large. Ask about fewer clients at once.", eRefused: "Opus declined that request. Rephrase it.",
-      eCancelled: "Stopped.", eOther: "Something interrupted the answer. Send it again.", truncated: "The answer was cut short. Ask a narrower question for the rest.", tierNote: "Answered by the {0} model tier (Opus wasn't available for this account).",
+      thinking: "Thinking…", who: "{M}", unavailable: "Asking {M} needs this page open inside Claude while signed in.",
+      eNotGranted: "Claude access wasn't allowed for this page, so {M} can't answer here.", eDisabled: "Claude isn't available for this account.", eRate: "You've hit a usage limit. Try again in a few minutes.",
+      eSession: "Your session expired. Sign in to Claude again.", eTooLarge: "The question plus the dashboard data is too large. Ask about fewer clients at once.", eRefused: "{M} declined that request. Rephrase it.",
+      eCancelled: "Stopped.", eOther: "Something interrupted the answer. Send it again.", truncated: "The answer was cut short. Ask a narrower question for the rest.", tierNote: "Answered by the {0} model tier ({M} wasn't available for this account).",
       askAlert: "Help me handle this alert: \"{0}\" — {1}. What's the context, how serious is it, and what exactly should I do next?",
       askClient: "Give me a full status brief on {0}: relationship health, performance and why, contract status, open risks, and the 3 things we should do next.",
       sugg: ["What are the 5 most important things I should deal with this week?", "Which contracts end in the next 90 days and what's the renewal risk for each?", "Which clients look at risk of churning, based on the brains and the performance data?", "Where are we overspending on tools? What could we cancel or downgrade?", "Why did the clients with the biggest click drops this month drop? Check SurgeOS."],
@@ -604,7 +610,7 @@ tbody tr:hover { background: var(--line-subtle); }
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
       teamTitle: "Team news", teamSub: "From #all-cut-inside and the team channels in Slack, last 14 days", whoOut: "Out of office", dSlack: "From Slack", slackLast: "Client last wrote {0}", slackMsgs: "{0} messages in 30 days", slackAsk: "Open ask", noClientSlack: "No messages from the client in this channel in 30 days.",
       newB: "New", openFor: "open {0}d", chSince: "Since the {0} refresh:", chNew: "{0} new", chRes: "{0} resolved", chShow: "Show resolved", chHide: "Hide resolved", fNew: "New since last refresh",
-      aheadTitle: "Client meetings this week", aheadSub: "From Google Calendar and the client brains. Prep asks Opus for a one-page brief.", prep: "Prep", internalM: "internal", approxM: "this week", allDay: "—", fromBrain: "from the brain",
+      aheadTitle: "Client meetings this week", aheadSub: "From Google Calendar and the client brains. Prep asks {M} for a one-page brief.", prep: "Prep", internalM: "internal", approxM: "this week", allDay: "—", fromBrain: "from the brain",
       askPrep: "Prepare me for this meeting: {0} — \"{1}\" on {2}. Give a one-page brief: where the relationship stands, what we promised and still owe, what changed in performance since the last meeting and why, contract and commercial points, risks to raise or avoid, and a suggested agenda with 3-5 points. Use the client brain and recent meetings; look up SurgeOS if needed.",
       dfsTitle: "DataForSEO spend", dfsSub: "Rebuilt from DataForSEO's own task log (last 6 months), as of {0}", dfsBal: "Balance", dfsLasts: "lasts about {0}–{1} days at the recent pace",
       dfs30: "Last 30 days", dfsAvg: "{0}/day on average · {1}/day in the last 7 days", dfsMonth: "This month so far", dfsProj: "on pace for {0} this month",
@@ -622,7 +628,7 @@ tbody tr:hover { background: var(--line-subtle); }
       dFee: "Monthly fee", brainFull: "Whole brain read", brainSummary: "Summary of the brain's main files", sharedBrain: "Covered by the {0} brain",
     },
     he: {
-      appName: "חדר בקרה", waiting: "ממתין לנתונים…", refreshNow: "רענון עכשיו", askOpus: "שאל את Opus",
+      appName: "חדר בקרה", waiting: "ממתין לנתונים…", refreshNow: "רענון עכשיו", askOpus: "שאל את {M}",
       tOverview: "סקירה", tAlerts: "התראות", tClients: "לקוחות", tContracts: "חוזים", tTools: "כלים",
       briefEyebrow: "תדריך סוכנות", briefEmptyTitle: "התדריך יופיע אחרי הרענון הראשון",
       briefEmptyText: "פעמיים ביום שגרה קוראת את כל ה-client brains והחוזים ב-Google Drive, את גיליון הכלים ואת נתוני הביצועים מ-SurgeOS, וכותבת כאן מה דורש תשומת לב.",
@@ -649,7 +655,7 @@ tbody tr:hover { background: var(--line-subtle); }
       alertsN: "התראה אחת", alertsNs: "{0} התראות", clicks: "קליקים", d28: "28 יום",
       fAll: "הכול", fAnySev: "כל החומרות", fShowAcked: "הצג גם שטופלו", alertsTotal: "{0} סה\"כ · {1} טופלו",
       fNoContract: "ללא חוזה", noClients: "אין לקוחות שמתאימים.",
-      dBrain: "מה-client brain", dBrainUpdated: "ה-brain עודכן לאחרונה ב-{0}", dNoBrain: "עדיין לא נמצא client brain ב-Drive ללקוח הזה.", dAskAbout: "שאל את Opus על {0}",
+      dBrain: "מה-client brain", dBrainUpdated: "ה-brain עודכן לאחרונה ב-{0}", dNoBrain: "עדיין לא נמצא client brain ב-Drive ללקוח הזה.", dAskAbout: "שאל את {M} על {0}",
       dOrganic: "חיפוש אורגני", d7: "7 ימים אחרונים", d28l: "28 ימים אחרונים", d90: "90 ימים אחרונים", pos: "מיקום", dAlerts: "התראות", dWins: "הצלחות", dOkrs: "OKRs", dDelivery: "ביצוע",
       dOpen: "משימות פתוחות", dOverdue: "באיחור", dHours: "שעות בפועל / תקציב", dContract: "חוזה", dNoContract: "לא נמצא חוזה ב-Drive.", dFacts: "עובדות מפתח", dUpcoming: "בקרוב", dPeople: "אנשי קשר",
       dDocs: "מסמכי ה-brain", dBrainFolder: "לתיקיית ה-brain", dClientFolder: "תיקיית הלקוח", close: "סגור", autoRenews: "מתחדש אוטומטית", noticeD: "הודעה מוקדמת {0} ימים", perMo: "/חודש",
@@ -661,10 +667,10 @@ tbody tr:hover { background: var(--line-subtle); }
       paying: "בתשלום", notPaying: "לא בתשלום", on: "פעיל", off: "כבוי", lapsed: "פג לפני {0} ימים", projected: "משוער", noTools: "אין כלים שמתאימים.",
       otherTools: "{0} כלים נוספים", spendTotal: "סה\"כ {0} לשנה על {1} כלים בתשלום.", spendTop: "{0} לבדו הוא {1}% מזה.", noCost: "אין נתוני עלות.", checked: "נבדק {0} דרך {1}", noLive: "אין עדיין בדיקות חיות.",
       justNow: "עכשיו", minAgo: "לפני {0} דק'", hAgo: "לפני {0} שע'", dAgo: "לפני {0} ימים",
-      thinking: "חושב…", who: "Opus", unavailable: "כדי לשאול את Opus צריך לפתוח את הדף בתוך Claude, מחוברים.",
-      eNotGranted: "לא ניתנה לדף הרשאה ל-Claude, ולכן Opus לא יכול לענות כאן.", eDisabled: "Claude לא זמין בחשבון הזה.", eRate: "הגעתם למגבלת שימוש. נסו שוב בעוד כמה דקות.",
-      eSession: "פג תוקף ההתחברות. התחברו שוב ל-Claude.", eTooLarge: "השאלה יחד עם נתוני הדשבורד גדולה מדי. שאלו על פחות לקוחות בבת אחת.", eRefused: "Opus סירב לבקשה. נסחו אותה מחדש.",
-      eCancelled: "נעצר.", eOther: "התשובה נקטעה. שלחו שוב.", truncated: "התשובה נקטעה. שאלו שאלה ממוקדת יותר כדי לקבל את ההמשך.", tierNote: "ענה מודל בדרגת {0} (Opus לא היה זמין לחשבון הזה).",
+      thinking: "חושב…", who: "{M}", unavailable: "כדי לשאול את {M} צריך לפתוח את הדף בתוך Claude, מחוברים.",
+      eNotGranted: "לא ניתנה לדף הרשאה ל-Claude, ולכן {M} לא יכול לענות כאן.", eDisabled: "Claude לא זמין בחשבון הזה.", eRate: "הגעתם למגבלת שימוש. נסו שוב בעוד כמה דקות.",
+      eSession: "פג תוקף ההתחברות. התחברו שוב ל-Claude.", eTooLarge: "השאלה יחד עם נתוני הדשבורד גדולה מדי. שאלו על פחות לקוחות בבת אחת.", eRefused: "{M} סירב לבקשה. נסחו אותה מחדש.",
+      eCancelled: "נעצר.", eOther: "התשובה נקטעה. שלחו שוב.", truncated: "התשובה נקטעה. שאלו שאלה ממוקדת יותר כדי לקבל את ההמשך.", tierNote: "ענה מודל בדרגת {0} ({M} לא היה זמין לחשבון הזה).",
       askAlert: "עזור לי לטפל בהתראה הזו: \"{0}\" — {1}. מה ההקשר, כמה זה חמור, ומה בדיוק לעשות עכשיו?",
       askClient: "תן לי תמונת מצב מלאה על {0}: מצב היחסים, ביצועים ולמה, מצב החוזה, סיכונים פתוחים, ו-3 הדברים שצריך לעשות עכשיו.",
       sugg: ["מה 5 הדברים הכי חשובים שאני צריך לטפל בהם השבוע?", "אילו חוזים מסתיימים ב-90 הימים הקרובים ומה סיכון החידוש בכל אחד?", "אילו לקוחות נראים בסיכון לעזוב, לפי ה-brains ונתוני הביצועים?", "איפה אנחנו מוציאים יותר מדי על כלים? מה אפשר לבטל או להוריד מסלול?", "למה ירדו הקליקים אצל הלקוחות עם הירידה הכי גדולה החודש? תבדוק ב-SurgeOS."],
@@ -688,7 +694,7 @@ tbody tr:hover { background: var(--line-subtle); }
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
       teamTitle: "חדשות הצוות", teamSub: "מ-#all-cut-inside ומערוצי הצוות ב-Slack, 14 הימים האחרונים", whoOut: "לא במשרד", dSlack: "מ-Slack", slackLast: "הלקוח כתב לאחרונה {0}", slackMsgs: "{0} הודעות ב-30 יום", slackAsk: "בקשה פתוחה", noClientSlack: "אין הודעות מהלקוח בערוץ הזה ב-30 יום.",
       newB: "חדש", openFor: "פתוח {0} ימים", chSince: "מאז הרענון של {0}:", chNew: "{0} חדשות", chRes: "{0} נסגרו", chShow: "הצג מה נסגר", chHide: "הסתר", fNew: "חדשות מאז הרענון הקודם",
-      aheadTitle: "פגישות לקוחות השבוע", aheadSub: "מ-Google Calendar ומה-client brains. \"הכנה\" מבקש מ-Opus תדריך של עמוד אחד.", prep: "הכנה", internalM: "פנימית", approxM: "השבוע", allDay: "—", fromBrain: "מה-brain",
+      aheadTitle: "פגישות לקוחות השבוע", aheadSub: "מ-Google Calendar ומה-client brains. \"הכנה\" מבקש מ-{M} תדריך של עמוד אחד.", prep: "הכנה", internalM: "פנימית", approxM: "השבוע", allDay: "—", fromBrain: "מה-brain",
       askPrep: "תכין אותי לפגישה הזו: {0} — \"{1}\" ב-{2}. תן תדריך של עמוד אחד: איפה עומדים היחסים, מה הבטחנו ועוד חייבים, מה השתנה בביצועים מאז הפגישה הקודמת ולמה, נקודות חוזה ומסחריות, סיכונים שכדאי להעלות או להימנע מהם, ואג'נדה מוצעת של 3-5 נקודות. תשתמש ב-client brain ובפגישות האחרונות; תבדוק ב-SurgeOS אם צריך.",
       dfsTitle: "הוצאות DataForSEO", dfsSub: "שוחזר מיומן המשימות של DataForSEO (6 חודשים אחרונים), נכון ל-{0}", dfsBal: "יתרה", dfsLasts: "מספיקה לכ-{0}–{1} ימים בקצב האחרון",
       dfs30: "30 הימים האחרונים", dfsAvg: "{0} ליום בממוצע · {1} ליום ב-7 הימים האחרונים", dfsMonth: "החודש עד עכשיו", dfsProj: "בקצב של {0} לחודש",
@@ -708,7 +714,10 @@ tbody tr:hover { background: var(--line-subtle); }
   };
   let LANG = "en";
   try { if (localStorage.getItem("ci.lang") === "he") LANG = "he"; } catch (e) {}
-  const t = (k, ...v) => { let s = (I18N[LANG][k] ?? I18N.en[k] ?? k); return typeof s === "string" ? s.replace(/\{(\d)\}/g, (_, i) => v[i] ?? "") : s; };
+  // the assistant is named after the model the page asks for; change both together
+  const MODEL = "claude-opus-5-5", MODEL_LABEL = "Opus 5.5";
+  const fill = (s, v) => s.replace(/\{M\}/g, MODEL_LABEL).replace(/\{(\d)\}/g, (_, i) => v[i] ?? "");
+  const t = (k, ...v) => { const s = (I18N[LANG][k] ?? I18N.en[k] ?? k); return typeof s === "string" ? fill(s, v) : Array.isArray(s) ? s.map((x) => fill(x, [])) : s; };
   const L = (o, f) => (LANG === "he" && o?.he?.[f]) || o?.[f];   // localized data field with English fallback
   const LOC = () => (LANG === "he" ? "he-IL" : "en-GB");
 
@@ -1210,7 +1219,6 @@ c) otherwise print the JSON in one code block at the end, so I can paste it to t
   }
 
   // ---------------------------------------------------------------- Ask Opus
-  const MODEL = "claude-opus-5-5";
   const SURGE_TOOLS = ["portfolio_overview", "get_weekly_digest", "get_client_overview", "gsc_timeseries", "gsc_breakdown", "get_tasks", "get_okrs", "get_peec_trend", "search_gsc_queries", "search_gsc_pages", "get_annotations"];
   const chat = { turns: [], ctl: null, busy: false };
   let sampleChecked = false;
