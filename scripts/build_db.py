@@ -471,6 +471,13 @@ def build():
             revenue["atRisk"][cur] = revenue["atRisk"].get(cur, 0) + fee
             revenue["clientsAtRisk"] += 1
 
+    # tool checks that don't match a sheet row (e.g. a Google Cloud billing account found in email) still raise alerts
+    for x in (load("toolchecks.json", {}) or {}).get("items", []) if isinstance(load("toolchecks.json", {}), dict) else []:
+        if slug(x.get("tool") or "") not in tools and x.get("status") in ("low", "critical"):
+            alert(f"tool-{slug(x.get('tool'))}-check", "high" if x["status"] == "critical" else "medium", "tools",
+                  f"{x.get('tool')}: {x.get('headline')}", x.get("detail") or "", source=x.get("source") or x.get("method"))
+            a = alerts[slug(f"tool-{slug(x.get('tool'))}-check")]
+            a["he"] = {"title": he(a["title"]), "detail": he(a["detail"])}
     tcl = load("toolchecks.json", {})
     last_tc = iso((tcl or {}).get("checkedAt")) if isinstance(tcl, dict) else None
     if not last_tc or (TODAY - last_tc).days > 9:
