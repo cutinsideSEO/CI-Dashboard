@@ -249,7 +249,7 @@ def build():
         for extra in (b.get("surgeosClients") or [])[1:] + (b.get("relatedSurgeosClients") or []):
             ek = match_key(extra, clients.keys())
             if ek and ek != key and "brain" not in clients[ek]:
-                clients[ek]["brain"] = dict(b, issues=[], displayName=None, sharedBrainOf=b.get("displayName") or key,
+                clients[ek]["brain"] = dict(b, issues=[], displayName=None, sharedBrainOf=b.get("displayName") or key, primaryKey=key,
                                             summary=f"Covered by the {b.get('displayName') or key} brain. " + (b.get("summary") or ""))
     for i, a in enumerate((agency_brain or {}).get("issues") or []):
         alert(f"agency-{slug(a.get('title', i))[:40]}", a.get("severity", "medium"), "agency", f"Agency: {a.get('title')}",
@@ -262,15 +262,25 @@ def build():
         key = match_key(k.get("client") or k.get("displayName"), clients.keys()) or k.get("client")
         if not key or key in NOT_CLIENTS:  # unmatched entries with no client are finished one-off projects
             continue
+        if k.get("type") == "other" and not k.get("url") and not k.get("monthlyFee"):
+            continue  # audit stubs such as "No agreement found" are not contracts
         cmap.setdefault(key, []).append(k)
         clients.setdefault(key, {"client": key})
 
     contract_docs = {}
     for key, lst in cmap.items():
-        # latest agreement = most recent start (an amendment supersedes the trial it replaced)
-        lst.sort(key=lambda k: (k.get("startDate") or k.get("endDate") or "", k.get("endDate") or "9999"), reverse=True)
+        # governing agreement: not ended, a real agreement (not a PO/quote/email), not pipeline, most recent start.
+        # A client can hold several at once (Yad2 SEO + GEO); the rest are listed as supporting documents.
+        def rank(k):
+            active = k.get("relationship") == "active"
+            start = k.get("startDate") or k.get("endDate") or ("9999" if active else "")  # an undated active arrangement is the current one
+            return (k.get("relationship") not in ("ended", "notice_given"), active, k.get("type") not in ("PO", "quote", "other"),
+                    k.get("relationship") != "pipeline", start, k.get("endDate") or "9999")
+        lst.sort(key=rank, reverse=True)
         for i, k in enumerate(lst):
             cid = slug(f"{key}-{k.get('title') or i}")
+            if cid in contract_docs:
+                cid = slug(f"{cid[:190]}-{i}")
             end = iso(k.get("endDate"))
             nd = k.get("noticeDays")
             notice = end - dt.timedelta(days=int(nd)) if end and nd else None
@@ -290,6 +300,13 @@ def build():
                 doc["status"] = "ok"
             contract_docs[cid] = doc
         latest = next(d for d in contract_docs.values() if d["client"] == key and d["isLatest"])
+        for d in contract_docs.values():
+            if d["client"] == key and not d["isLatest"] and d.get("relationship") in ("ended", "notice_given") \
+                    and d.get("type") not in ("other", "PO", "quote") and latest.get("relationship") not in ("ended", "notice_given") \
+                    and (iso(d.get("endDate")) is None or (TODAY - iso(d.get("endDate"))).days < 120) and (d.get("startDate") or "") >= "2026":
+                alert(f"contract-{key}-{slug(d.get('title') or 'side')[:30]}-ended", "medium", "contracts",
+                      f"{DISPLAY.get(key, key)}: part of the engagement ended",
+                      f"\"{(d.get('title') or '').split(' (')[0].split(' - ')[0]}\" has ended. The main agreement continues.", client=key, source=d.get("title"), source_url=d.get("url"))
         clients[key]["contract"] = {k2: latest.get(k2) for k2 in (
             "title", "url", "type", "startDate", "endDate", "daysLeft", "status", "autoRenew", "noticeDays",
             "noticeDeadline", "monthlyFee", "totalValue", "currency", "hoursPerMonth", "confidence", "relationship", "signed")}
@@ -318,6 +335,10 @@ def build():
         elif rel == "paused":
             alert(f"contract-{key}-paused", "medium", "contracts", f"{disp}: engagement paused",
                   latest.get("notes") or "See the source document.", client=key, source=latest.get("title"), source_url=url)
+        if latest.get("signed") is None and latest.get("relationship") == "active":
+            alert(f"contract-{key}-unverified", "low", "contracts", f"{disp}: no signed agreement on file",
+                  f"Work runs on \"{latest.get('title')}\"{fee_s}, but no signed copy was found in Drive or Gmail. Get one on file.",
+                  client=key, source=latest.get("title"), source_url=url)
         if latest.get("signed") is False:
             alert(f"contract-{key}-unsigned", "medium", "contracts", f"{disp}: latest agreement not signed",
                   f"\"{latest.get('title')}\"{fee_s} is still unsigned. Get it signed or confirm which terms apply.",
@@ -327,6 +348,11 @@ def build():
             alert(f"contract-{key}-notice", "high", "contracts", f"{disp}: notice deadline {nd:%d %b %Y}",
                   f"{latest.get('noticeDays')} days' notice before the {end:%d %b %Y} end date. After this the contract terms lock in.",
                   client=key, due=nd, source=latest.get("title"), source_url=url)
+
+    for key, c in clients.items():
+        pk = (c.get("brain") or {}).get("primaryKey")
+        if not c.get("contract") and pk and clients.get(pk, {}).get("contract"):
+            c["contract"] = dict(clients[pk]["contract"], sharedFrom=pk)
 
     client_docs = {}
     for key, c in clients.items():
@@ -406,12 +432,12 @@ def build():
     for cd in client_docs.values():
         k = cd.get("contract") or {}
         fee, cur = k.get("monthlyFee"), k.get("currency") or "ILS"
-        ident = k.get("url") or k.get("title")
-        if not fee or not ident or ident in seen or k.get("status") == "expired" or k.get("relationship") in ("ended", "notice_given"):
+        ident = (k.get("url"), k.get("title"))  # several agreements can cite the same source doc (e.g. a handover summary)
+        if not fee or k.get("sharedFrom") or ident in seen or k.get("status") == "expired" or k.get("relationship") in ("ended", "notice_given"):
             continue
         seen.add(ident)
-        signed = next((x.get("signed") for x in contract_docs.values() if (x.get("url") or x.get("title")) == ident), None)
-        bucket = "pipeline" if signed is False else "active"
+        signed = k.get("signed")
+        bucket = "pipeline" if k.get("relationship") == "pipeline" or (signed is False and not k.get("relationship")) else "active"
         revenue[bucket][cur] = revenue[bucket].get(cur, 0) + fee
         if bucket == "active" and cd["status"] == "risk":
             revenue["atRisk"][cur] = revenue["atRisk"].get(cur, 0) + fee
