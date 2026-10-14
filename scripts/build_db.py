@@ -342,8 +342,8 @@ def build():
             "toolsSheet": "https://docs.google.com/spreadsheets/d/1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU/edit",
             "surgeos": "SurgeOS (Search Console BigQuery mirror, GA4, Peec)", "drive": "Google Drive client folders",
         },
-        "schedule": os.environ.get("SCHEDULE", "Twice a day, 07:00 and 15:00 Israel time"),
-        "triggerId": os.environ.get("TRIGGER_ID"),
+        "schedule": os.environ.get("SCHEDULE", "Twice a day, ~07:00 and ~15:00 Israel time"),
+        "triggerId": os.environ.get("TRIGGER_ID", "trig_013SgkySAGVthbCU99RnjsMt"),
     }
 
     # ---- write: a handful of snapshot documents (each well under the 256 KiB doc cap)

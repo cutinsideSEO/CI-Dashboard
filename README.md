@@ -16,13 +16,13 @@ The **Ask Opus** tab sends questions to Claude Opus along with the dashboard dat
 
 ## How it updates
 
-A Claude Code routine runs twice a day (07:00 and 15:00 Israel time) and follows [REFRESH.md](REFRESH.md):
+The "Control Room refresh" routine (`trig_013SgkySAGVthbCU99RnjsMt`) runs twice a day at 06:56 and 14:56 Israel time and follows [REFRESH.md](REFRESH.md):
 
 1. It re-reads the sources (the tools sheet, Drive brains and contracts, SurgeOS, live tool checks).
 2. `scripts/build_db.py` merges them into documents and computes the alerts.
 3. It writes those documents to the artifact's database, along with a fresh executive briefing.
 
-The page itself never changes. Data lives in the artifact database (`meta`, `briefing`, `clients`, `contracts`, `tools`, `alerts`). Acknowledgements live in `acks` and are kept across refreshes.
+The page itself never changes. Data lives in the artifact database: `meta/state`, `briefing/latest`, `snapshot/{clients,contracts,tools,alerts}` and `sources/*`. Acknowledgements live in `acks` and are kept across refreshes.
 
 ## Local build
 

@@ -3,7 +3,7 @@
 This is what the twice-daily routine does. A person can follow it too. It is read-only towards every source (Drive, SurgeOS, the tools sheet). The only thing it writes is the dashboard's own artifact database.
 
 - Artifact: https://claude.ai/artifact/5AxMQ4gPXYVmeQWk1Kzq45
-- Repo: `cutinsideseo/ci-dashboard`
+- Repo: `cutinsideSEO/CI-Dashboard`
 - Work directory: the repo root. Put inputs in `data/`. The build writes to `out/`.
 
 ## 0. Load the previous state
