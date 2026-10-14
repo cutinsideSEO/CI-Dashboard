@@ -4,11 +4,18 @@ Most tools in the Tools Database have no API this project can reach. Once a week
 
 This runs on the owner's computer, in the Claude desktop app with Claude in Chrome. The cloud session that refreshes the dashboard has no browser with those logins.
 
-## Set it up once
+## Set it up once (about 3 minutes)
 
-In the Claude desktop app, create a scheduled task that runs weekly (for example Sunday 08:00) with this prompt:
+1. On your computer, open the Claude desktop app. Make sure Claude in Chrome is connected, and that Chrome is signed in to the tools.
+2. Open the Control Room, go to **Tools → Weekly browser check** and click **Copy the task prompt**.
+3. In the desktop app, create a scheduled task that runs weekly (for example Sunday 08:00) and paste the prompt.
+4. Run it once now to check that it works. Results show up straight away in the same card and in the **Usage** column.
 
-> Run the weekly tool check from BROWSER-CHECK.md in github.com/cutinsideSEO/CI-Dashboard (branch claude/ecstatic-bardeen-rnln3h) for the Cut Inside Control Room, https://claude.ai/artifact/5AxMQ4gPXYVmeQWk1Kzq45. Use Claude in Chrome with my signed-in accounts. Read only: never change settings, buy, upgrade, cancel, or type passwords.
+The list of tools to check lives in the dashboard database (`sources/toolchecks` → `plan`), built from the Tools Database sheet:
+- **30 paid tools** to read;
+- **5 tools to confirm cancelled:** Glimpse, V0, heygen, Ceyo and Canva are marked "not paying" in the sheet but still have auto-renew on.
+
+The full procedure is in `.claude/skills/control-room-tool-check/SKILL.md`.
 
 ## Rules
 

@@ -241,6 +241,11 @@ tbody tr:hover { background: var(--line-subtle); }
 .note { font-size: 12px; color: var(--ink-3); }
 .toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--raised); color: var(--ink); border: 1px solid var(--line); box-shadow: var(--shadow-lg); padding: 10px 18px; border-radius: 9999px; z-index: 60; font-size: 13px; max-width: calc(100% - 32px); }
 .live { display: grid; gap: 10px; }
+.wc { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; }
+.wc ol { margin: 0; padding-inline-start: 20px; color: var(--ink-2); display: grid; gap: 6px; }
+.wc .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.wc pre { white-space: pre-wrap; background: var(--tag); border-radius: 8px; padding: 12px 14px; font: 12px/1.6 ui-monospace, Menlo, monospace; color: var(--ink-2); margin: 10px 0 0; max-height: 180px; overflow: auto; direction: ltr; text-align: left; }
+@media (max-width: 860px) { .wc { grid-template-columns: minmax(0, 1fr); } }
 .lv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 16px; border-radius: 12px; background: var(--tag); }
 .lv .v { font: 700 28px var(--f-display); color: var(--accent-text); }
 .ltr { direction: ltr; unicode-bidi: isolate; }
@@ -339,6 +344,10 @@ tbody tr:hover { background: var(--line-subtle); }
       </div>
     </div>
     <div class="card">
+      <div class="card-h"><h2 data-i18n="wcTitle">Weekly browser check</h2><span class="sub" id="wcSub"></span></div>
+      <div class="card-b"><div id="weeklyCheck"></div></div>
+    </div>
+    <div class="card">
       <div class="card-h"><h2 data-i18n="allTools">All tools</h2><span class="sub" id="toolsSub"></span><span class="spacer"></span><a href="https://docs.google.com/spreadsheets/d/1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU/edit" target="_blank" rel="noopener" data-i18n="openSheet">Open the sheet</a></div>
       <div class="card-b"><div class="filters" id="toolFilters" style="margin-bottom:10px"></div><div class="tbl-wrap"><table id="toolTable"></table></div></div>
     </div>
@@ -423,6 +432,9 @@ tbody tr:hover { background: var(--line-subtle); }
       srcTitle: "Sources", srcSheet: "Tools sheet", srcDrive: "Drive brains and contracts", srcSurge: "SurgeOS data through", srcDfs: "DataForSEO checked",
       tUsage: "Usage (last check)", lastUsed: "last used {0}", notChecked: "Not checked yet", srcBrowser: "Weekly browser check",
       relNotice: "Notice given", relEnded: "Ended", relPaused: "Paused", relPipeline: "Pipeline", unsigned: "Unsigned",
+      wcTitle: "Weekly browser check", wcNever: "Not run yet", wcLast: "Last run {0}", wcPlan: "{0} tools to check · {1} to confirm cancelled",
+      wcSteps: ["Open the Claude desktop app on your computer, with Claude in Chrome connected and signed in to the tools.", "Create a scheduled task that runs weekly (e.g. Sunday 08:00) and paste the prompt below.", "Run it once now. Results appear here and in the Usage column as soon as it finishes."],
+      wcCopy: "Copy the task prompt", wcCopied: "Prompt copied. Paste it into a scheduled task in the Claude desktop app.", wcCopyFail: "Couldn't copy. Select the text and copy it.", wcCancel: "Confirm cancelled:", wcResults: "{0} checked · {1} need attention",
       dFee: "Monthly fee", brainFull: "Whole brain read", brainSummary: "Summary of the brain's main files", sharedBrain: "Covered by the {0} brain",
     },
     he: {
@@ -480,6 +492,9 @@ tbody tr:hover { background: var(--line-subtle); }
       srcTitle: "מקורות", srcSheet: "גיליון הכלים", srcDrive: "brains וחוזים ב-Drive", srcSurge: "נתוני SurgeOS עד", srcDfs: "DataForSEO נבדק",
       tUsage: "שימוש (בדיקה אחרונה)", lastUsed: "שימוש אחרון {0}", notChecked: "עוד לא נבדק", srcBrowser: "בדיקת דפדפן שבועית",
       relNotice: "נמסרה הודעה", relEnded: "הסתיים", relPaused: "מושהה", relPipeline: "בצנרת", unsigned: "לא חתום",
+      wcTitle: "בדיקת דפדפן שבועית", wcNever: "עוד לא רצה", wcLast: "רצה לאחרונה {0}", wcPlan: "{0} כלים לבדיקה · {1} לווידוא ביטול",
+      wcSteps: ["פותחים את אפליקציית Claude לדסקטופ במחשב, עם Claude in Chrome מחובר ומחובר לכלים.", "יוצרים משימה מתוזמנת שבועית (למשל ראשון 08:00) ומדביקים את הפרומפט שלמטה.", "מריצים פעם אחת עכשיו. התוצאות יופיעו כאן ובעמודת השימוש מיד בסיום."],
+      wcCopy: "העתקת הפרומפט למשימה", wcCopied: "הפרומפט הועתק. הדביקו אותו במשימה מתוזמנת באפליקציית Claude לדסקטופ.", wcCopyFail: "ההעתקה נכשלה. סמנו את הטקסט והעתיקו.", wcCancel: "לוודא ביטול:", wcResults: "{0} נבדקו · {1} דורשים טיפול",
       dFee: "תשלום חודשי", brainFull: "ה-brain נקרא במלואו", brainSummary: "תקציר של קבצי ה-brain העיקריים", sharedBrain: "מכוסה ע\"י ה-brain של {0}",
     },
   };
@@ -489,7 +504,7 @@ tbody tr:hover { background: var(--line-subtle); }
   const L = (o, f) => (LANG === "he" && o?.he?.[f]) || o?.[f];   // localized data field with English fallback
   const LOC = () => (LANG === "he" ? "he-IL" : "en-GB");
 
-  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {}, icons: {}, toolchecks: {}, toolcheckAt: null };
+  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {}, icons: {}, toolchecks: {}, toolcheckAt: null, toolPlan: [] };
   const TILE = ["#e0f4f4", "#fad05d", "#f7caf1", "#c5e9e6", "#7dcdc7", "#f3d9c6"];
   const logo = (key, size = 20) => {
     const c = S.clients.find((x) => x.key === key), dom = c?.domain, icon = dom && S.icons[dom];
@@ -769,7 +784,24 @@ tbody tr:hover { background: var(--line-subtle); }
   }
   const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const bcOf = (x) => x.browserCheck || S.toolchecks[slug(x.name)];
+  const WC_PROMPT = `Run the Control Room weekly tool check.
+Use Claude in Chrome with my signed-in accounts. Strictly read only: never change settings, plans or seats, never buy, upgrade, cancel or renew, and never type a password or code. If a tool isn't signed in, record that and move on.
+1. Read the plan: ArtifactData get, url=https://claude.ai/artifact/5AxMQ4gPXYVmeQWk1Kzq45, collection=sources, doc_id=toolchecks (note its version). The "plan" list says which tools to open and what to read; "verify-cancelled" tools must be confirmed cancelled.
+2. For each tool, open its billing / usage / subscription page and record: plan, renewsOn, usage vs limit (value + unit), lastUsed, loginOk, status (critical = stops within 14 days or a cancelled tool still charging; low = under 25% credits left or renewal decision within 30 days; else ok), a one-line headline and any unusual detail.
+3. Write the whole document back (ArtifactData set, same collection/doc_id, if_version = the version you read): {checkedAt, plan (unchanged), items: [{tool, checkedAt, method: "browser", loginOk, plan, renewsOn, lastUsed, value, unit, status, headline, detail}]}. If ArtifactData isn't available, save the JSON as a Google Doc named "Control Room tool checks" in my Drive.
+4. Finish with a short summary of anything critical or low.
+Full instructions: .claude/skills/control-room-tool-check/SKILL.md in github.com/cutinsideSEO/CI-Dashboard.`;
+  function renderWeekly() {
+    const plan = S.toolPlan || [], paid = plan.filter((x) => x.group === "paid"), canc = plan.filter((x) => x.group === "verify-cancelled");
+    const done = Object.values(S.toolchecks), bad = done.filter((x) => x.status === "low" || x.status === "critical" || x.loginOk === false).length;
+    $("#wcSub").textContent = (S.toolcheckAt ? t("wcLast", ago(S.toolcheckAt)) + " · " + t("wcResults", done.length, bad) : t("wcNever")) + (plan.length ? " · " + t("wcPlan", paid.length, canc.length) : "");
+    $("#weeklyCheck").innerHTML = `<div class="wc"><div><ol>${t("wcSteps").map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
+      <div style="margin-top:14px"><button class="btn primary" data-copyprompt>${esc(t("wcCopy"))}</button></div><pre id="wcPrompt">${esc(WC_PROMPT)}</pre></div>
+      <div><div class="caption">${esc(t("tTool"))}</div><div class="chips">${paid.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? (S.toolchecks[slug(x.tool)].status === "ok" ? "good" : "warn") : "mute"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>
+      ${canc.length ? `<div class="caption" style="margin-top:14px">${esc(t("wcCancel"))}</div><div class="chips">${canc.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? "good" : "warn"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>` : ""}</div></div>`;
+  }
   function renderTools() {
+    renderWeekly();
     const tools = S.tools, sp = S.meta?.spend || {};
     const paid = tools.filter((x) => x.paying && x.yearlyCost).sort((a, b) => b.yearlyCost - a.yearlyCost);
     const top = paid.slice(0, 10), rest = paid.slice(10).reduce((s, x) => s + x.yearlyCost, 0);
@@ -890,6 +922,7 @@ ${context()}`;
     if (d.askalert) { const a = S.alerts.find((x) => x.id === d.askalert); closeDrawer(); return ask(t("askAlert", L(a, "title"), L(a, "detail"))); }
     if (d.askclient) { const c = S.clients.find((x) => x.key === d.askclient); closeDrawer(); return ask(t("askClient", L(c, "name") || c.name)); }
     if (d.suggest) return ask(d.suggest);
+    if ("copyprompt" in d) { navigator.clipboard.writeText(WC_PROMPT).then(() => toast(t("wcCopied")), () => { const r = document.createRange(); r.selectNodeContents($("#wcPrompt")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast(t("wcCopyFail")); }); return; }
     if ("close" in d) return closeDrawer();
     if (d.client) return openClient(d.client);
   });
@@ -937,7 +970,7 @@ ${context()}`;
     };
     db.doc("meta/state").onSnapshot((s) => { S.meta = s.exists ? s.data() : null; syncShards(S.meta?.shards); showRefresh(); render(); }, err);
     db.doc("briefing/latest").onSnapshot((s) => { S.briefing = s.exists ? s.data() : null; render(); }, err);
-    db.doc("sources/toolchecks").onSnapshot((s) => { const d = s.exists ? s.data() : {}; S.toolchecks = Object.fromEntries((d.items || []).map((x) => [slug(x.tool || ""), x])); S.toolcheckAt = d.checkedAt || null; render(); }, err);
+    db.doc("sources/toolchecks").onSnapshot((s) => { const d = s.exists ? s.data() : {}; S.toolchecks = Object.fromEntries((d.items || []).filter((x) => x.checkedAt).map((x) => [slug(x.tool || ""), x])); S.toolcheckAt = d.checkedAt || null; S.toolPlan = d.plan || []; render(); }, err);
     db.doc("snapshot/favicons").onSnapshot((s) => { S.icons = (s.exists && s.data().icons) || {}; render(); }, err);
     db.collection("acks").limit(1000).onSnapshot(async (q) => {
       S.acks = Object.fromEntries(q.docs.map((d) => [d.id, d.data()]));
