@@ -662,6 +662,7 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
       covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
+      prepNext: "Prep for the meeting ({0})",
       tTeam: "Team", tsTitle: "Team schedule", tsSub: "From each teammate's Google Calendar · updated {0}", tsWeek: "Meeting load", tsWeekSub: "Hours in meetings per person per working day. Click a day to open it above.",
       tsCover: "Client meetings ahead", tsCoverSub: "Who meets which client in the next two weeks, and which clients have nothing booked", tsOut: "Out of office", tsConf: "Double bookings", tsConfSub: "Overlapping meetings on one person's calendar",
       kClient: "Client meeting", kExternal: "Other external", kInternal: "Internal", kPersonal: "Personal / focus", kOut: "Out", tsMeet: "{0} meetings", tsHours: "{0}h in meetings", tsClientM: "{0} client meetings", tsOutN: "{0} out", tsBusiest: "busiest: {0} ({1}h)",
@@ -678,7 +679,7 @@ tbody tr:hover { background: var(--line-subtle); }
       hk: "Housekeeping", olderAg: "Show older agreements", openN: "{0} open", pulseTitle: "Open items", actTitle: "What to act on", actSub: "Ranked by severity, deadline and the kind of issue. Mark done what you've handled.",
       hygiene: "{0} tools look out of date in the tools sheet", hygieneSub: "Lapsed expiry dates, cancelled tools with auto-renew still on, and unclear billing. Review them together in Tools.", review: "Review",
       radarTitle: "Clients at a glance", radarSub: "Sorted by what needs attention first. Click a client for the full picture.",
-      rStatus: "Status", rRel: "Relationship", rClicks: "Clicks · 28d", rContract: "Contract", rOpen: "Open items", rMeet: "Last meeting", urgentN: "{0} urgent", noneOpen: "none",
+      rStatus: "Status", rRel: "Relationship", rClicks: "Clicks · 28d", rContract: "Contract", rOpen: "Open items", rMeet: "Meetings", nextM: "next {0}", lastM: "last {0}", urgentN: "{0} urgent", noneOpen: "none",
       briefMore: "Read the full briefing", briefLess: "Show less", moreMeet: "Show {0} more", lessMeet: "Show fewer",
       noEndN: "Not shown: {0} clients whose agreement has no end date ({1}).", findClient: "Jump to a client…", groupClient: "Group by client", searchAlerts: "Search alerts…", agencyGroup: "Agency and tools",
       kSpendMo: "Tool spend / month", kRenN: "{0} renewals in the next 30 days", kEnd90: "Contracts ending ≤90d", markDone: "Mark done", seeAllN: "See all {0} alerts", dueToday: "due today", dueIn: "due in {0}d", overdue: "{0}d overdue",
@@ -750,6 +751,7 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
       covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
+      prepNext: "הכנה לפגישה ({0})",
       tTeam: "צוות", tsTitle: "לו\"ז הצוות", tsSub: "מהיומן של כל אחד בצוות ב-Google Calendar · עודכן {0}", tsWeek: "עומס פגישות", tsWeekSub: "שעות בפגישות לכל אחד בכל יום עבודה. לחיצה על יום פותחת אותו למעלה.",
       tsCover: "פגישות לקוחות קרובות", tsCoverSub: "מי נפגש עם איזה לקוח בשבועיים הקרובים, ולאילו לקוחות לא נקבע כלום", tsOut: "לא במשרד", tsConf: "כפל זימונים", tsConfSub: "פגישות חופפות ביומן של אותו אדם",
       kClient: "פגישת לקוח", kExternal: "חיצוני אחר", kInternal: "פנימי", kPersonal: "אישי / ריכוז", kOut: "לא במשרד", tsMeet: "{0} פגישות", tsHours: "{0} שע' בפגישות", tsClientM: "{0} פגישות לקוחות", tsOutN: "{0} לא במשרד", tsBusiest: "הכי עמוס: {0} ({1} שע')",
@@ -766,7 +768,7 @@ tbody tr:hover { background: var(--line-subtle); }
       hk: "תחזוקה", olderAg: "הצג גם הסכמים קודמים", openN: "{0} פתוחים", pulseTitle: "פריטים פתוחים", actTitle: "מה לטפל בו עכשיו", actSub: "מדורג לפי חומרה, מועד וסוג הבעיה. סמנו מה שכבר טופל.",
       hygiene: "{0} כלים נראים לא מעודכנים בגיליון הכלים", hygieneSub: "תאריכי תפוגה שעברו, כלים שבוטלו עם חידוש אוטומטי פעיל, וחיוב לא ברור. כדאי לעבור עליהם יחד בלשונית הכלים.", review: "לבדיקה",
       radarTitle: "הלקוחות במבט אחד", radarSub: "ממוין לפי מה שדורש טיפול קודם. לחיצה על לקוח פותחת את התמונה המלאה.",
-      rStatus: "סטטוס", rRel: "מצב היחסים", rClicks: "קליקים · 28 יום", rContract: "חוזה", rOpen: "פריטים פתוחים", rMeet: "פגישה אחרונה", urgentN: "{0} דחופים", noneOpen: "אין",
+      rStatus: "סטטוס", rRel: "מצב היחסים", rClicks: "קליקים · 28 יום", rContract: "חוזה", rOpen: "פריטים פתוחים", rMeet: "פגישות", nextM: "הבאה {0}", lastM: "אחרונה {0}", urgentN: "{0} דחופים", noneOpen: "אין",
       briefMore: "לתדריך המלא", briefLess: "הצג פחות", moreMeet: "עוד {0}", lessMeet: "הצג פחות",
       noEndN: "לא מוצגים: {0} לקוחות שבהסכם שלהם אין תאריך סיום ({1}).", findClient: "מעבר ללקוח…", groupClient: "קיבוץ לפי לקוח", searchAlerts: "חיפוש בהתראות…", agencyGroup: "סוכנות וכלים",
       kSpendMo: "הוצאה על כלים / חודש", kRenN: "{0} חידושים ב-30 הימים הקרובים", kEnd90: "חוזים שמסתיימים ≤90 יום", markDone: "סמן כטופל", seeAllN: "לכל {0} ההתראות", dueToday: "היום", dueIn: "בעוד {0} ימים", overdue: "באיחור של {0} ימים",
@@ -1032,6 +1034,14 @@ tbody tr:hover { background: var(--line-subtle); }
       return `<button class="row" data-client="${esc(c.key)}"><div><div class="num" style="font-weight:700">${esc(fmtD(m.date))}</div><div class="sub note">${esc(rel(days(m.date)))}</div></div>
       <div style="min-width:0"><div class="t">${cname(c.key, 18)}<span class="note">·</span><span>${esc(h.title || m.title)}</span>${moodTag(m.sentiment, " ")}</div><div class="s">${esc(h.summary || m.summary || "")}</div></div></button>`; }).join("") : `<div class="empty">${esc(t("noMeetings"))}</div>`;
   }
+  // next client meeting from the week's list, or from the team calendars (two weeks)
+  function nextMeeting(key) {
+    const now = new Date().toISOString(), todayIl = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+    const a = (S.meta?.meetingsAhead || []).filter((m) => m.client === key && !m.internal).map((m) => ({ date: m.date, time: m.time, title: (LANG === "he" && m.he?.title) || m.title }));
+    const b = (S.team?.events || []).filter((e) => e.client === key && e.kind === "client" && e.e > now).map((e) => ({ date: ilDate(e.s), time: e.s.slice(11, 16), title: e.t }));
+    const l = a.concat(b).filter((m) => m.date >= todayIl).sort((x, y) => (x.date + (x.time || "")).localeCompare(y.date + (y.time || "")));
+    return l[0] ? { ...l[0], d: days(l[0].date) } : null;
+  }
   function renderAhead() {
     const l = S.meta?.meetingsAhead || [], card = $("#aheadCard"); card.hidden = !l.length; if (!l.length) return;
     let html = "", last = "";
@@ -1067,7 +1077,8 @@ tbody tr:hover { background: var(--line-subtle); }
         <td><div class="clk"><div><div class="num">${w.clicks != null ? fmtN(w.clicks) : "—"}</div><div class="note">${pct(w.clicksChangePct)}</div></div>${spark(c.perf?.spark28, 72, 26)}</div></td>
         <td class="hide-sm">${kchip(c)}</td>
         <td><span class="cnt">${n[0] ? `<span>${esc(t("openN", n[0]))}</span>${n[1] ? `<span class="pill high">${esc(t("urgentN", n[1]))}</span>` : ""}` : `<span class="note">${esc(t("noneOpen"))}</span>`}</span></td>
-        <td class="hide-sm note">${it?.lastMeeting ? esc(rel(days(it.lastMeeting))) : it?.sharedFrom ? esc(t("covShared", clientName(it.sharedFrom))) : "—"}</td></tr>`; }).join("")}</tbody>`;
+        <td class="hide-sm note">${(() => { const nx = nextMeeting(c.key), last = it?.lastMeeting ? t("lastM", rel(days(it.lastMeeting))) : it?.sharedFrom ? t("covShared", clientName(it.sharedFrom)) : "";
+          return (nx ? `<div style="color:var(--accent-text);font-weight:600">${esc(t("nextM", nx.d === 0 ? t("today") : rel(nx.d)))}</div>` : "") + (last ? `<div>${esc(last)}</div>` : nx ? "" : "—"); })()}</td></tr>`; }).join("")}</tbody>`;
   }
 
   // ---------------------------------------------------------------- alerts tab
@@ -1146,7 +1157,7 @@ tbody tr:hover { background: var(--line-subtle); }
           ${dec.length || fu.length ? `<details><summary>${esc(t("iDecisions"))}</summary><ul>${dec.concat(fu).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></details>` : ""}
           ${m.url ? `<a class="note" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.source || t("source"))}</a>` : m.source ? `<span class="note">${esc(m.source)}</span>` : ""}</div>`; }).join("")}</div>` : ""}
         ${(it.themes || []).length ? `<div><h3>${esc(t("iThemes"))}</h3><div class="themes">${it.themes.map((x, i) => `<div class="theme"><b>${esc(h.themes?.[i]?.title || x.title)}</b><span>${esc(h.themes?.[i]?.detail || x.detail || "")}</span></div>`).join("")}</div></div>` : ""}`; })() : ""}
-      <div><button class="btn primary" data-askclient="${esc(key)}">${esc(t("dAskAbout", nm))}</button></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${(() => { const nx = nextMeeting(key); return nx ? `<button class="btn primary" data-prepnext="${esc(key)}">${esc(t("prepNext", nx.d === 0 ? t("today") : fmtD(nx.date) + (nx.time ? " " + nx.time : "")))}</button>` : ""; })()}<button class="btn ${nextMeeting(key) ? "" : "primary"}" data-askclient="${esc(key)}">${esc(t("dAskAbout", nm))}</button></div>
       <div class="prov"><b>${esc(t("provTitle"))}:</b>${c.lastBrainUpdate ? `<span>${esc(t("provBrain", fmtD(c.lastBrainUpdate)))}</span>` : ""}${c.intel?.updatedAt ? `<span>${esc(t("provMeet", fmtD(c.intel.updatedAt)))}</span>` : ""}${c.contract ? `<span>${esc(t("provContract", (c.contract.title || "").split(" (")[0].slice(0, 60), c.contract.confidence || "?"))}</span>` : ""}${c.perf?.w28 ? `<span>${esc(t("provPerf", fmtD(S.meta?.dataThrough)))}</span>` : ""}</div>
       ${p.w28 ? `<div><h3>${esc(t("dOrganic"))}</h3><div class="mgrid">${win(p.w7, t("d7"))}${win(p.w28, t("d28l"))}${win(p.w90, t("d90"))}</div>${p.spark28 ? `<div style="margin-top:10px">${spark(p.spark28, 580, 64)}</div>` : ""}${L(c, "headline") ? `<p style="margin:8px 0 0;color:var(--ink-2)">${esc(L(c, "headline"))}</p>` : ""}</div>` : ""}
       ${wins.length ? `<div><h3>${esc(t("dWins"))}</h3>${list(wins)}</div>` : ""}
@@ -1342,10 +1353,18 @@ c) otherwise print the JSON in one code block at the end, so I can paste it to t
     const k = S.contracts.map((x) => ({ client: x.client, title: x.title, type: x.type, start: x.startDate, end: x.endDate, daysLeft: x.daysLeft, status: x.status, autoRenew: x.autoRenew, noticeDays: x.noticeDays, monthlyFee: x.monthlyFee, currency: x.currency, hours: x.hoursPerMonth, latest: x.isLatest, signed: x.signed, notes: x.notes, url: x.url }));
     const tl = S.tools.map((x) => ({ name: x.name, paying: x.paying, yearly: x.yearlyCost, monthly: x.monthlyCost, billing: x.frequency, model: x.model, nextRenewal: x.nextRenewal, daysToRenewal: x.daysToRenewal, autoRenew: x.autoRenew, admin: x.admin, plan: x.plan, notes: x.notes, live: x.live && x.live.headline }));
     const a = sortAlerts(S.alerts).map((x) => ({ sev: x.severity, cat: x.category, client: x.client, title: x.title, detail: x.detail, due: x.dueDate, acked: !!S.acks[x.id] }));
-    return JSON.stringify({ today: new Date().toISOString().slice(0, 10), refreshedAt: S.meta?.updatedAt, gscDataThrough: S.meta?.dataThrough, spend: S.meta?.spend, briefing: S.briefing?.text, alerts: a, clients: c, contracts: k, tools: tl }).slice(0, 200000);
+    const slack = S.clients.filter((x) => x.slack).map((x) => ({ client: x.key, mood: x.slack.mood, summary: x.slack.summary, lastClientMessageAt: x.slack.lastClientMessageAt, openAsks: (x.slack.channels || []).flatMap((ch) => (ch.openAsks || []).map((o) => ({ channel: ch.name, ...o }))) }));
+    const todayIl = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+    const team = S.team && { people: (S.team.people || []).map((p) => ({ email: p.email, name: p.name, access: p.access })), out: S.team.out,
+      upcoming: (S.team.events || []).filter((e) => !e.allDay && e.s.slice(0, 10) >= todayIl && !["personal", "focus", "solo"].includes(e.kind)).slice(0, 160).map((e) => ({ start: e.s, end: e.e, title: e.t, kind: e.kind, client: e.client, people: e.people.map(pName) })),
+      conflicts: S.team.conflicts };
+    const dfs = S.dfs && { balance: S.dfs.balance, deposited: S.dfs.deposited, runRate: S.dfs.runRate, monthly: (S.dfs.monthly || []).map((m) => [m.month, m.cost]), last30: { total: S.dfs.last30?.total, byEndpoint: S.dfs.last30?.byEndpoint, byClient: S.dfs.last30?.byClient }, findings: (S.dfs.findings || []).map((f) => f.en) };
+    return JSON.stringify({ today: new Date().toISOString().slice(0, 10), refreshedAt: S.meta?.updatedAt, gscDataThrough: S.meta?.dataThrough, spend: S.meta?.spend, briefing: S.briefing?.text, alerts: a, clients: c, contracts: k, tools: tl,
+      clientMeetingsThisWeek: S.meta?.meetingsAhead, changesSinceLastRefresh: S.meta?.changes && { newAlerts: S.meta.changes.new.length, resolved: S.meta.changes.resolved.map((r) => r.title) },
+      slack, teamNews: S.meta?.team && { summary: S.meta.team.summary, announcements: S.meta.team.announcements, out: S.meta.team.who_is_out }, teamSchedule: team, dataforseoSpend: dfs }).slice(0, 240000);
   }
   const RULES = () => `You are the AI chief of staff inside the Cut Inside Control Room, the operations dashboard of Cut Inside, an SEO and GEO agency in Tel Aviv. The person asking runs or manages the agency. ${LANG === "he" ? "The dashboard is set to Hebrew: answer in natural, concise Israeli business Hebrew (keep client, tool and product names in English)." : "Answer in English unless they write in another language; then answer in that language."}
-Ground every claim in the DASHBOARD DATA below or in a tool result. Cite where a fact comes from (client brain, contract, Tools sheet, SurgeOS) and give dates and numbers. If the data does not cover something, say so plainly and, when it helps, look it up with the tools: "surgeos" for live search performance, tasks and OKRs, "drive_search" + "drive_read" for client brains, contracts and meeting notes in Google Drive, and "get_client" for one client's full record. Use tools only when the dashboard data is not enough; keep tool calls few and targeted.
+Ground every claim in the DASHBOARD DATA below or in a tool result. Cite where a fact comes from (client brain, contract, Tools sheet, SurgeOS, Slack, Google Calendar, DataForSEO) and give dates and numbers. If the data does not cover something, say so plainly and, when it helps, look it up with the tools: "surgeos" for live search performance, tasks and OKRs, "drive_search" + "drive_read" for client brains, contracts and meeting notes in Google Drive, and "get_client" for one client's full record. Use tools only when the dashboard data is not enough; keep tool calls few and targeted.
 Be direct: lead with the answer, then the reasons, then concrete next steps with owners where known. Short headings, bullets and small markdown tables. No filler, no emoji.
 
 DASHBOARD DATA (JSON, refreshed twice daily):
@@ -1435,6 +1454,7 @@ ${context()}`;
     if (d.askalert) { const a = S.alerts.find((x) => x.id === d.askalert); closeDrawer(); return ask(t("askAlert", L(a, "title"), L(a, "detail"))); }
     if (d.askclient) { const c = S.clients.find((x) => x.key === d.askclient); closeDrawer(); return ask(t("askClient", L(c, "name") || c.name)); }
     if (d.suggest) return ask(d.suggest);
+    if (d.prepnext) { const nx = nextMeeting(d.prepnext); closeDrawer(); if (nx) return ask(t("askPrep", clientName(d.prepnext), nx.title, fmtD(nx.date) + (nx.time ? " " + nx.time : ""))); }
     if (d.prep) { const m = (S.meta?.meetingsAhead || [])[+d.prep]; if (m) return ask(t("askPrep", clientName(m.client), (LANG === "he" && m.he?.title) || m.title, fmtD(m.date) + (m.time ? " " + m.time : ""))); }
     if ("copyprompt" in d) { navigator.clipboard.writeText(wcPrompt()).then(() => toast(t("wcCopied")), () => { const r = document.createRange(); r.selectNodeContents($("#wcPrompt")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast(t("wcCopyFail")); }); return; }
     if ("close" in d) return closeDrawer();

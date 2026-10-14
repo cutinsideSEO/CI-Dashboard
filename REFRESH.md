@@ -106,6 +106,14 @@ The previous state is in `sources/meetings`. Copy it to `data/meetings/` in step
 2. For each client that had a meeting, add it to `meetings` and drop the oldest past 6. Refresh `themes`, `highlights` and `relationship` if the meeting changed them.
 3. Add Hebrew for every new string to `tm`. Read only: never edit Drive, Calendar or Gmail.
 
+## 4b2. Team calendars → `data/team_calendar.json` (read-only)
+
+For every teammate (or, michael, yarden, maor, amitg, maya, leonid, yuval, guy, seo, plus any other @cutinside.com address that shows up in invites), call `Google_Calendar.list_events` with `calendarId=<email>` from 7 days ago to 14 days ahead. A background agent works well for this. Merge the same event across calendars by its id, and save `{generatedAt, from, to, people[{email, name, access}], events[{id, start, end, allDay, title, people[], declined[], attendees[], organizer, eventType, transparency, url}]}`.
+
+- **Privacy:** private or personal-looking events become "Personal" with no attendees or link. Out-of-office blocks get a neutral title (Out of office, Abroad, Vacation, Reserve duty, Sick). Never include descriptions.
+- **Use:** the build turns this into the **Team** tab (daily timeline, load heatmap, client coverage, out of office, double bookings). Ask Opus 5.5 uses it too.
+- **Read only:** never create, change or answer an invite.
+
 ## 4c. Slack → `data/slack.json` (read-only)
 
 Read the channels in the last 30 days with the Slack connector: `slack_list_user_channels`, `slack_read_channel` and `slack_read_thread`. **Never post, react, draft or schedule anything**, leave out HR and personal matters, and never quote DMs. A background agent works well for this. The shape is:
