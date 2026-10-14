@@ -232,6 +232,9 @@ def build():
             if fn.endswith(".json"):
                 m = json.load(open(os.path.join(mdir, fn), encoding="utf-8"))
                 TM.update(m.pop("tm", {}) or {})
+                # "last meeting" counts client-facing meetings only
+                cm = [x.get("date") for x in m.get("meetings") or [] if x.get("type") != "internal" and x.get("date")]
+                m["lastMeeting"] = max(cm) if cm else None
                 intel[m.get("client") or fn[:-5]] = m
     tools = build_tools()
     perf = load("performance.json", {})
