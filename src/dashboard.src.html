@@ -476,7 +476,7 @@ tbody tr:hover { background: var(--line-subtle); }
       tUsage: "Usage (last check)", lastUsed: "last used {0}", notChecked: "Not checked yet", srcBrowser: "Weekly browser check",
       relNotice: "Notice given", relEnded: "Ended", relPaused: "Paused", relPipeline: "Pipeline", unsigned: "Unsigned",
       wcTitle: "Weekly browser check", wcNever: "Not run yet", wcLast: "Last run {0}", wcPlan: "{0} tools to check · {1} to confirm cancelled",
-      wcSteps: ["Open the Claude desktop app on your computer, with Claude in Chrome connected and signed in to the tools.", "Create a scheduled task that runs weekly (e.g. Sunday 08:00) and paste the prompt below.", "Run it once now. Results appear here and in the Usage column as soon as it finishes."],
+      wcSteps: ["Once: install the Claude desktop app and the Claude in Chrome extension, and turn on Settings → Connectors → Claude in Chrome (and Google Drive).", "In Chrome, sign in to the tools yourself (passwords are in NordPass). Claude never types them.", "First run with you watching: in Cowork, start a new task, paste the prompt below and approve the sites it asks for.", "Then schedule it: Scheduled → New task → Set up manually → paste the prompt → Weekly, Sunday 08:00 → Save. Keep the computer awake and Chrome open at that time."],
       wcCopy: "Copy the task prompt", wcCopied: "Prompt copied. Paste it into a scheduled task in the Claude desktop app.", wcCopyFail: "Couldn't copy. Select the text and copy it.", wcCancel: "Confirm cancelled:", wcResults: "{0} checked · {1} need attention",
       feedTitle: "Latest client meetings", feedSub: "What was discussed with clients recently, from the client brains, meeting notes and calendar", noMeetings: "No meetings found yet.",
       iHighlights: "Highlights", iMeetings: "Recent meetings", iThemes: "Main topics", iRelationship: "Relationship", iDecisions: "Decisions and action items", iLastMeeting: "Last meeting {0}", iShared: "From the {0} meetings",
@@ -543,7 +543,7 @@ tbody tr:hover { background: var(--line-subtle); }
       tUsage: "שימוש (בדיקה אחרונה)", lastUsed: "שימוש אחרון {0}", notChecked: "עוד לא נבדק", srcBrowser: "בדיקת דפדפן שבועית",
       relNotice: "נמסרה הודעה", relEnded: "הסתיים", relPaused: "מושהה", relPipeline: "בצנרת", unsigned: "לא חתום",
       wcTitle: "בדיקת דפדפן שבועית", wcNever: "עוד לא רצה", wcLast: "רצה לאחרונה {0}", wcPlan: "{0} כלים לבדיקה · {1} לווידוא ביטול",
-      wcSteps: ["פותחים את אפליקציית Claude לדסקטופ במחשב, עם Claude in Chrome מחובר ומחובר לכלים.", "יוצרים משימה מתוזמנת שבועית (למשל ראשון 08:00) ומדביקים את הפרומפט שלמטה.", "מריצים פעם אחת עכשיו. התוצאות יופיעו כאן ובעמודת השימוש מיד בסיום."],
+      wcSteps: ["פעם אחת: מתקינים את אפליקציית Claude לדסקטופ ואת התוסף Claude in Chrome, ומפעילים ב-Settings ← Connectors את Claude in Chrome (וגם Google Drive).", "ב-Chrome מתחברים לכלים בעצמכם (הסיסמאות ב-NordPass). Claude אף פעם לא מקליד אותן.", "הרצה ראשונה מול העיניים: ב-Cowork פותחים משימה חדשה, מדביקים את הפרומפט שלמטה ומאשרים את האתרים שהוא מבקש.", "ואז מתזמנים: Scheduled ← New task ← Set up manually ← מדביקים את הפרומפט ← Weekly, ראשון 08:00 ← Save. המחשב צריך להיות ער ו-Chrome פתוח בשעה הזו."],
       wcCopy: "העתקת הפרומפט למשימה", wcCopied: "הפרומפט הועתק. הדביקו אותו במשימה מתוזמנת באפליקציית Claude לדסקטופ.", wcCopyFail: "ההעתקה נכשלה. סמנו את הטקסט והעתיקו.", wcCancel: "לוודא ביטול:", wcResults: "{0} נבדקו · {1} דורשים טיפול",
       feedTitle: "פגישות אחרונות עם לקוחות", feedSub: "מה דובר עם לקוחות לאחרונה, מה-client brains, מסיכומי פגישות ומהיומן", noMeetings: "עדיין לא נמצאו פגישות.",
       iHighlights: "הדברים החשובים", iMeetings: "פגישות אחרונות", iThemes: "נושאים מרכזיים", iRelationship: "מצב היחסים", iDecisions: "החלטות ומשימות", iLastMeeting: "פגישה אחרונה {0}", iShared: "מתוך הפגישות של {0}",
@@ -884,19 +884,34 @@ tbody tr:hover { background: var(--line-subtle); }
   }
   const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const bcOf = (x) => x.browserCheck || S.toolchecks[slug(x.name)];
-  const WC_PROMPT = `Run the Control Room weekly tool check.
-Use Claude in Chrome with my signed-in accounts. Strictly read only: never change settings, plans or seats, never buy, upgrade, cancel or renew, and never type a password or code. If a tool isn't signed in, record that and move on.
-1. Read the plan: ArtifactData get, url=https://claude.ai/artifact/5AxMQ4gPXYVmeQWk1Kzq45, collection=sources, doc_id=toolchecks (note its version). The "plan" list says which tools to open and what to read; "verify-cancelled" tools must be confirmed cancelled.
-2. For each tool, open its billing / usage / subscription page and record: plan, renewsOn, usage vs limit (value + unit), lastUsed, loginOk, status (critical = stops within 14 days or a cancelled tool still charging; low = under 25% credits left or renewal decision within 30 days; else ok), a one-line headline and any unusual detail.
-3. Write the whole document back (ArtifactData set, same collection/doc_id, if_version = the version you read): {checkedAt, plan (unchanged), items: [{tool, checkedAt, method: "browser", loginOk, plan, renewsOn, lastUsed, value, unit, status, headline, detail}]}. If ArtifactData isn't available, save the JSON as a Google Doc named "Control Room tool checks" in my Drive.
-4. Finish with a short summary of anything critical or low.
-Full instructions: .claude/skills/control-room-tool-check/SKILL.md in github.com/cutinsideSEO/CI-Dashboard.`;
+  function wcPrompt() {
+    const plan = S.toolPlan || [];
+    const line = (x) => `- ${x.tool} (account: ${x.account || "any"}): ${x.look || "plan, renewal, usage vs limit, last activity"}`;
+    const paid = plan.filter((x) => x.group === "paid").map(line).join("\n"), canc = plan.filter((x) => x.group === "verify-cancelled").map(line).join("\n");
+    return `Run the Control Room weekly tool check.
+Use Claude in Chrome with my signed-in accounts, in a new tab. Strictly read only: never change settings, plans or seats, never buy, upgrade, cancel or renew, never accept a dialog that would, and never type a password, 2FA code or card number. If a tool isn't signed in, or is signed in to a different account than listed, record that (loginOk: false, or a note in detail) and move on. About 2 minutes per tool.
+
+1. Tools to check. If ArtifactData is available, read the current list first (ArtifactData get, url=https://claude.ai/artifact/5AxMQ4gPXYVmeQWk1Kzq45, collection=sources, doc_id=toolchecks, note its version) and use its "plan". Otherwise use this list:
+PAID (read the status):
+${paid || "- (see the Tools tab of the Control Room)"}
+CONFIRM CANCELLED (make sure nothing will charge again):
+${canc || "- none"}
+
+2. For each tool, open its billing / usage / subscription page and record: plan, renewsOn (YYYY-MM-DD), usage vs limit (value + unit, e.g. "412 / 500" credits), lastUsed (YYYY-MM-DD, if shown), loginOk, status, a one-line headline and any unusual detail. Status: critical = something stops within 14 days (credits out, expired, payment failed) or a "confirm cancelled" tool is still active; low = under 25% of credits left or a renewal decision within 30 days; otherwise ok. Record only what the page shows; leave a field out rather than guess.
+
+3. Save the results as one JSON document: {"checkedAt": "<now ISO>", "plan": <the plan, unchanged>, "items": [{"tool": "<exact name from the list>", "checkedAt", "method": "browser", "loginOk", "plan", "renewsOn", "lastUsed", "value", "unit", "status", "headline", "detail"}]}. Save it the first way that works:
+a) ArtifactData set, same url/collection/doc_id, if_version = the version you read;
+b) a Google Doc named "Control Room tool checks" in my Drive (replace its content);
+c) otherwise print the JSON in one code block at the end, so I can paste it to the Control Room refresh session.
+
+4. Finish with a short summary: how many tools were checked, which are critical or low, and which weren't signed in or didn't load.`;
+  }
   function renderWeekly() {
     const plan = S.toolPlan || [], paid = plan.filter((x) => x.group === "paid"), canc = plan.filter((x) => x.group === "verify-cancelled");
     const done = Object.values(S.toolchecks), bad = done.filter((x) => x.status === "low" || x.status === "critical" || x.loginOk === false).length;
     $("#wcSub").textContent = (S.toolcheckAt ? t("wcLast", ago(S.toolcheckAt)) + " · " + t("wcResults", done.length, bad) : t("wcNever")) + (plan.length ? " · " + t("wcPlan", paid.length, canc.length) : "");
     $("#weeklyCheck").innerHTML = `<div class="wc"><div><ol>${t("wcSteps").map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
-      <div style="margin-top:14px"><button class="btn primary" data-copyprompt>${esc(t("wcCopy"))}</button></div><pre id="wcPrompt">${esc(WC_PROMPT)}</pre></div>
+      <div style="margin-top:14px"><button class="btn primary" data-copyprompt>${esc(t("wcCopy"))}</button></div><pre id="wcPrompt">${esc(wcPrompt())}</pre></div>
       <div><div class="caption">${esc(t("tTool"))}</div><div class="chips">${paid.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? (S.toolchecks[slug(x.tool)].status === "ok" ? "good" : "warn") : "mute"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>
       ${canc.length ? `<div class="caption" style="margin-top:14px">${esc(t("wcCancel"))}</div><div class="chips">${canc.map((x) => `<span class="pill ${S.toolchecks[slug(x.tool)] ? "good" : "warn"}" title="${esc(x.look || "")}">${esc(x.tool)}</span>`).join("")}</div>` : ""}</div></div>`;
   }
@@ -1022,7 +1037,7 @@ ${context()}`;
     if (d.askalert) { const a = S.alerts.find((x) => x.id === d.askalert); closeDrawer(); return ask(t("askAlert", L(a, "title"), L(a, "detail"))); }
     if (d.askclient) { const c = S.clients.find((x) => x.key === d.askclient); closeDrawer(); return ask(t("askClient", L(c, "name") || c.name)); }
     if (d.suggest) return ask(d.suggest);
-    if ("copyprompt" in d) { navigator.clipboard.writeText(WC_PROMPT).then(() => toast(t("wcCopied")), () => { const r = document.createRange(); r.selectNodeContents($("#wcPrompt")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast(t("wcCopyFail")); }); return; }
+    if ("copyprompt" in d) { navigator.clipboard.writeText(wcPrompt()).then(() => toast(t("wcCopied")), () => { const r = document.createRange(); r.selectNodeContents($("#wcPrompt")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast(t("wcCopyFail")); }); return; }
     if ("close" in d) return closeDrawer();
     if (d.client) return openClient(d.client);
   });
