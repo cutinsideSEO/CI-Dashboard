@@ -17,16 +17,18 @@ ArtifactData list  url=<artifact>  collection=snapshot  out_dir=prev
 ArtifactData list  url=<artifact>  collection=sources   out_dir=prev
 ```
 
-1. The tool result prints each document's `version`. Write them to `prev/versions.json`, for example `{"meta/state": 4, "snapshot/clients": 4, ...}`.
-2. Copy `prev/sources/brains.json`, `prev/sources/contracts.json` and `prev/sources/performance.json` into `data/` as the starting points. For brains and contracts, unwrap `{items: [...]}` into the plain array.
-3. Merge `prev/sources/tm.json` and any `tm-N.json` shards (each `{items: [{en, he}]}`) into `data/tm.json` as one `{english: hebrew}` object. This is the Hebrew translation memory.
-4. Copy `prev/sources/toolchecks.json` (the weekly browser check, see BROWSER-CHECK.md) to `data/toolchecks.json` if it exists.
-5. Copy `prev/snapshot/favicons.json`, taking its `icons` object, to `data/favicons.json` if it exists.
-6. Copy `prev/sources/slack.json` to `data/slack.json` if it exists (the last Slack read; step 4c replaces it).
-7. Copy `prev/snapshot/dataforseo.json` to `data/dfs_prev.json` and its `balanceHistory` array to `data/dfs_balance.json`, if it exists. The build adds this run's balance to the series and keeps the spend analysis in place.
+1. The tool result prints each document's `version`. Write them all to `prev/versions.json`, for example `{"meta/state": 17, "snapshot/clients": 15, ...}`.
+2. Run `python3 scripts/restore_prev.py`. It rebuilds `data/` from `prev/`:
+   - brains, contracts, performance, meetings, Slack, tool checks, favicons and the DataForSEO analysis and balance series;
+   - the translation memory (merged);
+   - the briefing and source status;
+   - from `sources/inputs`: the tools sheet CSV, the one-off alerts, the calendar and the live checks.
+
+   It only fills files that are missing, so a container that kept its `data/` loses nothing. A fresh container gets everything back. (Tested on 14 Oct 2026: a build from a fresh restore matches the live dashboard.)
 
 ## 1. Tools sheet → `data/tools.csv`
 
+0. Check `Google_Drive.get_file_metadata` for the sheet. If `modifiedTime` is older than the last run and `data/tools.csv` exists, keep it and skip steps 1–2 below. (The download comes back as base64 inside the tool result, and copying it by hand is error-prone.)
 1. Call `Google_Drive.download_file_content` with fileId `1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU` and exportMimeType `text/csv`. This exports the first tab, "💻 Tools Database".
 2. Base64-decode `content` and save it as `data/tools.csv`.
 3. Also read the "Changes Done (Log)" tab with `read_file_content`. Mention any new log entry in the briefing.

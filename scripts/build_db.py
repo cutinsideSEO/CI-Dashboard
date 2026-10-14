@@ -822,6 +822,10 @@ def build():
         json.dump(sorted(MISSING), f, ensure_ascii=False, indent=1)
     if intel:
         put("sources", "meetings", {"items": list(intel.values()), "updatedAt": NOW})
+    # small inputs kept in the database so a fresh container can rebuild data/ (scripts/restore_prev.py)
+    inputs = {"toolsCsv": open(os.path.join(DATA, "tools.csv"), encoding="utf-8").read() if os.path.exists(os.path.join(DATA, "tools.csv")) else None,
+              "extraAlerts": load("extra_alerts.json", []), "calendar": load("calendar.json", []), "livechecks": load("livechecks.json", []), "updatedAt": NOW}
+    put("sources", "inputs", inputs)
     if os.path.exists(os.path.join(DATA, "slack.json")):
         put("sources", "slack", json.load(open(os.path.join(DATA, "slack.json"), encoding="utf-8")))
     for name in ("brains", "contracts", "performance"):
