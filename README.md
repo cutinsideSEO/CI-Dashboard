@@ -16,13 +16,23 @@ The **Ask Opus** tab sends questions to Claude Opus along with the dashboard dat
 
 ## How it updates
 
-The "Control Room refresh" routine (`trig_013SgkySAGVthbCU99RnjsMt`) runs twice a day at 06:56 and 14:56 Israel time and follows [REFRESH.md](REFRESH.md):
+The "Control Room refresh" routine (`trig_01WDH93AGHQEqNsCiNghRytm`) runs twice a day at 06:56 and 14:56 Israel time and follows [REFRESH.md](REFRESH.md):
 
 1. It re-reads the sources (the tools sheet, Drive brains and contracts, SurgeOS, live tool checks).
 2. `scripts/build_db.py` merges them into documents and computes the alerts.
 3. It writes those documents to the artifact's database, along with a fresh executive briefing.
 
 The page itself never changes. Data lives in the artifact database: `meta/state`, `briefing/latest`, `snapshot/{clients,contracts,tools,alerts}` and `sources/*`. Acknowledgements live in `acks` and are kept across refreshes.
+
+## Design and language
+
+The page follows the [Cut Inside design system](https://claude.ai/artifact/KtDR5tusYbobTc3GPFATnN):
+- dark brand ground with a light theme, one teal accent, Familjen Grotesk for headlines and numbers, and Montserrat for copy;
+- pill buttons and tabs, and the official lockup logos in `assets/`.
+
+The **עברית / English** button switches the whole interface, including right-to-left layout. Data content (briefing, alerts, client summaries and issues) comes from a Hebrew translation memory that the refresh routine keeps up to date (`sources/tm` in the database).
+
+Edit `src/dashboard.src.html`, then run `python3 scripts/build_page.py`. That inlines the logos into `dashboard.html`, the published file.
 
 ## Local build
 

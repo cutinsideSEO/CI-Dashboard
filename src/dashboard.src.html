@@ -1,0 +1,902 @@
+<title>Cut Inside Control Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@600;700&family=Montserrat:wght@400;500;600&family=Heebo:wght@400;500;600;700&display=swap">
+<style>
+/* Cut Inside design system (dark-first brand): black grounds, one teal accent, Familjen Grotesk headlines + numbers,
+   Montserrat copy (Heebo carries Hebrew glyphs). Layout: sticky header + pill tabs; summary first, detail after. */
+:root {
+  --surface: #1a1a18; --raised: #232321; --card: rgba(255,255,255,.04); --tag: rgba(255,255,255,.06);
+  --nav: rgba(26,26,24,.92); --scrim: rgba(0,0,0,.55);
+  --ink: #ffffff; --ink-2: #e8e8e8; --ink-3: #999997; --ink-on-light: #1a1a18;
+  --accent: #49b9b1; --accent-text: #49b9b1; --on-accent: #ffffff; --teal-dark: #34a09a; --aqua: #e0f4f4; --gold: #fad05d;
+  --line: rgba(255,255,255,.12); --line-strong: rgba(255,255,255,.25); --line-subtle: rgba(255,255,255,.06);
+  --crit: #ff8f80; --crit-bg: rgba(255,143,128,.14); --warn: #fad05d; --warn-bg: rgba(250,208,93,.13);
+  --good: #7dd3a4; --good-bg: rgba(125,211,164,.13); --info: #f7caf1; --info-bg: rgba(247,202,241,.12);
+  --shadow-card: none; --shadow-lg: 0 8px 24px rgba(0,0,0,.35);
+  --logo-dark: inline; --logo-light: none;
+  --f-display: "Familjen Grotesk", "Heebo", system-ui, sans-serif;
+  --f-body: Montserrat, "Heebo", system-ui, -apple-system, sans-serif;
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --surface: #ffffff; --raised: #ffffff; --card: #ffffff; --tag: #e0f4f4; --nav: rgba(255,255,255,.92); --scrim: rgba(26,26,24,.4);
+    --ink: #1a1a18; --ink-2: #5f5f5d; --ink-3: #6a6a69; --accent-text: #23706b;
+    --line: rgba(26,26,24,.12); --line-strong: rgba(26,26,24,.25); --line-subtle: rgba(26,26,24,.06);
+    --crit: #b3372b; --crit-bg: #fbe4e1; --warn: #7d5900; --warn-bg: #fdf0cc; --good: #1f7a47; --good-bg: #ddf2e5; --info: #9d4b73; --info-bg: #fbe9f8;
+    --shadow-card: 0 1px 2px rgba(0,0,0,.12); --shadow-lg: 0 8px 24px rgba(0,0,0,.2);
+    --logo-dark: none; --logo-light: inline; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --surface: #ffffff; --raised: #ffffff; --card: #ffffff; --tag: #e0f4f4; --nav: rgba(255,255,255,.92); --scrim: rgba(26,26,24,.4);
+  --ink: #1a1a18; --ink-2: #5f5f5d; --ink-3: #6a6a69; --accent-text: #23706b;
+  --line: rgba(26,26,24,.12); --line-strong: rgba(26,26,24,.25); --line-subtle: rgba(26,26,24,.06);
+  --crit: #b3372b; --crit-bg: #fbe4e1; --warn: #7d5900; --warn-bg: #fdf0cc; --good: #1f7a47; --good-bg: #ddf2e5; --info: #9d4b73; --info-bg: #fbe9f8;
+  --shadow-card: 0 1px 2px rgba(0,0,0,.12); --shadow-lg: 0 8px 24px rgba(0,0,0,.2);
+  --logo-dark: none; --logo-light: inline; color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--surface); color: var(--ink); font: 400 14px/1.7 var(--f-body); }
+a { color: var(--accent-text); text-underline-offset: 3px; transition: color .15s var(--ease); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.num { font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; letter-spacing: -.02em; text-wrap: balance; margin: 0; line-height: 1.15; }
+h3 { font-weight: 600; letter-spacing: 0; }
+.eyebrow { font: 600 12px/1.4 var(--f-body); text-transform: uppercase; letter-spacing: .06em; color: var(--accent-text); }
+.caption { font: 500 11px/1.5 var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); }
+:root[lang="he"] .eyebrow, :root[lang="he"] .caption { letter-spacing: 0; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* header */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line-subtle); }
+.bar-row { display: flex; align-items: center; gap: 16px; padding-block: 14px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.brand img { height: 28px; width: auto; }
+.brand .logo-d { display: var(--logo-dark); } .brand .logo-l { display: var(--logo-light); }
+.brand .div { width: 1px; height: 22px; background: var(--line); }
+.brand .name { font: 600 15px var(--f-display); color: var(--ink-2); white-space: nowrap; }
+.fresh { display: flex; gap: 8px; align-items: center; color: var(--ink-3); font-size: 12px; flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
+.dot.stale { background: var(--warn); }
+.spacer { flex: 1; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-strong); background: transparent; padding: 8px 18px; border-radius: 9999px; cursor: pointer; font: 600 13px var(--f-body); white-space: nowrap; transition: opacity .15s var(--ease), transform .15s var(--ease), border-color .15s var(--ease); }
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: scale(.98); }
+.btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-size: 14px; }
+.btn.primary:hover { opacity: .85; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.lang { padding-inline: 14px; font-family: "Heebo", var(--f-body); }
+.tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-block: 0 14px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { border: 0; background: var(--tag); color: var(--ink-2); padding: 7px 16px; border-radius: 9999px; cursor: pointer; font: 500 13.5px var(--f-body); white-space: nowrap; display: inline-flex; gap: 8px; align-items: center; transition: background .15s var(--ease); }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.tab .ct { font: 700 11.5px var(--f-display); opacity: .8; }
+.tab .ct.hot { color: var(--crit); opacity: 1; }
+.tab[aria-selected="true"] .ct.hot { color: var(--on-accent); }
+
+main { padding-block: 32px 80px; }
+.panel { display: grid; gap: 24px; }
+.card { background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; box-shadow: var(--shadow-card); min-width: 0; }
+.card-h { display: flex; align-items: baseline; gap: 6px 12px; padding: 22px 24px 0; flex-wrap: wrap; }
+.card-h h2 { font-size: 22px; }
+.card-h .sub { color: var(--ink-3); font-size: 12.5px; }
+.card-b { padding: 16px 24px 24px; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 24px; }
+@media (max-width: 960px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+/* briefing */
+.brief { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; padding: 32px; }
+.brief h2 { font-size: clamp(28px, 4vw, 44px); line-height: 1.1; margin: 8px 0 16px; max-width: 22ch; }
+.brief .text { color: var(--ink-2); max-width: 72ch; }
+.brief .text p { margin: 0 0 8px; }
+.brief .text h4 { font: 600 15px var(--f-display); color: var(--ink); margin: 14px 0 4px; letter-spacing: 0; }
+.brief .text ul { margin: 0 0 6px; padding-inline-start: 20px; }
+.brief .meta { font-size: 12px; color: var(--ink-3); margin-top: 10px; }
+.sevstack { display: grid; grid-template-columns: repeat(3, auto); gap: 10px; align-content: start; }
+.sev { padding: 14px 18px; border-radius: 12px; min-width: 104px; cursor: pointer; border: 0; text-align: start; transition: transform .15s var(--ease); }
+.sev:hover { transform: translateY(-2px); }
+.sev b { display: block; font: 700 36px/1 var(--f-display); }
+.sev span { font: 500 12px var(--f-body); }
+.sev.high { background: var(--crit-bg); color: var(--crit); }
+.sev.medium { background: var(--warn-bg); color: var(--warn); }
+.sev.low { background: var(--info-bg); color: var(--info); }
+@media (max-width: 720px) { .brief { grid-template-columns: minmax(0, 1fr); padding: 24px 20px; } }
+
+/* KPI stat blocks */
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; padding: 20px; min-width: 0; box-shadow: var(--shadow-card); }
+.kpi .v { font: 700 30px/1 var(--f-display); color: var(--accent-text); margin-top: 10px; font-variant-numeric: tabular-nums; }
+.kpi .d { font-size: 12px; color: var(--ink-3); margin-top: 8px; }
+.up { color: var(--good); } .down { color: var(--crit); }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi .v { font-size: 26px; } }
+
+/* alerts */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip { border: 0; background: var(--tag); border-radius: 9999px; padding: 5px 14px; font: 500 12.5px var(--f-body); cursor: pointer; color: var(--ink-2); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.chip .n { font-family: var(--f-display); font-weight: 700; margin-inline-start: 4px; }
+.alist { display: grid; }
+.alert { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; padding: 16px 0; border-top: 1px solid var(--line-subtle); align-items: start; }
+.alert:first-child { border-top: 0; padding-top: 4px; }
+.alert > .pill { margin-top: 2px; }
+.alert .t { font-weight: 600; color: var(--ink); line-height: 1.5; }
+.alert .dt { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.alert .am { display: flex; gap: 6px 12px; flex-wrap: wrap; font-size: 11.5px; color: var(--ink-3); margin-top: 8px; align-items: center; }
+.alert .side { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.alert.acked { opacity: .45; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1 var(--f-body); padding: 5px 10px; border-radius: 9999px; white-space: nowrap; background: var(--tag); color: var(--ink-2); }
+.pill.pd::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.crit, .pill.high, .pill.risk, .pill.expired, .pill.critical { background: var(--crit-bg); color: var(--crit); }
+.pill.warn, .pill.medium, .pill.watch, .pill.soon { background: var(--warn-bg); color: var(--warn); }
+.pill.good, .pill.ok, .pill.renewed { background: var(--good-bg); color: var(--good); }
+.pill.low, .pill.info, .pill.unknown { background: var(--info-bg); color: var(--info); }
+.pill.mute { background: var(--tag); color: var(--ink-3); }
+.link-btn { background: none; border: 0; padding: 0; color: var(--accent-text); cursor: pointer; font: 500 12px var(--f-body); }
+.link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
+.link-btn.arrow::after { content: " →"; }
+:root[dir="rtl"] .link-btn.arrow::after { content: " ←"; }
+
+/* timeline (always drawn left-to-right: time runs left to right) */
+.tl { overflow-x: auto; direction: ltr; }
+.tl svg { display: block; min-width: 640px; width: 100%; height: auto; }
+.tl text { fill: var(--ink-3); font: 500 11px var(--f-body); }
+.tl .lbl { fill: var(--ink); font: 600 12.5px var(--f-body); }
+.tl .grid { stroke: var(--line-subtle); }
+.tl .today { stroke: var(--accent); stroke-dasharray: 3 3; }
+.tl .todayl { fill: var(--accent-text); font-weight: 600; }
+.tl rect.bar { cursor: pointer; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); margin-top: 12px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-inline-end: 6px; vertical-align: -1px; }
+
+/* client cards */
+.cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+.cl { text-align: start; background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; padding: 20px; cursor: pointer; display: grid; gap: 10px; min-width: 0; box-shadow: var(--shadow-card); transition: transform .15s var(--ease), border-color .15s var(--ease); }
+.cl:hover { transform: translateY(-2px); border-color: var(--line); }
+.cl .top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.cl .nm { font: 700 19px/1.2 var(--f-display); letter-spacing: -.01em; }
+.cl .dom { font-size: 12px; color: var(--ink-3); direction: ltr; text-align: start; unicode-bidi: plaintext; }
+.cl .hl { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 3.2em; }
+.cl .stats { display: flex; justify-content: space-between; align-items: end; gap: 8px; }
+.cl .stats .num { font-size: 17px; font-weight: 700; }
+.cl .foot { display: flex; gap: 6px; flex-wrap: wrap; }
+.spark { display: block; direction: ltr; }
+.spark .area { fill: var(--accent); opacity: .14; }
+.spark .ln { fill: none; stroke: var(--accent); stroke-width: 2; }
+.spark .end { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.search { flex: 1 1 240px; min-width: 0; border: 1px solid var(--line-strong); background: transparent; border-radius: 8px; padding: 9px 14px; font: inherit; color: var(--ink); }
+.search::placeholder { color: var(--ink-3); }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: start; font: 500 11px var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; cursor: pointer; user-select: none; }
+:root[lang="he"] th { letter-spacing: 0; }
+td { padding: 12px; border-bottom: 1px solid var(--line-subtle); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: end; }
+td.num { font-weight: 700; }
+td .sub { color: var(--ink-3); font-size: 12px; }
+tbody tr:hover { background: var(--line-subtle); }
+
+/* bars */
+.hbars { display: grid; gap: 10px; }
+.hb { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr) 76px; gap: 12px; align-items: center; font-size: 12.5px; }
+.hb .track { height: 10px; background: var(--tag); border-radius: 4px; overflow: hidden; }
+.hb .fill { height: 100%; background: var(--accent); border-start-end-radius: 4px; border-end-end-radius: 4px; display: block; }
+.hb .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb .num { text-align: end; font-weight: 700; }
+
+/* drawer */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
+.drawer { position: fixed; top: 0; bottom: 0; inset-inline-end: 0; width: min(660px, 100%); background: var(--raised); z-index: 41; overflow-y: auto; border-inline-start: 1px solid var(--line); box-shadow: var(--shadow-lg); padding: calc(24px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); display: grid; gap: 22px; align-content: start; }
+.drawer > * { min-width: 0; }
+.drawer h2 { font-size: 36px; }
+.drawer .spark { width: 100%; height: auto; }
+.drawer h3 { font-size: 16px; margin-bottom: 8px; }
+.drawer ul { margin: 0; padding-inline-start: 18px; color: var(--ink-2); }
+.drawer li { margin: 4px 0; }
+.mgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.m { background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; padding: 12px 14px; }
+.m .v { font: 700 22px var(--f-display); color: var(--accent-text); }
+.m .l { font-size: 11.5px; color: var(--ink-3); }
+.close { position: sticky; top: 0; justify-self: end; background: var(--raised); }
+@media (max-width: 520px) { .mgrid { grid-template-columns: minmax(0, 1fr); } .drawer h2 { font-size: 28px; } }
+
+/* chat */
+.chat { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 580px; }
+.msgs { padding: 8px 24px 20px; display: grid; gap: 16px; align-content: start; overflow-y: auto; max-height: 64vh; }
+.msg { max-width: 860px; }
+.msg.me { justify-self: end; background: var(--tag); padding: 10px 16px; border-radius: 16px 16px 4px 16px; }
+:root[dir="rtl"] .msg.me { border-radius: 16px 16px 16px 4px; }
+.msg.ai .who { margin-bottom: 4px; }
+.msg.ai p { margin: 0 0 8px; color: var(--ink-2); }
+.msg.ai strong { color: var(--ink); }
+.msg.ai ul, .msg.ai ol { margin: 0 0 8px; padding-inline-start: 20px; color: var(--ink-2); }
+.msg.ai h4 { font: 600 16px var(--f-display); margin: 12px 0 4px; }
+.msg.ai code { font-size: 12.5px; background: var(--tag); padding: 1px 5px; border-radius: 4px; }
+.msg.ai table { margin: 6px 0 10px; font-size: 12.5px; }
+.steps { font-size: 12px; color: var(--ink-3); display: grid; gap: 2px; margin-top: 6px; }
+.compose { display: flex; gap: 10px; padding: 14px 24px 20px; border-top: 1px solid var(--line-subtle); align-items: flex-end; }
+.compose textarea { flex: 1; min-width: 0; resize: vertical; min-height: 48px; max-height: 200px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); border-radius: 8px; padding: 11px 14px; font: inherit; }
+.suggest { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 24px 0; }
+.empty { color: var(--ink-3); padding: 20px; text-align: center; font-size: 13px; }
+.note { font-size: 12px; color: var(--ink-3); }
+.toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--raised); color: var(--ink); border: 1px solid var(--line); box-shadow: var(--shadow-lg); padding: 10px 18px; border-radius: 9999px; z-index: 60; font-size: 13px; max-width: calc(100% - 32px); }
+.live { display: grid; gap: 10px; }
+.lv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 16px; border-radius: 12px; background: var(--tag); }
+.lv .v { font: 700 28px var(--f-display); color: var(--accent-text); }
+.ltr { direction: ltr; unicode-bidi: isolate; }
+@media (prefers-reduced-motion: no-preference) { .drawer { animation: slide .25s cubic-bezier(0, 0, .25, 1); } @keyframes slide { from { opacity: .4; transform: translateX(var(--slide, 24px)); } } :root[dir="rtl"] .drawer { --slide: -24px; } }
+@media (prefers-reduced-motion: reduce) { .cl, .sev, .btn { transition: none; } .cl:hover, .sev:hover { transform: none; } }
+</style>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="bar-row">
+      <div class="brand">
+        <img class="logo-d" src="%%LOGO_WHITE%%" alt="Cut Inside">
+        <img class="logo-l" src="%%LOGO_BLACK%%" alt="Cut Inside">
+        <span class="div" aria-hidden="true"></span><span class="name" data-i18n="appName">Control Room</span>
+      </div>
+      <div class="fresh" id="fresh"><span class="dot stale"></span><span data-i18n="waiting">Waiting for data…</span></div>
+      <div class="spacer"></div>
+      <button class="btn lang" id="langBtn" lang="he" title="Switch language">עברית</button>
+      <button class="btn" id="refreshBtn" hidden data-i18n="refreshNow">Refresh now</button>
+      <button class="btn primary" id="askTop" data-i18n="askOpus">Ask Opus</button>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="overview" aria-selected="true"><span data-i18n="tOverview">Overview</span></button>
+      <button class="tab" role="tab" data-tab="alerts"><span data-i18n="tAlerts">Alerts</span> <span class="ct" id="ct-alerts">0</span></button>
+      <button class="tab" role="tab" data-tab="clients"><span data-i18n="tClients">Clients</span> <span class="ct" id="ct-clients">0</span></button>
+      <button class="tab" role="tab" data-tab="contracts"><span data-i18n="tContracts">Contracts</span> <span class="ct" id="ct-contracts">0</span></button>
+      <button class="tab" role="tab" data-tab="tools"><span data-i18n="tTools">Tools</span> <span class="ct" id="ct-tools">0</span></button>
+      <button class="tab" role="tab" data-tab="ask"><span data-i18n="askOpus">Ask Opus</span></button>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+  <section class="panel" data-panel="overview">
+    <div class="card brief">
+      <div>
+        <div class="eyebrow" id="briefDate" data-i18n="briefEyebrow">Agency briefing</div>
+        <h2 id="briefTitle" data-i18n="briefEmptyTitle">The briefing appears after the first refresh</h2>
+        <div class="text" id="briefText"><p data-i18n="briefEmptyText">Twice a day a routine reads every client brain and contract in Google Drive, the tools sheet and SurgeOS performance data, then writes what needs attention here.</p></div>
+        <div class="meta" id="briefMeta"></div>
+      </div>
+      <div class="sevstack" id="sevstack"></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2 data-i18n="needsAttention">Needs attention</h2><span class="sub" data-i18n="needsAttentionSub">Highest severity first. Acknowledge what you've handled.</span></div>
+        <div class="card-b"><div class="alist" id="topAlerts"></div>
+          <div style="margin-top:12px"><button class="link-btn arrow" data-goto="alerts" data-i18n="seeAll">See all alerts</button></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i18n="upcomingTitle">Coming up</h2><span class="sub" data-i18n="next90">Renewals and contract ends, next 90 days</span></div>
+        <div class="card-b"><div id="upcoming"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="runway">Contract runway</h2><span class="sub" data-i18n="runwaySub">Each client's latest agreement, from today to its end date</span></div>
+      <div class="card-b"><div class="tl" id="timeline"></div>
+        <div class="legend"><span><i style="background:var(--crit)"></i><span data-i18n="lg1">Ends within 30 days or expired</span></span><span><i style="background:var(--warn)"></i><span data-i18n="lg2">31–90 days</span></span><span><i style="background:var(--accent)"></i><span data-i18n="lg3">More than 90 days</span></span><span><i style="background:var(--info)"></i><span data-i18n="lg4">No end date in the contract</span></span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="health">Portfolio health</h2><span class="sub" data-i18n="healthSub">Organic clicks, last 28 days vs the 28 before (Search Console via SurgeOS)</span></div>
+      <div class="card-b"><div class="cgrid" id="healthGrid"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="alerts" hidden>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="allAlerts">All alerts</h2><span class="sub" id="alertsSub"></span></div>
+      <div class="card-b"><div class="filters" id="alertFilters" style="margin-bottom:12px"></div><div class="alist" id="allAlerts"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="clients" hidden>
+    <div class="toolbar"><input class="search" id="clientSearch" type="search" data-i18n-ph="searchPh" placeholder="Search clients, domains, issues…" aria-label="Search clients"><div class="filters" id="clientFilters"></div></div>
+    <div class="cgrid" id="clientGrid"></div>
+  </section>
+
+  <section class="panel" data-panel="contracts" hidden>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="tContracts">Contracts</h2><span class="sub" data-i18n="contractsSub">Found in Google Drive. "Inferred" end dates were computed from start date + term.</span></div>
+      <div class="card-b tbl-wrap"><table id="contractTable"></table></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="tools" hidden>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-h"><h2 data-i18n="moneyTitle">Where the money goes</h2><span class="sub" data-i18n="moneySub">Top paid tools by yearly cost, from the Tools Database sheet</span></div>
+        <div class="card-b"><div class="hbars" id="spendBars"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 data-i18n="liveTitle">Live checks</h2><span class="sub" data-i18n="liveSub">Balances and usage read from the tools themselves</span></div>
+        <div class="card-b"><div class="live" id="liveChecks"></div><p class="note" style="margin:12px 0 0" data-i18n="liveNote">Tools without an API or connector can't be checked automatically yet. Their usage is tracked from the sheet.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2 data-i18n="allTools">All tools</h2><span class="sub" id="toolsSub"></span><span class="spacer"></span><a href="https://docs.google.com/spreadsheets/d/1NhlhJMoLFvQws1Bzim9iDHCJghsQUEhcXBngqj2FnBU/edit" target="_blank" rel="noopener" data-i18n="openSheet">Open the sheet</a></div>
+      <div class="card-b"><div class="filters" id="toolFilters" style="margin-bottom:10px"></div><div class="tbl-wrap"><table id="toolTable"></table></div></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="ask" hidden>
+    <div class="card chat">
+      <div>
+        <div class="card-h"><h2 data-i18n="askOpus">Ask Opus</h2><span class="sub" id="askSub" data-i18n="askSub">Answers from the dashboard data, with live lookups in SurgeOS and Google Drive when needed.</span></div>
+        <div class="suggest" id="suggest"></div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <form class="compose" id="compose">
+        <textarea id="q" rows="2" data-i18n-ph="askPh" placeholder="e.g. Which clients are at risk of churning this quarter, and why?" aria-label="Your question"></textarea>
+        <button class="btn" type="button" id="stopBtn" hidden data-i18n="stop">Stop</button>
+        <button class="btn primary" type="submit" id="sendBtn" data-i18n="send">Send</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-modal="true" role="dialog"></aside>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  // ---------------------------------------------------------------- i18n
+  const I18N = {
+    en: {
+      appName: "Control Room", waiting: "Waiting for data…", refreshNow: "Refresh now", askOpus: "Ask Opus",
+      tOverview: "Overview", tAlerts: "Alerts", tClients: "Clients", tContracts: "Contracts", tTools: "Tools",
+      briefEyebrow: "Agency briefing", briefEmptyTitle: "The briefing appears after the first refresh",
+      briefEmptyText: "Twice a day a routine reads every client brain and contract in Google Drive, the tools sheet and SurgeOS performance data, then writes what needs attention here.",
+      needsAttention: "Needs attention", needsAttentionSub: "Highest severity first. Acknowledge what you've handled.", seeAll: "See all alerts",
+      upcomingTitle: "Coming up", next90: "Renewals and contract ends, next 90 days", runway: "Contract runway", runwaySub: "Each client's latest agreement, from today to its end date",
+      lg1: "Ends within 30 days or expired", lg2: "31–90 days", lg3: "More than 90 days", lg4: "No end date in the contract",
+      health: "Portfolio health", healthSub: "Organic clicks, last 28 days vs the 28 before (Search Console via SurgeOS)",
+      allAlerts: "All alerts", searchPh: "Search clients, domains, issues…", contractsSub: "Found in Google Drive. \"Inferred\" end dates were computed from start date + term.",
+      moneyTitle: "Where the money goes", moneySub: "Top paid tools by yearly cost, from the Tools Database sheet", liveTitle: "Live checks", liveSub: "Balances and usage read from the tools themselves",
+      liveNote: "Tools without an API or connector can't be checked automatically yet. Their usage is tracked from the sheet.", allTools: "All tools", openSheet: "Open the sheet",
+      askSub: "Answers from the dashboard data, with live lookups in SurgeOS and Google Drive when needed.", askPh: "e.g. Which clients are at risk of churning this quarter, and why?", stop: "Stop", send: "Send",
+      updated: "Updated {0}", gscThrough: "GSC data through {0}", openInClaude: "Open this dashboard in Claude, signed in, to load agency data.",
+      sevHigh: "Urgent", sevMedium: "Watch", sevLow: "FYI",
+      catContracts: "Contracts", catClients: "Client brain", catPerformance: "Performance", catTools: "Tools", catAgency: "Agency ops",
+      kClients: "Active clients", kAtRisk: "{0} at risk", kEnding: "Contracts ending ≤90d", kExpired: "{0} already expired", kOnFile: "{0} on file",
+      kClicks: "Organic clicks · 28d", kVsPrior: "vs prior 28 days", kPortfolio: "portfolio total", kSpend: "Tool spend / year", kPerMonth: "{0} per month", kFromSheet: "from the tools sheet",
+      kRenewals: "Renewals ≤30d", kSubs: "tool subscriptions", kUrgent: "Urgent alerts", kAcked: "{0} acknowledged",
+      noAlerts: "No alerts yet.", allAcked: "Everything is acknowledged.", noMatch: "No alerts match these filters.",
+      ackBy: "Acknowledged by {0} · {1}", acknowledge: "Acknowledge", reopen: "Reopen", openClient: "Open client", source: "Source",
+      inDays: "in {0}d", daysAgo: "{0}d ago", today: "today", inDaysLong: "in {0} days", daysAgoLong: "{0} days ago",
+      uContract: "Contract", uNotice: "Notice", uTool: "Tool", uEnds: "ends", uEnded: "ended", uNoticeDl: "notice deadline", uRenews: "renews · {0}/yr", uExpires: "expires · auto-renew off", nothing90: "Nothing in the next 90 days.",
+      noEnd: "end date unknown", expiredAgo: "expired {0} days ago", todayLbl: "Today", noContractsYet: "Contracts appear here once found in Drive.", loading: "Client data loads here.",
+      stRisk: "At risk", stWatch: "Watch", stGood: "Healthy", noContract: "No contract on file", contractNoEnd: "Contract · no end date", contractEnded: "Contract ended", contractDays: "Contract {0}d",
+      alertsN: "{0} alert", alertsNs: "{0} alerts", clicks: "clicks", d28: "28 days",
+      fAll: "All", fAnySev: "Any severity", fShowAcked: "Show acknowledged", alertsTotal: "{0} total · {1} acknowledged",
+      fNoContract: "No contract", noClients: "No clients match.",
+      dBrain: "From the client brain", dBrainUpdated: "Brain last updated {0}", dNoBrain: "No client brain found in Drive for this client yet.", dAskAbout: "Ask Opus about {0}",
+      dOrganic: "Organic search", d7: "Last 7 days", d28l: "Last 28 days", d90: "Last 90 days", pos: "pos", dAlerts: "Alerts", dWins: "Wins", dOkrs: "OKRs", dDelivery: "Delivery",
+      dOpen: "Open tasks", dOverdue: "Overdue", dHours: "Hours used / budget", dContract: "Contract", dNoContract: "No contract found in Drive.", dFacts: "Key facts", dUpcoming: "Coming up", dPeople: "People",
+      dDocs: "Brain documents", dBrainFolder: "Open the brain folder", dClientFolder: "Client folder", close: "Close", autoRenews: "auto-renews", noticeD: "{0}d notice", perMo: "/mo",
+      okOn: "on track", okAt: "at risk", okOff: "off track", okUnknown: "unknown",
+      cClient: "Client", cDoc: "Document", cStatus: "Status", cEnds: "Ends", cDays: "Days left", cNotice: "Notice by", cAuto: "Auto-renew", cFee: "Fee / month", older: "older agreement", conf: "{0} confidence", inferred: "inferred", total: "total", yes: "Yes", no: "No",
+      csExpired: "Expired", csCritical: "≤30 days", csSoon: "≤90 days", csOk: "Active", csRenewed: "Auto-renewed", csUnknown: "No end date", noContracts: "No contracts found yet.",
+      tfAttention: "Needs attention", tfPaying: "Paying", tfAll: "All", tfCancelled: "Not paying", toolsSubT: "{0} tools · {1} paid · {2} per month",
+      tTool: "Tool", tStatus: "Status", tYear: "Per year", tBilling: "Billing", tRenewal: "Next renewal", tAuto: "Auto-renew", tAdmin: "Admin", tNotes: "Notes",
+      paying: "Paying", notPaying: "Not paying", on: "On", off: "Off", lapsed: "lapsed {0}d ago", projected: "projected", noTools: "No tools match.",
+      otherTools: "{0} other tools", spendTotal: "Total {0} per year across {1} paid tools.", spendTop: "{0} alone is {1}% of it.", noCost: "No cost data.", checked: "Checked {0} via {1}", noLive: "No live checks yet.",
+      justNow: "just now", minAgo: "{0} min ago", hAgo: "{0} h ago", dAgo: "{0} d ago",
+      thinking: "Thinking…", who: "Opus", unavailable: "Asking Opus needs this page open inside Claude while signed in.",
+      eNotGranted: "Claude access wasn't allowed for this page, so Opus can't answer here.", eDisabled: "Claude isn't available for this account.", eRate: "You've hit a usage limit. Try again in a few minutes.",
+      eSession: "Your session expired. Sign in to Claude again.", eTooLarge: "The question plus the dashboard data is too large. Ask about fewer clients at once.", eRefused: "Opus declined that request. Rephrase it.",
+      eCancelled: "Stopped.", eOther: "Something interrupted the answer. Send it again.", truncated: "The answer was cut short. Ask a narrower question for the rest.", tierNote: "Answered by the {0} model tier (Opus wasn't available for this account).",
+      askAlert: "Help me handle this alert: \"{0}\" — {1}. What's the context, how serious is it, and what exactly should I do next?",
+      askClient: "Give me a full status brief on {0}: relationship health, performance and why, contract status, open risks, and the 3 things we should do next.",
+      sugg: ["What are the 5 most important things I should deal with this week?", "Which contracts end in the next 90 days and what's the renewal risk for each?", "Which clients look at risk of churning, based on the brains and the performance data?", "Where are we overspending on tools? What could we cancel or downgrade?", "Why did the clients with the biggest click drops this month drop? Check SurgeOS."],
+      starting: "Starting…", refreshStarted: "Refresh started. New data lands here in about 20–40 minutes.", refreshRunning: "Refresh running", refreshFail: "Couldn't start the refresh. Try again.",
+      rNotConnected: "Connect Claude Code Remote in claude.ai Settings → Connectors to refresh from here.", rReauth: "Reconnect Claude Code Remote in claude.ai Settings → Connectors.", rNotAllowed: "Refreshing isn't allowed for this view.",
+      signIn: "Sign in to Claude to acknowledge alerts.", viewOnly: "You have view-only access, so you can't acknowledge alerts.", saveFail: "Couldn't save that. Try again.", teammate: "a teammate", you: "you",
+      writtenBy: "Written by {0} from the latest refresh", lang: "עברית", langTitle: "החלפה לעברית",
+    },
+    he: {
+      appName: "חדר בקרה", waiting: "ממתין לנתונים…", refreshNow: "רענון עכשיו", askOpus: "שאל את Opus",
+      tOverview: "סקירה", tAlerts: "התראות", tClients: "לקוחות", tContracts: "חוזים", tTools: "כלים",
+      briefEyebrow: "תדריך סוכנות", briefEmptyTitle: "התדריך יופיע אחרי הרענון הראשון",
+      briefEmptyText: "פעמיים ביום שגרה קוראת את כל ה-client brains והחוזים ב-Google Drive, את גיליון הכלים ואת נתוני הביצועים מ-SurgeOS, וכותבת כאן מה דורש תשומת לב.",
+      needsAttention: "דורש טיפול", needsAttentionSub: "החמור ביותר קודם. סמנו מה שכבר טופל.", seeAll: "לכל ההתראות",
+      upcomingTitle: "בקרוב", next90: "חידושים וסיומי חוזים ב-90 הימים הקרובים", runway: "מסלול החוזים", runwaySub: "ההסכם העדכני של כל לקוח, מהיום ועד תאריך הסיום",
+      lg1: "מסתיים תוך 30 יום או פג", lg2: "31–90 יום", lg3: "יותר מ-90 יום", lg4: "אין תאריך סיום בחוזה",
+      health: "בריאות התיק", healthSub: "קליקים אורגניים, 28 הימים האחרונים מול 28 הקודמים (Search Console דרך SurgeOS)",
+      allAlerts: "כל ההתראות", searchPh: "חיפוש לקוח, דומיין, בעיה…", contractsSub: "נמצאו ב-Google Drive. תאריכי סיום \"מחושבים\" חושבו מתאריך ההתחלה + תקופת ההסכם.",
+      moneyTitle: "לאן הולך הכסף", moneySub: "הכלים היקרים ביותר בעלות שנתית, מגיליון הכלים", liveTitle: "בדיקות חיות", liveSub: "יתרות ושימוש שנקראו ישירות מהכלים",
+      liveNote: "כלים בלי API או חיבור עדיין לא נבדקים אוטומטית. השימוש בהם נלקח מהגיליון.", allTools: "כל הכלים", openSheet: "לגיליון",
+      askSub: "תשובות מנתוני הדשבורד, עם שליפות חיות מ-SurgeOS ומ-Google Drive כשצריך.", askPh: "למשל: אילו לקוחות בסיכון לעזוב ברבעון הזה, ולמה?", stop: "עצור", send: "שלח",
+      updated: "עודכן {0}", gscThrough: "נתוני GSC עד {0}", openInClaude: "פתחו את הדשבורד בתוך Claude, מחוברים, כדי לטעון את נתוני הסוכנות.",
+      sevHigh: "דחוף", sevMedium: "למעקב", sevLow: "לידיעה",
+      catContracts: "חוזים", catClients: "Client brain", catPerformance: "ביצועים", catTools: "כלים", catAgency: "תפעול סוכנות",
+      kClients: "לקוחות פעילים", kAtRisk: "{0} בסיכון", kEnding: "חוזים שמסתיימים ≤90 יום", kExpired: "{0} כבר פגו", kOnFile: "{0} בתיק",
+      kClicks: "קליקים אורגניים · 28 יום", kVsPrior: "מול 28 הימים הקודמים", kPortfolio: "סה\"כ התיק", kSpend: "הוצאה על כלים / שנה", kPerMonth: "{0} לחודש", kFromSheet: "מגיליון הכלים",
+      kRenewals: "חידושים ≤30 יום", kSubs: "מנויים לכלים", kUrgent: "התראות דחופות", kAcked: "{0} טופלו",
+      noAlerts: "אין עדיין התראות.", allAcked: "הכול סומן כטופל.", noMatch: "אין התראות שמתאימות לסינון.",
+      ackBy: "סומן כטופל ע\"י {0} · {1}", acknowledge: "סמן כטופל", reopen: "פתח מחדש", openClient: "ללקוח", source: "מקור",
+      inDays: "בעוד {0} ימים", daysAgo: "לפני {0} ימים", today: "היום", inDaysLong: "בעוד {0} ימים", daysAgoLong: "לפני {0} ימים",
+      uContract: "חוזה", uNotice: "הודעה", uTool: "כלי", uEnds: "מסתיים", uEnded: "הסתיים", uNoticeDl: "מועד אחרון למתן הודעה", uRenews: "מתחדש · {0} לשנה", uExpires: "פג · חידוש אוטומטי כבוי", nothing90: "אין כלום ב-90 הימים הקרובים.",
+      noEnd: "אין תאריך סיום", expiredAgo: "פג לפני {0} ימים", todayLbl: "היום", noContractsYet: "חוזים יופיעו כאן אחרי שיימצאו ב-Drive.", loading: "נתוני הלקוחות נטענים כאן.",
+      stRisk: "בסיכון", stWatch: "למעקב", stGood: "תקין", noContract: "אין חוזה בתיק", contractNoEnd: "חוזה · ללא תאריך סיום", contractEnded: "החוזה הסתיים", contractDays: "חוזה · {0} ימים",
+      alertsN: "התראה אחת", alertsNs: "{0} התראות", clicks: "קליקים", d28: "28 יום",
+      fAll: "הכול", fAnySev: "כל החומרות", fShowAcked: "הצג גם שטופלו", alertsTotal: "{0} סה\"כ · {1} טופלו",
+      fNoContract: "ללא חוזה", noClients: "אין לקוחות שמתאימים.",
+      dBrain: "מה-client brain", dBrainUpdated: "ה-brain עודכן לאחרונה ב-{0}", dNoBrain: "עדיין לא נמצא client brain ב-Drive ללקוח הזה.", dAskAbout: "שאל את Opus על {0}",
+      dOrganic: "חיפוש אורגני", d7: "7 ימים אחרונים", d28l: "28 ימים אחרונים", d90: "90 ימים אחרונים", pos: "מיקום", dAlerts: "התראות", dWins: "הצלחות", dOkrs: "OKRs", dDelivery: "ביצוע",
+      dOpen: "משימות פתוחות", dOverdue: "באיחור", dHours: "שעות בפועל / תקציב", dContract: "חוזה", dNoContract: "לא נמצא חוזה ב-Drive.", dFacts: "עובדות מפתח", dUpcoming: "בקרוב", dPeople: "אנשי קשר",
+      dDocs: "מסמכי ה-brain", dBrainFolder: "לתיקיית ה-brain", dClientFolder: "תיקיית הלקוח", close: "סגור", autoRenews: "מתחדש אוטומטית", noticeD: "הודעה מוקדמת {0} ימים", perMo: "/חודש",
+      okOn: "בדרך", okAt: "בסיכון", okOff: "לא בדרך", okUnknown: "לא ידוע",
+      cClient: "לקוח", cDoc: "מסמך", cStatus: "סטטוס", cEnds: "מסתיים", cDays: "ימים שנותרו", cNotice: "הודעה עד", cAuto: "חידוש אוטומטי", cFee: "תשלום חודשי", older: "הסכם קודם", conf: "רמת ביטחון: {0}", inferred: "מחושב", total: "סה\"כ", yes: "כן", no: "לא",
+      csExpired: "פג", csCritical: "≤30 יום", csSoon: "≤90 יום", csOk: "פעיל", csRenewed: "חודש אוטומטית", csUnknown: "ללא תאריך סיום", noContracts: "עדיין לא נמצאו חוזים.",
+      tfAttention: "דורש טיפול", tfPaying: "בתשלום", tfAll: "הכול", tfCancelled: "לא בתשלום", toolsSubT: "{0} כלים · {1} בתשלום · {2} לחודש",
+      tTool: "כלי", tStatus: "סטטוס", tYear: "לשנה", tBilling: "חיוב", tRenewal: "חידוש הבא", tAuto: "חידוש אוטומטי", tAdmin: "אדמין", tNotes: "הערות",
+      paying: "בתשלום", notPaying: "לא בתשלום", on: "פעיל", off: "כבוי", lapsed: "פג לפני {0} ימים", projected: "משוער", noTools: "אין כלים שמתאימים.",
+      otherTools: "{0} כלים נוספים", spendTotal: "סה\"כ {0} לשנה על {1} כלים בתשלום.", spendTop: "{0} לבדו הוא {1}% מזה.", noCost: "אין נתוני עלות.", checked: "נבדק {0} דרך {1}", noLive: "אין עדיין בדיקות חיות.",
+      justNow: "עכשיו", minAgo: "לפני {0} דק'", hAgo: "לפני {0} שע'", dAgo: "לפני {0} ימים",
+      thinking: "חושב…", who: "Opus", unavailable: "כדי לשאול את Opus צריך לפתוח את הדף בתוך Claude, מחוברים.",
+      eNotGranted: "לא ניתנה לדף הרשאה ל-Claude, ולכן Opus לא יכול לענות כאן.", eDisabled: "Claude לא זמין בחשבון הזה.", eRate: "הגעתם למגבלת שימוש. נסו שוב בעוד כמה דקות.",
+      eSession: "פג תוקף ההתחברות. התחברו שוב ל-Claude.", eTooLarge: "השאלה יחד עם נתוני הדשבורד גדולה מדי. שאלו על פחות לקוחות בבת אחת.", eRefused: "Opus סירב לבקשה. נסחו אותה מחדש.",
+      eCancelled: "נעצר.", eOther: "התשובה נקטעה. שלחו שוב.", truncated: "התשובה נקטעה. שאלו שאלה ממוקדת יותר כדי לקבל את ההמשך.", tierNote: "ענה מודל בדרגת {0} (Opus לא היה זמין לחשבון הזה).",
+      askAlert: "עזור לי לטפל בהתראה הזו: \"{0}\" — {1}. מה ההקשר, כמה זה חמור, ומה בדיוק לעשות עכשיו?",
+      askClient: "תן לי תמונת מצב מלאה על {0}: מצב היחסים, ביצועים ולמה, מצב החוזה, סיכונים פתוחים, ו-3 הדברים שצריך לעשות עכשיו.",
+      sugg: ["מה 5 הדברים הכי חשובים שאני צריך לטפל בהם השבוע?", "אילו חוזים מסתיימים ב-90 הימים הקרובים ומה סיכון החידוש בכל אחד?", "אילו לקוחות נראים בסיכון לעזוב, לפי ה-brains ונתוני הביצועים?", "איפה אנחנו מוציאים יותר מדי על כלים? מה אפשר לבטל או להוריד מסלול?", "למה ירדו הקליקים אצל הלקוחות עם הירידה הכי גדולה החודש? תבדוק ב-SurgeOS."],
+      starting: "מתחיל…", refreshStarted: "הרענון התחיל. הנתונים החדשים יגיעו בעוד כ-20–40 דקות.", refreshRunning: "רענון רץ", refreshFail: "לא הצלחתי להתחיל את הרענון. נסו שוב.",
+      rNotConnected: "חברו את Claude Code Remote ב-claude.ai, בהגדרות → Connectors, כדי לרענן מכאן.", rReauth: "חברו מחדש את Claude Code Remote ב-claude.ai, בהגדרות → Connectors.", rNotAllowed: "אין הרשאה לרענן מהתצוגה הזו.",
+      signIn: "התחברו ל-Claude כדי לסמן התראות.", viewOnly: "יש לכם הרשאת צפייה בלבד, ולכן אי אפשר לסמן התראות.", saveFail: "השמירה נכשלה. נסו שוב.", teammate: "חבר צוות", you: "את/ה",
+      writtenBy: "נכתב ע\"י {0} מהרענון האחרון", lang: "English", langTitle: "Switch to English",
+    },
+  };
+  let LANG = "en";
+  try { if (localStorage.getItem("ci.lang") === "he") LANG = "he"; } catch (e) {}
+  const t = (k, ...v) => { let s = (I18N[LANG][k] ?? I18N.en[k] ?? k); return typeof s === "string" ? s.replace(/\{(\d)\}/g, (_, i) => v[i] ?? "") : s; };
+  const L = (o, f) => (LANG === "he" && o?.he?.[f]) || o?.[f];   // localized data field with English fallback
+  const LOC = () => (LANG === "he" ? "he-IL" : "en-GB");
+
+  const S = { meta: null, briefing: null, clients: [], contracts: [], tools: [], alerts: [], acks: {}, names: {} };
+  const UI = { tab: "overview", alertCat: "all", alertSev: "all", showAcked: false, clientFilter: "all", toolFilter: "attention", contractSort: "daysLeft", toolSort: "daysToRenewal" };
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const SEV = { high: 0, medium: 1, low: 2 };
+  const SEVL = { high: "sevHigh", medium: "sevMedium", low: "sevLow" };
+  const CATL = { contracts: "catContracts", clients: "catClients", performance: "catPerformance", tools: "catTools", agency: "catAgency" };
+  const STL = { risk: "stRisk", watch: "stWatch", good: "stGood" };
+  let db = null, user = null, mcp = null, sample = null, myId = null;
+  try { const tb = localStorage.getItem("ci.tab"); if (tb) UI.tab = tb; } catch (e) {}
+  if (location.hash && /^#[a-z]+$/.test(location.hash) && I18N.en["t" + location.hash[1].toUpperCase() + location.hash.slice(2)]) UI.tab = location.hash.slice(1);
+
+  const today = () => new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
+  const parse = (d) => (d ? new Date(String(d).slice(0, 10) + "T00:00:00Z") : null);
+  const days = (d) => { const x = parse(d); return x ? Math.round((x - today()) / 864e5) : null; };
+  const fmtD = (d) => { const x = parse(d); return x ? x.toLocaleDateString(LOC(), { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : "—"; };
+  const fmtN = (n) => (n == null ? "—" : n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "K" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(Math.round(n)));
+  const fmtUSD = (n) => (n == null ? "—" : "$" + Math.round(n).toLocaleString("en-US"));
+  const fmtMoney = (n, c) => (n == null ? "—" : ({ ILS: "₪", USD: "$", EUR: "€" }[c] || (c ? c + " " : "")) + Math.round(n).toLocaleString("en-US"));
+  const pct = (p) => (p == null ? "" : `<span class="${p >= 0 ? "up" : "down"} ltr">${p >= 0 ? "▲" : "▼"} ${Math.abs(p).toFixed(1)}%</span>`);
+  const ago = (iso) => { if (!iso) return ""; const m = Math.round((Date.now() - new Date(iso)) / 6e4); return m < 2 ? t("justNow") : m < 60 ? t("minAgo", m) : m < 1440 ? t("hAgo", Math.round(m / 60)) : t("dAgo", Math.round(m / 1440)); };
+  const rel = (d) => (d == null ? "" : d === 0 ? t("today") : d > 0 ? t("inDays", d) : t("daysAgo", -d));
+  const isAcked = (a) => !!S.acks[a.id];
+  const toast = (msg) => { const el = $("#toast"); el.textContent = msg; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (el.hidden = true), 3200); };
+
+  function applyLang() {
+    const root = document.documentElement;
+    root.lang = LANG; root.dir = LANG === "he" ? "rtl" : "ltr";
+    $$("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n)));
+    $$("[data-i18n-ph]").forEach((el) => (el.placeholder = t(el.dataset.i18nPh)));
+    const b = $("#langBtn"); b.textContent = t("lang"); b.title = t("langTitle"); b.lang = LANG === "he" ? "en" : "he";
+    if (!sample && sampleChecked) $("#askSub").textContent = t("unavailable");
+    renderAll();
+  }
+
+  let raf = 0;
+  const render = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderAll(); }); };
+  function renderAll() {
+    renderFresh(); renderCounts(); renderBrief(); renderKpis(); renderTopAlerts(); renderUpcoming(); renderTimeline(); renderHealth();
+    if (UI.tab === "alerts") renderAlerts();
+    if (UI.tab === "clients") renderClients();
+    if (UI.tab === "contracts") renderContracts();
+    if (UI.tab === "tools") renderTools();
+    if (UI.tab === "ask") renderSuggest();
+  }
+  function renderFresh() {
+    const m = S.meta; if (!m) return;
+    const stale = Date.now() - new Date(m.updatedAt) > 14 * 36e5;
+    $("#fresh").innerHTML = `<span class="dot ${stale ? "stale" : ""}"></span><span>${esc(t("updated", ago(m.updatedAt)))}</span><span>· ${esc(t("gscThrough", fmtD(m.dataThrough)))}</span>`;
+  }
+  function renderCounts() {
+    const open = S.alerts.filter((a) => !isAcked(a)), hi = open.filter((a) => a.severity === "high").length;
+    const c = $("#ct-alerts"); c.textContent = open.length; c.classList.toggle("hot", hi > 0);
+    $("#ct-clients").textContent = S.clients.length;
+    $("#ct-contracts").textContent = S.contracts.filter((k) => k.isLatest).length;
+    $("#ct-tools").textContent = S.tools.length;
+  }
+
+  function md(src) {
+    const lines = String(src || "").replace(/\r/g, "").split("\n");
+    let out = "", list = null, table = null;
+    const inline = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>").replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    const fl = () => { if (list) { out += `</${list}>`; list = null; } };
+    const ft = () => { if (table) { out += `<div class="tbl-wrap"><table>${table.join("")}</table></div>`; table = null; } };
+    for (const raw of lines) {
+      const l = raw.trimEnd(); let m;
+      if (/^\|.*\|$/.test(l.trim())) { fl(); if (/^\|\s*:?-{2,}/.test(l.trim())) continue; const cells = l.trim().slice(1, -1).split("|").map((c) => inline(c.trim())); if (!table) table = [`<thead><tr>${cells.map((c) => `<th>${c}</th>`).join("")}</tr></thead>`]; else table.push(`<tr>${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`); continue; }
+      ft();
+      if ((m = l.match(/^#{1,4}\s+(.*)/))) { fl(); out += `<h4>${inline(m[1])}</h4>`; }
+      else if ((m = l.match(/^\*\*([^*]+)\*\*\s*$/))) { fl(); out += `<h4>${inline(m[1])}</h4>`; }
+      else if ((m = l.match(/^\s*[-*•]\s+(.*)/))) { if (list !== "ul") { fl(); out += "<ul>"; list = "ul"; } out += `<li>${inline(m[1])}</li>`; }
+      else if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== "ol") { fl(); out += "<ol>"; list = "ol"; } out += `<li>${inline(m[1])}</li>`; }
+      else if (!l.trim()) fl();
+      else { fl(); out += `<p>${inline(l)}</p>`; }
+    }
+    fl(); ft(); return out;
+  }
+
+  // ---------------------------------------------------------------- overview
+  function renderBrief() {
+    const open = S.alerts.filter((a) => !isAcked(a));
+    $("#sevstack").innerHTML = ["high", "medium", "low"].map((s) => `<button class="sev ${s}" data-sev="${s}"><b>${open.filter((a) => a.severity === s).length}</b><span>${t(SEVL[s])}</span></button>`).join("");
+    const b = S.briefing; if (!b) return;
+    $("#briefDate").textContent = t("briefEyebrow") + " · " + new Date(b.generatedAt).toLocaleString(LOC(), { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    $("#briefTitle").textContent = L(b, "title") || t("briefEmptyTitle");
+    $("#briefText").innerHTML = md(L(b, "text"));
+    $("#briefMeta").textContent = b.by ? t("writtenBy", b.by) : "";
+  }
+  function renderKpis() {
+    const m = S.meta, latest = S.contracts.filter((k) => k.isLatest);
+    const ending = latest.filter((k) => k.daysLeft != null && k.daysLeft >= 0 && k.daysLeft <= 90).length;
+    const expired = latest.filter((k) => k.status === "expired").length;
+    const ren30 = S.tools.filter((x) => x.paying && x.daysToRenewal != null && x.daysToRenewal >= 0 && x.daysToRenewal <= 30).length;
+    const risk = S.clients.filter((c) => c.status === "risk").length;
+    let clicks = 0, prev = 0;
+    S.clients.forEach((c) => { const w = c.perf?.w28; if (w?.clicks != null && w.clicksChangePct != null) { clicks += w.clicks; prev += w.clicks / (1 + w.clicksChangePct / 100); } });
+    const pc = prev ? ((clicks - prev) / prev) * 100 : null, sp = m?.spend || {};
+    const k = [
+      [t("kClients"), S.clients.length || "—", t("kAtRisk", risk)],
+      [t("kEnding"), latest.length ? ending : "—", expired ? `<span class="down">${esc(t("kExpired", expired))}</span>` : esc(t("kOnFile", latest.length))],
+      [t("kClicks"), clicks ? fmtN(clicks) : "—", pc == null ? esc(t("kPortfolio")) : pct(pc) + " " + esc(t("kVsPrior"))],
+      [t("kSpend"), sp.yearly ? fmtUSD(sp.yearly) : "—", sp.monthly ? esc(t("kPerMonth", fmtUSD(sp.monthly))) : esc(t("kFromSheet"))],
+      [t("kRenewals"), S.tools.length ? ren30 : "—", esc(t("kSubs"))],
+      [t("kUrgent"), S.alerts.filter((a) => a.severity === "high" && !isAcked(a)).length, esc(t("kAcked", S.alerts.filter(isAcked).length))],
+    ];
+    $("#kpis").innerHTML = k.map(([l, v, d]) => `<div class="kpi"><div class="caption">${esc(l)}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+  }
+  function alertRow(a) {
+    const acked = S.acks[a.id];
+    const by = acked ? (S.names[acked.by] || t("teammate")) : "";
+    const due = a.dueDate ? `<span>${esc(fmtD(a.dueDate))} (${esc(rel(days(a.dueDate)))})</span>` : "";
+    const src = a.sourceUrl ? `<a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.source || t("source"))}</a>` : esc(a.source || "");
+    return `<div class="alert ${esc(a.severity)} ${acked ? "acked" : ""}"><span class="pill pd ${esc(a.severity)}">${esc(t(SEVL[a.severity] || "sevLow"))}</span>
+      <div style="min-width:0"><div class="t">${esc(L(a, "title"))}</div><div class="dt">${esc(L(a, "detail"))}</div>
+      <div class="am"><span class="pill mute">${esc(t(CATL[a.category] || a.category))}</span>${due}${src ? `<span>${src}</span>` : ""}${a.client ? `<button class="link-btn" data-client="${esc(a.client)}">${esc(t("openClient"))}</button>` : ""}${acked ? `<span>${esc(t("ackBy", by, ago(acked.at)))}</span>` : ""}</div></div>
+      <div class="side"><button class="link-btn" data-ack="${esc(a.id)}">${esc(acked ? t("reopen") : t("acknowledge"))}</button><button class="link-btn" data-askalert="${esc(a.id)}">${esc(t("askOpus"))}</button></div></div>`;
+  }
+  const sortAlerts = (l) => l.slice().sort((a, b) => (SEV[a.severity] ?? 3) - (SEV[b.severity] ?? 3) || String(a.dueDate || "9").localeCompare(String(b.dueDate || "9")));
+  function renderTopAlerts() {
+    const l = sortAlerts(S.alerts.filter((a) => !isAcked(a))).slice(0, 7);
+    $("#topAlerts").innerHTML = l.length ? l.map(alertRow).join("") : `<div class="empty">${esc(S.alerts.length ? t("allAcked") : t("noAlerts"))}</div>`;
+  }
+  const clientName = (key) => { const c = S.clients.find((x) => x.key === key); return c ? L(c, "name") || c.name : key; };
+  function renderUpcoming() {
+    const items = [];
+    S.contracts.filter((k) => k.isLatest && k.endDate).forEach((k) => {
+      const d = days(k.endDate);
+      if (d != null && d >= -30 && d <= 90) items.push({ d, date: k.endDate, kind: t("uContract"), name: clientName(k.client), what: d < 0 ? t("uEnded") : t("uEnds"), sev: d <= 30 ? "crit" : "warn", client: k.client });
+      if (k.noticeDeadline) { const n = days(k.noticeDeadline); if (n != null && n >= 0 && n <= 90) items.push({ d: n, date: k.noticeDeadline, kind: t("uNotice"), name: clientName(k.client), what: t("uNoticeDl"), sev: n <= 30 ? "crit" : "warn", client: k.client }); }
+    });
+    S.tools.filter((x) => x.paying && x.nextRenewal).forEach((x) => { const d = days(x.nextRenewal); if (d != null && d >= 0 && d <= 90) items.push({ d, date: x.nextRenewal, kind: t("uTool"), name: x.name, what: x.autoRenew ? t("uRenews", fmtUSD(x.yearlyCost)) : t("uExpires"), sev: !x.autoRenew || d <= 7 ? "crit" : "info" }); });
+    items.sort((a, b) => a.d - b.d);
+    $("#upcoming").innerHTML = items.length ? `<div class="tbl-wrap"><table><tbody>${items.slice(0, 12).map((i) => `<tr><td style="white-space:nowrap"><span class="num" style="font-weight:700">${esc(fmtD(i.date))}</span><div class="sub">${esc(i.d < 0 ? t("daysAgoLong", -i.d) : i.d === 0 ? t("today") : t("inDaysLong", i.d))}</div></td><td>${i.client ? `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(i.client)}">${esc(i.name)}</button>` : `<strong>${esc(i.name)}</strong>`}<div class="sub">${esc(i.what)}</div></td><td style="text-align:end"><span class="pill ${i.sev}">${esc(i.kind)}</span></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">${esc(t("nothing90"))}</div>`;
+  }
+  function renderTimeline() {
+    const rows = S.contracts.filter((k) => k.isLatest).map((k) => ({ k, d: days(k.endDate) })).sort((a, b) => (a.d ?? 9999) - (b.d ?? 9999));
+    if (!rows.length) { $("#timeline").innerHTML = `<div class="empty">${esc(t("noContractsYet"))}</div>`; return; }
+    const W = 1000, Lm = 180, R = 20, rh = 28, top = 34, H = top + rows.length * rh + 10;
+    const t0 = today(), span = 365 * 864e5, x = (dt) => Lm + Math.max(0, Math.min(1, (dt - t0 + 30 * 864e5) / (span + 30 * 864e5))) * (W - Lm - R);
+    let g = "";
+    for (let m = 0; m <= 12; m++) {
+      const d = new Date(Date.UTC(t0.getUTCFullYear(), t0.getUTCMonth() + m, 1));
+      if (d - t0 < -30 * 864e5 || d - t0 > span) continue;
+      const xx = x(d);
+      g += `<line class="grid" x1="${xx}" x2="${xx}" y1="${top - 6}" y2="${H - 6}"/><text x="${xx + 4}" y="${top - 14}">${esc(d.toLocaleDateString(LOC(), { month: "short", timeZone: "UTC" }))}${d.getUTCMonth() === 0 ? " " + d.getUTCFullYear() : ""}</text>`;
+    }
+    const tx = x(t0);
+    g += `<line class="today" x1="${tx}" x2="${tx}" y1="${top - 6}" y2="${H - 6}"/>`;
+    rows.forEach(({ k, d }, i) => {
+      const y = top + i * rh, name = clientName(k.client);
+      const col = d == null ? "var(--info)" : d <= 30 ? "var(--crit)" : d <= 90 ? "var(--warn)" : "var(--accent)";
+      g += `<text class="lbl" x="${Lm - 12}" y="${y + 16}" text-anchor="end">${esc(name.length > 22 ? name.slice(0, 21) + "…" : name)}</text>`;
+      if (d == null) {
+        g += `<rect class="bar" data-client="${esc(k.client)}" x="${tx}" y="${y + 7}" width="56" height="12" rx="4" fill="${col}" opacity=".45"><title>${esc(name)}: ${esc(t("noEnd"))}</title></rect><text x="${tx + 64}" y="${y + 17}">${esc(t("noEnd"))}</text>`;
+      } else {
+        const ex = x(parse(k.endDate)), x1 = Math.min(tx, ex), w = Math.max(4, Math.abs(ex - tx));
+        g += `<rect class="bar" data-client="${esc(k.client)}" x="${x1}" y="${y + 7}" width="${w}" height="12" rx="4" fill="${col}"><title>${esc(name)}: ${esc(fmtD(k.endDate))} (${esc(rel(d))})</title></rect>`;
+        const right = Math.max(ex, tx), end = right > W - 150;
+        g += `<text x="${end ? x1 - 6 : right + 6}" y="${y + 17}" text-anchor="${end ? "end" : "start"}">${esc(fmtD(k.endDate))}${d < 0 ? " · " + esc(t("expiredAgo", -d)) : ""}</text>`;
+      }
+    });
+    g += `<text class="todayl" x="${tx}" y="${H - 1}" text-anchor="middle">${esc(t("todayLbl"))}</text>`;
+    $("#timeline").innerHTML = `<svg viewBox="0 0 ${W} ${H + 6}" role="img" aria-label="${esc(t("runway"))}">${g}</svg>`;
+  }
+  function spark(vals, w = 124, h = 36) {
+    if (!vals || vals.length < 2) return "";
+    const mn = Math.min(...vals), mx = Math.max(...vals), r = mx - mn || 1;
+    const pts = vals.map((v, i) => [(i / (vals.length - 1)) * (w - 8) + 4, h - 5 - ((v - mn) / r) * (h - 12)]);
+    const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(""), last = pts[pts.length - 1];
+    return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path class="area" d="${d}L${last[0]} ${h}L4 ${h}Z"/><path class="ln" d="${d}"/><circle class="end" cx="${last[0]}" cy="${last[1]}" r="4"/><title>${esc(fmtN(vals[vals.length - 1]))}</title></svg>`;
+  }
+  function clientCard(c) {
+    const w = c.perf?.w28 || {}, k = c.contract, kd = k?.endDate ? days(k.endDate) : null;
+    const kchip = !k ? `<span class="pill mute">${esc(t("noContract"))}</span>` : kd == null ? `<span class="pill unknown">${esc(t("contractNoEnd"))}</span>` : `<span class="pill ${kd < 0 ? "expired" : kd <= 30 ? "critical" : kd <= 90 ? "soon" : "ok"}">${esc(kd < 0 ? t("contractEnded") : t("contractDays", kd))}</span>`;
+    return `<button class="cl" data-client="${esc(c.key)}"><div class="top"><div style="min-width:0"><div class="nm">${esc(L(c, "name") || c.name)}</div><div class="dom">${esc(c.domain || "")}</div></div><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span></div>
+      <div class="hl">${esc(L(c, "headline") || L(c, "summary") || "")}</div>
+      <div class="stats"><div><div class="num">${fmtN(w.clicks)}</div><div class="note">${pct(w.clicksChangePct) || esc(t("d28"))} · ${esc(t("clicks"))}</div></div>${spark(c.perf?.spark28)}</div>
+      <div class="foot">${kchip}${c.alertCount ? `<span class="pill mute">${esc(c.alertCount > 1 ? t("alertsNs", c.alertCount) : t("alertsN", 1))}</span>` : ""}</div></button>`;
+  }
+  function renderHealth() {
+    if (!S.clients.length) { $("#healthGrid").innerHTML = `<div class="empty">${esc(t("loading"))}</div>`; return; }
+    const o = { risk: 0, watch: 1, good: 2 };
+    $("#healthGrid").innerHTML = S.clients.slice().sort((a, b) => (o[a.status] ?? 3) - (o[b.status] ?? 3) || (b.perf?.w28?.clicks || 0) - (a.perf?.w28?.clicks || 0)).map(clientCard).join("");
+  }
+
+  // ---------------------------------------------------------------- alerts tab
+  function renderAlerts() {
+    const cats = ["all", ...Object.keys(CATL)];
+    const vis = (a) => UI.showAcked || !isAcked(a);
+    $("#alertFilters").innerHTML = cats.map((c) => `<button class="chip" data-acat="${c}" aria-pressed="${UI.alertCat === c}">${esc(c === "all" ? t("fAll") : t(CATL[c]))}<span class="n">${S.alerts.filter((a) => (c === "all" || a.category === c) && vis(a)).length}</span></button>`).join("")
+      + `<span style="width:8px"></span>` + ["all", "high", "medium", "low"].map((s) => `<button class="chip" data-asev="${s}" aria-pressed="${UI.alertSev === s}">${esc(s === "all" ? t("fAnySev") : t(SEVL[s]))}</button>`).join("")
+      + `<button class="chip" data-acked aria-pressed="${UI.showAcked}">${esc(t("fShowAcked"))}</button>`;
+    const l = sortAlerts(S.alerts.filter((a) => (UI.alertCat === "all" || a.category === UI.alertCat) && (UI.alertSev === "all" || a.severity === UI.alertSev) && vis(a)));
+    $("#allAlerts").innerHTML = l.length ? l.map(alertRow).join("") : `<div class="empty">${esc(t("noMatch"))}</div>`;
+    $("#alertsSub").textContent = t("alertsTotal", S.alerts.length, S.alerts.filter(isAcked).length);
+  }
+
+  // ---------------------------------------------------------------- clients tab + drawer
+  function renderClients() {
+    $("#clientFilters").innerHTML = ["all", "risk", "watch", "good", "nocontract"].map((x) => `<button class="chip" data-cf="${x}" aria-pressed="${UI.clientFilter === x}">${esc(x === "all" ? t("fAll") : x === "nocontract" ? t("fNoContract") : t(STL[x]))}</button>`).join("");
+    const q = ($("#clientSearch").value || "").toLowerCase();
+    const l = S.clients.filter((c) => (UI.clientFilter === "all" || (UI.clientFilter === "nocontract" ? !c.contract : c.status === UI.clientFilter)) && (!q || JSON.stringify([c.name, c.domain, c.summary, c.headline, c.issues, c.he]).toLowerCase().includes(q))).sort((a, b) => a.name.localeCompare(b.name));
+    $("#clientGrid").innerHTML = l.length ? l.map(clientCard).join("") : `<div class="empty">${esc(t("noClients"))}</div>`;
+  }
+  const list = (arr) => `<ul>${arr.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+  function openClient(key) {
+    const c = S.clients.find((x) => x.key === key); if (!c) return;
+    const p = c.perf || {}, nm = L(c, "name") || c.name;
+    const win = (w, l) => (w ? `<div class="m"><div class="l">${esc(l)}</div><div class="v">${fmtN(w.clicks)}</div><div class="l">${pct(w.clicksChangePct) || esc(t("clicks"))} · ${esc(t("pos"))} ${w.position != null ? w.position.toFixed(1) : "—"}</div></div>` : "");
+    const al = sortAlerts(S.alerts.filter((a) => a.client === key)), kc = S.contracts.filter((x) => x.client === key);
+    const facts = L(c, "keyFacts") || [], upc = L(c, "upcoming") || [], wins = (LANG === "he" && c.he?.wins) || p.wins || [];
+    const okl = { on_track: ["good", "okOn"], at_risk: ["warn", "okAt"], off_track: ["crit", "okOff"] };
+    $("#drawer").innerHTML = `<button class="btn close" data-close>${esc(t("close"))}</button>
+      <div><div class="eyebrow ltr" style="direction:ltr;text-align:start">${esc(c.domain || "")}</div><h2 style="margin-top:6px">${esc(nm)}</h2><div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span>${(c.services || []).map((s) => `<span class="pill mute">${esc(s)}</span>`).join("")}</div></div>
+      ${L(c, "summary") ? `<div><h3>${esc(t("dBrain"))}</h3><p style="margin:0;color:var(--ink-2)">${esc(L(c, "summary"))}</p>${c.lastBrainUpdate ? `<p class="note" style="margin:6px 0 0">${esc(t("dBrainUpdated", fmtD(c.lastBrainUpdate)))}</p>` : ""}</div>` : `<p class="note">${esc(t("dNoBrain"))}</p>`}
+      <div><button class="btn primary" data-askclient="${esc(key)}">${esc(t("dAskAbout", nm))}</button></div>
+      ${p.w28 ? `<div><h3>${esc(t("dOrganic"))}</h3><div class="mgrid">${win(p.w7, t("d7"))}${win(p.w28, t("d28l"))}${win(p.w90, t("d90"))}</div>${p.spark28 ? `<div style="margin-top:10px">${spark(p.spark28, 580, 64)}</div>` : ""}${L(c, "headline") ? `<p style="margin:8px 0 0;color:var(--ink-2)">${esc(L(c, "headline"))}</p>` : ""}</div>` : ""}
+      ${al.length ? `<div><h3>${esc(t("dAlerts"))}</h3><div class="alist">${al.map(alertRow).join("")}</div></div>` : ""}
+      ${wins.length ? `<div><h3>${esc(t("dWins"))}</h3>${list(wins)}</div>` : ""}
+      ${(p.okrs || []).length ? `<div><h3>${esc(t("dOkrs"))}</h3><ul>${p.okrs.map((o) => { const s = okl[o.status] || ["mute", "okUnknown"]; return `<li>${esc(o.name)} · <span class="num">${o.progressPct != null ? o.progressPct + "%" : "—"}</span> <span class="pill ${s[0]}">${esc(t(s[1]))}</span></li>`; }).join("")}</ul></div>` : ""}
+      ${p.openTasks != null || p.hoursBudget ? `<div><h3>${esc(t("dDelivery"))}</h3><div class="mgrid"><div class="m"><div class="l">${esc(t("dOpen"))}</div><div class="v">${p.openTasks ?? "—"}</div></div><div class="m"><div class="l">${esc(t("dOverdue"))}</div><div class="v">${p.overdueTasks ?? "—"}</div></div><div class="m"><div class="l">${esc(t("dHours"))}</div><div class="v">${p.hoursUsed ?? "—"} / ${p.hoursBudget ?? "—"}</div></div></div></div>` : ""}
+      <div><h3>${esc(t("dContract"))}</h3>${kc.length ? `<div class="tbl-wrap"><table><tbody>${kc.map((x) => `<tr><td>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>` : esc(x.title)}<div class="sub">${esc(x.type || "")} · ${esc(fmtD(x.startDate))} → ${esc(fmtD(x.endDate))}${x.autoRenew ? " · " + esc(t("autoRenews")) : ""}${x.noticeDays ? " · " + esc(t("noticeD", x.noticeDays)) : ""}</div>${x.notes ? `<div class="sub">${esc(x.notes)}</div>` : ""}</td><td class="num">${fmtMoney(x.monthlyFee, x.currency)}${x.monthlyFee ? esc(t("perMo")) : ""}</td></tr>`).join("")}</tbody></table></div>` : `<p class="note" style="margin:0">${esc(t("dNoContract"))}</p>`}</div>
+      ${facts.length ? `<div><h3>${esc(t("dFacts"))}</h3>${list(facts)}</div>` : ""}
+      ${upc.length ? `<div><h3>${esc(t("dUpcoming"))}</h3>${list(upc)}</div>` : ""}
+      ${(c.contacts || []).length ? `<div><h3>${esc(t("dPeople"))}</h3>${list(c.contacts)}</div>` : ""}
+      ${(c.brainDocs || []).length || c.brainFolderUrl ? `<div><h3>${esc(t("dDocs"))}</h3><ul>${(c.brainDocs || []).map((d) => `<li><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a> <span class="note">${esc(fmtD(d.modified))}</span></li>`).join("")}</ul>${c.brainFolderUrl ? `<p style="margin:10px 0 0"><a href="${esc(c.brainFolderUrl)}" target="_blank" rel="noopener">${esc(t("dBrainFolder"))}</a>${c.driveFolderUrl ? ` · <a href="${esc(c.driveFolderUrl)}" target="_blank" rel="noopener">${esc(t("dClientFolder"))}</a>` : ""}</p>` : ""}</div>` : ""}`;
+    $("#drawer").hidden = false; $("#scrim").hidden = false; $("#drawer").scrollTop = 0; $("[data-close]", $("#drawer")).focus();
+  }
+  const closeDrawer = () => { $("#drawer").hidden = true; $("#scrim").hidden = true; };
+
+  // ---------------------------------------------------------------- contracts + tools tables
+  function sortable(cols, sortKey, rows) {
+    const s = UI[sortKey], v = (r, c) => (c.sortVal ? c.sortVal(r) : r[c.key]);
+    const col = cols.find((x) => x.key === s) || cols[0];
+    const sorted = rows.slice().sort((a, b) => { const x = v(a, col), y = v(b, col); if (x == null) return 1; if (y == null) return -1; return typeof x === "number" ? x - y : String(x).localeCompare(String(y)); });
+    return `<thead><tr>${cols.map((c) => `<th class="${c.num ? "num" : ""}" data-sort="${sortKey}:${c.key}">${esc(t(c.label))}${s === c.key ? " ↑" : ""}</th>`).join("")}</tr></thead><tbody>${sorted.map((r) => `<tr>${cols.map((c) => `<td class="${c.num ? "num" : ""}">${c.render(r)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  }
+  function renderContracts() {
+    if (!S.contracts.length) { $("#contractTable").innerHTML = `<tbody><tr><td class="empty">${esc(t("noContracts"))}</td></tr></tbody>`; return; }
+    const CS = { expired: "csExpired", critical: "csCritical", soon: "csSoon", ok: "csOk", renewed: "csRenewed", unknown: "csUnknown" };
+    $("#contractTable").innerHTML = sortable([
+      { key: "client", label: "cClient", sortVal: (k) => clientName(k.client), render: (k) => `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(k.client)}">${esc(clientName(k.client))}</button>${k.isLatest ? "" : `<div class="sub">${esc(t("older"))}</div>`}` },
+      { key: "title", label: "cDoc", render: (k) => `${k.url ? `<a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.title)}</a>` : esc(k.title)}<div class="sub">${esc(k.type || "")}${k.scope ? " · " + esc(k.scope) : ""}</div>` },
+      { key: "status", label: "cStatus", render: (k) => `<span class="pill pd ${esc(k.status)}">${esc(t(CS[k.status] || "csUnknown"))}</span>${k.confidence && k.confidence !== "high" ? `<div class="sub">${esc(t("conf", k.confidence))}</div>` : ""}` },
+      { key: "endDate", label: "cEnds", render: (k) => `${esc(fmtD(k.endDate))}${k.notes && /infer/i.test(k.notes) ? `<div class="sub">${esc(t("inferred"))}</div>` : ""}` },
+      { key: "daysLeft", label: "cDays", num: true, render: (k) => (k.daysLeft == null ? "—" : k.daysLeft) },
+      { key: "noticeDeadline", label: "cNotice", render: (k) => (k.noticeDeadline ? esc(fmtD(k.noticeDeadline)) : k.noticeDays ? esc(t("noticeD", k.noticeDays)) : "—") },
+      { key: "autoRenew", label: "cAuto", render: (k) => (k.autoRenew == null ? "—" : esc(k.autoRenew ? t("yes") : t("no"))) },
+      { key: "monthlyFee", label: "cFee", num: true, render: (k) => (k.monthlyFee ? fmtMoney(k.monthlyFee, k.currency) : k.totalValue ? fmtMoney(k.totalValue, k.currency) + " " + esc(t("total")) : "—") },
+    ], "contractSort", S.contracts);
+  }
+  const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  function renderTools() {
+    const tools = S.tools, sp = S.meta?.spend || {};
+    const paid = tools.filter((x) => x.paying && x.yearlyCost).sort((a, b) => b.yearlyCost - a.yearlyCost);
+    const top = paid.slice(0, 10), rest = paid.slice(10).reduce((s, x) => s + x.yearlyCost, 0);
+    const gl = top.map((x) => [x.name, x.yearlyCost]).concat(rest ? [[t("otherTools", paid.length - 10), rest]] : []), gmax = Math.max(...gl.map((g) => g[1]), 1);
+    $("#spendBars").innerHTML = gl.length ? gl.map(([g, v]) => `<div class="hb" title="${esc(g)}: ${fmtUSD(v)}"><span class="nm">${esc(g)}</span><span class="track"><span class="fill" style="width:${(v / gmax) * 100}%"></span></span><span class="num">${fmtUSD(v)}</span></div>`).join("") + `<p class="note" style="margin:8px 0 0">${esc(t("spendTotal", fmtUSD(sp.yearly), sp.paying))} ${paid[0] ? esc(t("spendTop", paid[0].name, Math.round((paid[0].yearlyCost / sp.yearly) * 100))) : ""}</p>` : `<div class="empty">${esc(t("noCost"))}</div>`;
+    const live = tools.filter((x) => x.live);
+    $("#liveChecks").innerHTML = live.length ? live.map((x) => { const l = x.live; return `<div class="lv"><div><div style="font-weight:600">${esc(x.name)}</div><div class="note">${esc(l.headline || "")}</div><div class="note">${esc(t("checked", ago(l.checkedAt), l.method || "API"))}</div></div><div style="text-align:end"><div class="v">${l.unit === "USD" ? fmtUSD(l.value) : esc(l.value)}</div><span class="pill pd ${l.status === "critical" ? "crit" : l.status === "low" ? "warn" : "good"}">${esc(l.status || "ok")}</span></div></div>`; }).join("") : `<div class="empty">${esc(t("noLive"))}</div>`;
+    $("#toolFilters").innerHTML = [["attention", "tfAttention"], ["paying", "tfPaying"], ["all", "tfAll"], ["cancelled", "tfCancelled"]].map(([k, l]) => `<button class="chip" data-tf="${k}" aria-pressed="${UI.toolFilter === k}">${esc(t(l))}</button>`).join("");
+    const flagged = new Set(S.alerts.filter((a) => a.category === "tools").map((a) => a.id.replace(/^tool-/, "").replace(/-(expired|renewal|stale|autorenew-on|billing-unclear|live)$/, "")));
+    const rows = tools.filter((x) => UI.toolFilter === "all" || (UI.toolFilter === "paying" && x.paying) || (UI.toolFilter === "cancelled" && !x.paying) || (UI.toolFilter === "attention" && flagged.has(slug(x.name))));
+    $("#toolsSub").textContent = t("toolsSubT", tools.length, sp.paying || 0, fmtUSD(sp.monthly));
+    $("#toolTable").innerHTML = rows.length ? sortable([
+      { key: "name", label: "tTool", render: (x) => `<strong>${esc(x.name)}</strong><div class="sub">${esc([x.group, x.plan].filter(Boolean).join(" · "))}</div>` },
+      { key: "paying", label: "tStatus", sortVal: (x) => (x.paying ? 0 : 1), render: (x) => `<span class="pill pd ${x.paying ? "good" : "mute"}">${esc(x.paying ? t("paying") : t("notPaying"))}</span>` },
+      { key: "yearlyCost", label: "tYear", num: true, sortVal: (x) => (x.yearlyCost == null ? null : -x.yearlyCost), render: (x) => fmtUSD(x.yearlyCost) },
+      { key: "frequency", label: "tBilling", render: (x) => `${esc(x.frequency || "—")}<div class="sub">${esc(x.model || "")}</div>` },
+      { key: "daysToRenewal", label: "tRenewal", render: (x) => (x.nextRenewal ? `${esc(fmtD(x.nextRenewal))}<div class="sub">${esc(x.daysToRenewal < 0 ? t("lapsed", -x.daysToRenewal) : t("inDays", x.daysToRenewal))}${x.renewalDateStale ? " · " + esc(t("projected")) : ""}</div>` : "—") },
+      { key: "autoRenew", label: "tAuto", render: (x) => esc(x.autoRenew ? t("on") : t("off")) },
+      { key: "admin", label: "tAdmin", render: (x) => `<span class="ltr">${esc(x.admin || "—")}</span>` },
+      { key: "notes", label: "tNotes", render: (x) => `<span class="sub">${esc(x.notes || "")}</span>${x.live ? `<div style="margin-top:4px"><span class="pill ${x.live.status === "critical" ? "crit" : "warn"}">${esc(x.live.headline)}</span></div>` : ""}` },
+    ], "toolSort", rows) : `<tbody><tr><td class="empty">${esc(t("noTools"))}</td></tr></tbody>`;
+  }
+
+  // ---------------------------------------------------------------- Ask Opus
+  const MODEL = "claude-opus-5-5";
+  const SURGE_TOOLS = ["portfolio_overview", "get_weekly_digest", "get_client_overview", "gsc_timeseries", "gsc_breakdown", "get_tasks", "get_okrs", "get_peec_trend", "search_gsc_queries", "search_gsc_pages", "get_annotations"];
+  const chat = { turns: [], ctl: null, busy: false };
+  let sampleChecked = false;
+  function renderSuggest() { $("#suggest").innerHTML = t("sugg").map((s) => `<button class="chip" data-suggest="${esc(s)}">${esc(s)}</button>`).join(""); }
+  function context() {
+    const c = S.clients.map((x) => ({ key: x.key, name: x.name, domain: x.domain, status: x.status, headline: x.headline, summary: x.summary, issues: (x.issues || []).map((i) => `${i.severity}: ${i.title} — ${i.detail}`), upcoming: x.upcoming, w28: x.perf?.w28 && { clicks: x.perf.w28.clicks, chg: x.perf.w28.clicksChangePct, pos: x.perf.w28.position }, okrs: x.perf?.okrs, contract: x.contract && { end: x.contract.endDate, daysLeft: x.contract.daysLeft, status: x.contract.status, fee: x.contract.monthlyFee, cur: x.contract.currency, autoRenew: x.contract.autoRenew, notice: x.contract.noticeDeadline } }));
+    const k = S.contracts.map((x) => ({ client: x.client, title: x.title, type: x.type, start: x.startDate, end: x.endDate, daysLeft: x.daysLeft, status: x.status, autoRenew: x.autoRenew, noticeDays: x.noticeDays, monthlyFee: x.monthlyFee, currency: x.currency, hours: x.hoursPerMonth, latest: x.isLatest, signed: x.signed, notes: x.notes, url: x.url }));
+    const tl = S.tools.map((x) => ({ name: x.name, paying: x.paying, yearly: x.yearlyCost, monthly: x.monthlyCost, billing: x.frequency, model: x.model, nextRenewal: x.nextRenewal, daysToRenewal: x.daysToRenewal, autoRenew: x.autoRenew, admin: x.admin, plan: x.plan, notes: x.notes, live: x.live && x.live.headline }));
+    const a = sortAlerts(S.alerts).map((x) => ({ sev: x.severity, cat: x.category, client: x.client, title: x.title, detail: x.detail, due: x.dueDate, acked: !!S.acks[x.id] }));
+    return JSON.stringify({ today: new Date().toISOString().slice(0, 10), refreshedAt: S.meta?.updatedAt, gscDataThrough: S.meta?.dataThrough, spend: S.meta?.spend, briefing: S.briefing?.text, alerts: a, clients: c, contracts: k, tools: tl }).slice(0, 200000);
+  }
+  const RULES = () => `You are the AI chief of staff inside the Cut Inside Control Room, the operations dashboard of Cut Inside, an SEO and GEO agency in Tel Aviv. The person asking runs or manages the agency. ${LANG === "he" ? "The dashboard is set to Hebrew: answer in natural, concise Israeli business Hebrew (keep client, tool and product names in English)." : "Answer in English unless they write in another language; then answer in that language."}
+Ground every claim in the DASHBOARD DATA below or in a tool result. Cite where a fact comes from (client brain, contract, Tools sheet, SurgeOS) and give dates and numbers. If the data does not cover something, say so plainly and, when it helps, look it up with the tools: "surgeos" for live search performance, tasks and OKRs, "drive_search" + "drive_read" for client brains, contracts and meeting notes in Google Drive, and "get_client" for one client's full record. Use tools only when the dashboard data is not enough; keep tool calls few and targeted.
+Be direct: lead with the answer, then the reasons, then concrete next steps with owners where known. Short headings, bullets and small markdown tables. No filler, no emoji.
+
+DASHBOARD DATA (JSON, refreshed twice daily):
+${context()}`;
+  function chatTools() {
+    const tools = [{
+      name: "get_client", description: "Full dashboard record for one client: brain summary, key facts, issues, upcoming items, contacts, brain document links, performance windows, OKRs, contract. Pass the client key or name.",
+      inputSchema: { type: "object", properties: { client: { type: "string" } }, required: ["client"] },
+      execute: ({ client }) => { const q = String(client || "").toLowerCase(); const c = S.clients.find((x) => x.key.toLowerCase() === q || x.name.toLowerCase() === q) || S.clients.find((x) => (x.key + " " + x.name + " " + (x.domain || "")).toLowerCase().includes(q)); if (!c) throw new Error("No client matches " + client); const { he, ...rest } = c; return JSON.stringify(rest).slice(0, 30000); },
+    }];
+    if (mcp) tools.push({
+      name: "surgeos", description: `Call a read-only SurgeOS tool (Cut Inside's SEO data platform: Search Console BigQuery mirror, GA4, Peec AI visibility, tasks, OKRs). tool is one of: ${SURGE_TOOLS.join(", ")}. args is that tool's input object; most take {client} (SurgeOS name, e.g. "BOG", "MO", "Ynet") and optional startDate/endDate YYYY-MM-DD, compare "previous_period"|"previous_year". portfolio_overview takes {window:"w7"|"w28"|"w90"|"w365"}. Returns JSON.`,
+      inputSchema: { type: "object", properties: { tool: { type: "string", enum: SURGE_TOOLS }, args: { type: "object" } }, required: ["tool"] },
+      execute: async ({ tool, args }, ctx) => { if (!SURGE_TOOLS.includes(String(tool))) throw new Error("Tool not allowed"); step(`SurgeOS · ${tool}${args?.client ? " · " + args.client : ""}`); const r = await mcp.callTool("SurgeOS", String(tool), args || {}, { signal: ctx.signal }); return JSON.stringify(r.payload ?? r.content).slice(0, 30000); },
+    }, {
+      name: "drive_search", description: "Search Cut Inside's Google Drive. query uses Drive syntax, e.g. \"title contains 'Zengo' and title contains 'contract'\" or \"fullText contains 'renewal'\" or \"parentId = '<folderId>'\". Returns file ids, titles, links and short snippets.",
+      inputSchema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] },
+      execute: async ({ query }, ctx) => { step(`Drive · ${query}`); const r = await mcp.callTool("Google Drive", "search_files", { query: String(query), pageSize: 12, snippetVerbosity: "BRIEF" }, { signal: ctx.signal }); return JSON.stringify(r.payload ?? r.content).slice(0, 24000); },
+    }, {
+      name: "drive_read", description: "Read the text of one Google Drive file (Docs, Sheets, PDFs, Word) by its file id from drive_search or from a document link in the data.",
+      inputSchema: { type: "object", properties: { fileId: { type: "string" } }, required: ["fileId"] },
+      execute: async ({ fileId }, ctx) => { step(`Drive · ${fileId}`); const r = await mcp.callTool("Google Drive", "read_file_content", { fileId: String(fileId) }, { signal: ctx.signal }); const p = r.payload; return (typeof p === "string" ? p : JSON.stringify(p ?? r.content)).slice(0, 30000); },
+    });
+    return tools;
+  }
+  let stepEl = null;
+  const step = (s) => { if (stepEl) stepEl.insertAdjacentHTML("beforeend", `<div class="ltr" style="text-align:start">→ ${esc(s)}</div>`); };
+  function addMsg(role, html) {
+    const d = document.createElement("div"); d.className = "msg " + role;
+    d.innerHTML = role === "ai" ? `<div class="who eyebrow">${esc(t("who"))}</div><div class="body">${html}</div><div class="steps"></div>` : html;
+    $("#msgs").appendChild(d); $("#msgs").scrollTop = $("#msgs").scrollHeight; return d;
+  }
+  async function ask(text) {
+    text = String(text || "").trim(); if (!text || chat.busy) return;
+    gotoTab("ask");
+    if (!sample) { addMsg("ai", `<p>${esc(t("unavailable"))}</p>`); return; }
+    chat.busy = true; $("#sendBtn").disabled = true; $("#stopBtn").hidden = false; $("#q").value = "";
+    addMsg("me", esc(text)); chat.turns.push({ role: "user", content: text });
+    const box = addMsg("ai", `<p class="note">${esc(t("thinking"))}</p>`), body = $(".body", box); stepEl = $(".steps", box);
+    chat.ctl = new AbortController();
+    let canTools = false; try { canTools = !!(await sample.limits()).tools; } catch (e) {}
+    try {
+      const res = await sample([{ role: "user", content: RULES() }, ...chat.turns.slice(-12)], {
+        model: MODEL, modelTier: "complex", cache: false, signal: chat.ctl.signal, tools: canTools ? chatTools() : undefined,
+        onText: ({ text }) => { body.innerHTML = md(text); $("#msgs").scrollTop = $("#msgs").scrollHeight; },
+      });
+      body.innerHTML = md(res.text) + (res.truncated ? `<p class="note">${esc(t("truncated"))}</p>` : "");
+      chat.turns.push({ role: "assistant", content: res.text });
+      if (res.modelApplied !== MODEL) stepEl.insertAdjacentHTML("beforeend", `<div>${esc(t("tierNote", res.modelTierApplied))}</div>`);
+    } catch (e) {
+      const copy = { not_granted: "eNotGranted", sampling_disabled: "eDisabled", rate_limited: "eRate", session_expired: "eSession", prompt_too_large: "eTooLarge", refused: "eRefused", cancelled: "eCancelled" }[e?.code] || "eOther";
+      body.innerHTML = (e?.text && e.code !== "refused" ? md(e.text) : "") + `<p class="note">${esc(t(copy))}</p>`;
+      if (e?.text) chat.turns.push({ role: "assistant", content: e.text });
+    } finally { chat.busy = false; $("#sendBtn").disabled = false; $("#stopBtn").hidden = true; stepEl = null; }
+  }
+
+  // ---------------------------------------------------------------- events
+  function gotoTab(tb) {
+    UI.tab = tb; try { localStorage.setItem("ci.tab", tb); } catch (e) {}
+    $$(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tb)));
+    $$("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== tb));
+    renderAll();
+    if (tb === "ask") setTimeout(() => $("#q").focus(), 0);
+  }
+  document.addEventListener("click", (e) => {
+    const th = e.target.closest("th[data-sort]");
+    if (th) { const [k, col] = th.dataset.sort.split(":"); UI[k] = col; return k === "contractSort" ? renderContracts() : renderTools(); }
+    const b = e.target.closest("button, [data-client]"); if (!b) return;
+    const d = b.dataset;
+    if (d.tab) return gotoTab(d.tab);
+    if (d.goto) return gotoTab(d.goto);
+    if (d.sev) { UI.alertSev = d.sev; UI.alertCat = "all"; return gotoTab("alerts"); }
+    if (d.acat) { UI.alertCat = d.acat; return renderAlerts(); }
+    if (d.asev) { UI.alertSev = d.asev; return renderAlerts(); }
+    if ("acked" in d) { UI.showAcked = !UI.showAcked; return renderAlerts(); }
+    if (d.cf) { UI.clientFilter = d.cf; return renderClients(); }
+    if (d.tf) { UI.toolFilter = d.tf; return renderTools(); }
+    if (d.ack) return toggleAck(d.ack);
+    if (d.askalert) { const a = S.alerts.find((x) => x.id === d.askalert); closeDrawer(); return ask(t("askAlert", L(a, "title"), L(a, "detail"))); }
+    if (d.askclient) { const c = S.clients.find((x) => x.key === d.askclient); closeDrawer(); return ask(t("askClient", L(c, "name") || c.name)); }
+    if (d.suggest) return ask(d.suggest);
+    if ("close" in d) return closeDrawer();
+    if (d.client) return openClient(d.client);
+  });
+  $("#scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#drawer").hidden) closeDrawer(); });
+  $("#askTop").addEventListener("click", () => gotoTab("ask"));
+  $("#langBtn").addEventListener("click", () => { LANG = LANG === "he" ? "en" : "he"; try { localStorage.setItem("ci.lang", LANG); } catch (e) {} closeDrawer(); applyLang(); });
+  $("#clientSearch").addEventListener("input", renderClients);
+  $("#compose").addEventListener("submit", (e) => { e.preventDefault(); ask($("#q").value); });
+  $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask($("#q").value); } });
+  $("#stopBtn").addEventListener("click", () => chat.ctl?.abort());
+  $("#refreshBtn").addEventListener("click", async () => {
+    const id = S.meta?.triggerId; if (!mcp || !id) return;
+    const b = $("#refreshBtn"); b.disabled = true; b.textContent = t("starting");
+    try { await mcp.callTool("Claude Code Remote", "fire_trigger", { trigger_id: id }); toast(t("refreshStarted")); b.textContent = t("refreshRunning"); }
+    catch (err) { b.disabled = false; b.textContent = t("refreshNow"); toast(t({ server_not_connected: "rNotConnected", needs_reauth: "rReauth", not_in_manifest: "rNotAllowed" }[err?.code] || "refreshFail")); }
+  });
+  async function toggleAck(id) {
+    if (!db) return toast(t("signIn"));
+    const ref = db.doc("acks/" + id);
+    try { if (S.acks[id]) await ref.delete(); else await ref.set({ by: myId || "unknown", at: new Date().toISOString() }); }
+    catch (e) { toast(t(e?.code === "invalid_argument" ? "viewOnly" : "saveFail")); }
+  }
+  const showRefresh = () => { if (S.meta?.triggerId && mcp && user) $("#refreshBtn").hidden = !user.canEdit(); };
+
+  // ---------------------------------------------------------------- boot
+  applyLang(); gotoTab(UI.tab);
+  (async () => {
+    db = await claude.use("db");
+    if (!db) { $("#fresh").innerHTML = `<span class="dot stale"></span><span>${esc(t("openInClaude"))}</span>`; return; }
+    const err = (e) => console.warn("db", e?.code, e?.message);
+    const subs = {}, parts = {};
+    const syncShards = (shards) => {
+      const want = new Set();
+      Object.entries(shards || {}).forEach(([name, ids]) => ids.forEach((id) => want.add(name + "|" + id)));
+      Object.keys(subs).forEach((k) => { if (!want.has(k)) { subs[k](); delete subs[k]; delete parts[k]; } });
+      want.forEach((k) => {
+        if (subs[k]) return;
+        subs[k] = db.doc("snapshot/" + k.split("|")[1]).onSnapshot((s) => {
+          parts[k] = s.exists ? s.data().items || [] : [];
+          ["clients", "contracts", "tools", "alerts"].forEach((n) => { S[n] = Object.entries(parts).filter(([kk]) => kk.startsWith(n + "|")).flatMap(([, v]) => v); });
+          render();
+        }, err);
+      });
+    };
+    db.doc("meta/state").onSnapshot((s) => { S.meta = s.exists ? s.data() : null; syncShards(S.meta?.shards); showRefresh(); render(); }, err);
+    db.doc("briefing/latest").onSnapshot((s) => { S.briefing = s.exists ? s.data() : null; render(); }, err);
+    db.collection("acks").limit(1000).onSnapshot(async (q) => {
+      S.acks = Object.fromEntries(q.docs.map((d) => [d.id, d.data()]));
+      const ids = [...new Set(Object.values(S.acks).map((a) => a.by).filter((x) => x && x.startsWith("u_")))];
+      if (user && ids.length) { try { const ps = await user.profiles(ids); ids.forEach((i) => (S.names[i] = myId === i ? t("you") : ps[i]?.name || t("teammate"))); } catch (e) {} }
+      render();
+    }, err);
+  })();
+  (async () => { user = await claude.use("user"); if (user) { try { myId = await user.id(); } catch (e) {} showRefresh(); } })();
+  (async () => { mcp = await claude.use("mcp"); showRefresh(); })();
+  (async () => { sample = await claude.use("sample"); sampleChecked = true; if (!sample) $("#askSub").textContent = t("unavailable"); })();
+})();
+</script>

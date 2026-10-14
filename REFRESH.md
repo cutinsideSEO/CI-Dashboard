@@ -1,6 +1,6 @@
 # Control Room refresh runbook
 
-This is what the twice-daily routine does. A person can follow it too. It is read-only towards every source (Drive, SurgeOS, the tools sheet). The only thing it writes is the dashboard's own artifact database.
+This is what the twice-daily routine (`trig_01WDH93AGHQEqNsCiNghRytm`, which runs inside the session that holds the Google Drive, SurgeOS and DataForSEO connectors) does. A person can follow it too. It is read-only towards every source (Drive, SurgeOS, the tools sheet). The only thing it writes is the dashboard's own artifact database.
 
 - Artifact: https://claude.ai/artifact/5AxMQ4gPXYVmeQWk1Kzq45
 - Repo: `cutinsideSEO/CI-Dashboard`
@@ -19,6 +19,7 @@ ArtifactData list  url=<artifact>  collection=sources   out_dir=prev
 
 1. The tool result prints each document's `version`. Write them to `prev/versions.json`, for example `{"meta/state": 4, "snapshot/clients": 4, ...}`.
 2. Copy `prev/sources/brains.json`, `prev/sources/contracts.json` and `prev/sources/performance.json` into `data/` as the starting points. For brains and contracts, unwrap `{items: [...]}` into the plain array.
+3. Merge `prev/sources/tm.json` and any `tm-N.json` shards (each `{items: [{en, he}]}`) into `data/tm.json` as one `{english: hebrew}` object. This is the Hebrew translation memory.
 
 ## 1. Tools sheet → `data/tools.csv`
 
@@ -97,16 +98,25 @@ python3 scripts/build_db.py --versions=prev/versions.json     # TODAY defaults t
 - It also writes a delete for any snapshot shard that is no longer needed.
 - It never touches `acks/*`, where viewers record which alerts they've acknowledged. Alert ids are stable from run to run, so acknowledgements carry over.
 
+## 6b. Hebrew
+
+The page has an English/Hebrew switch. Content from data (alerts, client headlines, summaries, issues, key facts) shows in Hebrew when its translation is in the memory.
+
+1. After the build, `out/untranslated.json` lists the English strings that have no Hebrew yet. Usually a few per run.
+2. Translate them into natural, concise Israeli business Hebrew. Keep names, tools, URLs, file names, numbers and currency exactly as they are, and write dates as "31 בדצמבר 2026".
+3. Add them to `data/tm.json` and run the build again. The build keeps only the entries in use and stores them in `sources/tm*`.
+
 ## 7. Briefing → `briefing/latest`
 
 Read `out/alerts/*.json` and the client headlines. Write `data/briefing.json` as:
 
 ```
-{title, text, by: "Claude (refresh routine)", generatedAt}
+{title, text, he: {title, text}, by: "Claude (refresh routine)", generatedAt}
 ```
 
 - `title` is a short headline of the day.
 - `text` is 120–220 words of markdown: the 3–6 things the agency owner must act on today (contracts, client risk, tools and spend), and what changed since the last briefing.
+- `he` is the same briefing written in Hebrew.
 
 Then run the build again so the briefing is included (it is written to `briefing/latest`).
 

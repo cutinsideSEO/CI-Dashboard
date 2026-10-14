@@ -97,6 +97,28 @@ def truthy(s):
 
 alerts = {}
 
+# Hebrew: a translation memory {english: hebrew} kept in data/tm.json. Strings missing from it are
+# written to out/untranslated.json for the refresh routine to translate; the pruned memory is stored
+# back in the database (sources/tm*) so the next run starts from it.
+TM = {}
+TM_USED = {}
+MISSING = set()
+
+
+def he(s):
+    if not s or not isinstance(s, str):
+        return s
+    if s in TM:
+        TM_USED[s] = TM[s]
+        return TM[s]
+    MISSING.add(s)
+    return None
+
+
+def he_list(xs):
+    out = [he(x) for x in (xs or [])]
+    return out if all(out) else None
+
 
 def alert(aid, severity, category, title, detail, client=None, due=None, source=None, source_url=None):
     aid = slug(aid)
@@ -157,8 +179,8 @@ def build_tools():
         elif paying and days is not None and days <= 45:
             sev = "high" if days <= 7 or not auto else "medium"
             what = "renews automatically" if auto else "expires (auto-renew OFF)"
-            alert(f"tool-{tid}-renewal", sev, "tools", f"{name} {what} in {days} day{'s' if days != 1 else ''}" if days else f"{name} {what} today",
-                  f"{nxt:%d %b %Y} · {cost} · admin {t['admin'] or 'n/a'}. Decide: renew, downgrade or cancel.", due=nxt, source=src)
+            alert(f"tool-{tid}-renewal", sev, "tools", f"{name} {what} on {nxt:%d %b %Y}",
+                  f"{cost} · admin {t['admin'] or 'n/a'}. Decide: renew, downgrade or cancel.", due=nxt, source=src)
         if paying and stale and freq.startswith("Yearly"):
             alert(f"tool-{tid}-stale", "low", "tools", f"{name}: sheet still shows the {expires:%d %b %Y} expiry",
                   f"It auto-renews yearly, so the next renewal should be {nxt:%d %b %Y}. Update the sheet so renewals stay accurate.", due=nxt, source=src)
@@ -192,6 +214,8 @@ def match_key(name, keys):
 
 def build():
     os.makedirs(OUT, exist_ok=True)
+    tm = load("tm.json", {})
+    TM.update(tm.get("items", tm) if isinstance(tm, dict) else {})
     tools = build_tools()
     perf = load("performance.json", {})
     brains = load("brains.json", [])
@@ -274,8 +298,8 @@ def build():
                   "Check the renewal terms and whether a price update is due.", client=key, due=end, source=latest.get("title"), source_url=url)
         elif days is not None and days <= 120:
             sev = "high" if days <= 30 else "medium" if days <= 90 else "low"
-            alert(f"contract-{key}-ending", sev, "contracts", f"{disp}: contract ends in {days} days",
-                  f"Ends {end:%d %b %Y}{fee_s}. " + ("Auto-renews unless notice is given." if latest.get("autoRenew") else "Does not auto-renew: start the renewal conversation."),
+            alert(f"contract-{key}-ending", sev, "contracts", f"{disp}: contract ends {end:%d %b %Y}",
+                  f"{fee_s.lstrip(' ·')}{'. ' if fee_s else ''}" + ("Auto-renews unless notice is given." if latest.get("autoRenew") else "Does not auto-renew: start the renewal conversation."),
                   client=key, due=end, source=latest.get("title"), source_url=url)
         if latest.get("signed") is False:
             alert(f"contract-{key}-unsigned", "medium", "contracts", f"{disp}: latest agreement not signed",
@@ -324,6 +348,22 @@ def build():
             "contract": c.get("contract"), "alertCount": len(sev), "updatedAt": NOW,
         }
 
+    # Hebrew fields (UI falls back to English where a string is not translated yet)
+    for a in alerts.values():
+        a["he"] = {"title": he(a["title"]), "detail": he(a["detail"])}
+    for c in client_docs.values():
+        c["he"] = {
+            "name": he(c["name"]) if c["name"] != c["key"] else None,
+            "headline": he(c["headline"]), "summary": he(c["summary"]),
+            "keyFacts": he_list(c["keyFacts"]), "upcoming": he_list(c["upcoming"]),
+            "wins": he_list((c["perf"] or {}).get("wins")),
+            "issues": [{"title": he(i.get("title")), "detail": he(i.get("detail"))} for i in c["issues"]],
+        }
+    if briefing and not briefing.get("he"):
+        bt, bx = he(briefing.get("title")), he(briefing.get("text"))
+        if bt and bx:
+            briefing["he"] = {"title": bt, "text": bx}
+
     # spend summary
     paying = [t for t in tools.values() if t["paying"]]
     spend = {
@@ -343,7 +383,7 @@ def build():
             "surgeos": "SurgeOS (Search Console BigQuery mirror, GA4, Peec)", "drive": "Google Drive client folders",
         },
         "schedule": os.environ.get("SCHEDULE", "Twice a day, ~07:00 and ~15:00 Israel time"),
-        "triggerId": os.environ.get("TRIGGER_ID", "trig_013SgkySAGVthbCU99RnjsMt"),
+        "triggerId": os.environ.get("TRIGGER_ID", "trig_01WDH93AGHQEqNsCiNghRytm"),
     }
 
     # ---- write: a handful of snapshot documents (each well under the 256 KiB doc cap)
@@ -378,6 +418,18 @@ def build():
     put("meta", "state", meta)
     if briefing:
         put("briefing", "latest", dict(briefing, generatedAt=briefing.get("generatedAt") or NOW))
+    tm_items = [{"en": k, "he": v} for k, v in sorted(TM_USED.items())]
+    parts, cur, size = [], [], 0
+    for it in tm_items:
+        n = len(json.dumps(it, ensure_ascii=False).encode())
+        if cur and size + n > 180_000:
+            parts.append(cur); cur, size = [], 0
+        cur.append(it); size += n
+    parts.append(cur)
+    for k, part in enumerate(parts):
+        put("sources", "tm" if k == 0 else f"tm-{k}", {"items": part, "updatedAt": NOW})
+    with open(os.path.join(OUT, "untranslated.json"), "w", encoding="utf-8") as f:
+        json.dump(sorted(MISSING), f, ensure_ascii=False, indent=1)
     for name in ("brains", "contracts", "performance"):
         raw = load(f"{name}.json", None)
         if raw is not None:
@@ -396,11 +448,11 @@ def build():
     live = {f"{w['collection']}/{w['doc_id']}" for w in writes}
     for key, ver in versions.items():  # shards that no longer exist
         col, did = key.split("/", 1)
-        if col == "snapshot" and key not in live:
+        if col in ("snapshot", "sources") and key not in live and (col == "snapshot" or did.startswith("tm-")):
             writes.append({"op": "delete", "collection": col, "doc_id": did, "if_version": int(ver)})
     with open(os.path.join(OUT, "writes.json"), "w") as f:
         json.dump(writes, f, indent=1)
-    print(json.dumps({"writes": len(writes), "shards": shards, "alerts": sev_counts, "clients": len(client_docs),
+    print(json.dumps({"untranslated": len(MISSING), "writes": len(writes), "shards": shards, "alerts": sev_counts, "clients": len(client_docs),
                       "contracts": len(contract_docs), "tools": len(tools), "spend": spend}))
 
 
