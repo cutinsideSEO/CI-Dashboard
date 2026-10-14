@@ -149,7 +149,7 @@ Then run the build again so the briefing is included (it is written to `briefing
 
 ## 8. Write
 
-1. Send everything in `out/writes.json` in one `ArtifactData batch` call, as `writes`. Split it if it has more than 50 entries.
+1. Send `out/writes-1.json`, `out/writes-2.json` and so on in order, one `ArtifactData batch` call each, as `writes`. They are already split under the 1 MiB request limit, with snapshot shards first and `meta/state` last.
 2. If an entry fails because its version changed, re-list that collection, update `prev/versions.json`, rebuild and resend. Never force a write.
 
 ## 9. Report

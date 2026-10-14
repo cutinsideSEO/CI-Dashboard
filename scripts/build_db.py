@@ -567,6 +567,22 @@ def build():
             writes.append({"op": "delete", "collection": col, "doc_id": did, "if_version": int(ver)})
     with open(os.path.join(OUT, "writes.json"), "w") as f:
         json.dump(writes, f, indent=1)
+    # ArtifactData batch requests are capped at 1 MiB: split into ordered parts (snapshots first, meta last,
+    # so the page never points at a shard that isn't written yet)
+    order = {"snapshot": 0, "sources": 1, "briefing": 2, "meta": 3}
+    parts, cur, size = [], [], 0
+    for w in sorted(writes, key=lambda w: order.get(w["collection"], 1)):
+        n = os.path.getsize(w["file_path"]) if w.get("file_path") else 200
+        if cur and (size + n > 850_000 or len(cur) >= 50):
+            parts.append(cur); cur, size = [], 0
+        cur.append(w); size += n
+    if cur:
+        parts.append(cur)
+    for old_part in [f for f in os.listdir(OUT) if f.startswith("writes-")]:
+        os.remove(os.path.join(OUT, old_part))
+    for i, part in enumerate(parts, 1):
+        with open(os.path.join(OUT, f"writes-{i}.json"), "w") as f:
+            json.dump(part, f, indent=1)
     print(json.dumps({"untranslated": len(MISSING), "writes": len(writes), "shards": shards, "alerts": sev_counts, "clients": len(client_docs),
                       "contracts": len(contract_docs), "tools": len(tools), "spend": spend}))
 
