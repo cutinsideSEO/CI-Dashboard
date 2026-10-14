@@ -15,6 +15,7 @@
   --crit: #ff8f80; --crit-bg: rgba(255,143,128,.14); --warn: #fad05d; --warn-bg: rgba(250,208,93,.13);
   --good: #7dd3a4; --good-bg: rgba(125,211,164,.13); --info: #f7caf1; --info-bg: rgba(247,202,241,.12);
   --shadow-card: none; --shadow-lg: 0 8px 24px rgba(0,0,0,.35);
+  --row: rgba(255,255,255,.035); --kpi-bg: #20201e;
   --logo-dark: inline; --logo-light: none;
   --f-display: "Familjen Grotesk", "Heebo", system-ui, sans-serif;
   --f-body: Montserrat, "Heebo", system-ui, -apple-system, sans-serif;
@@ -28,6 +29,7 @@
     --line: rgba(26,26,24,.12); --line-strong: rgba(26,26,24,.25); --line-subtle: rgba(26,26,24,.06);
     --crit: #b3372b; --crit-bg: #fbe4e1; --warn: #7d5900; --warn-bg: #fdf0cc; --good: #1f7a47; --good-bg: #ddf2e5; --info: #9d4b73; --info-bg: #fbe9f8;
     --shadow-card: 0 1px 2px rgba(0,0,0,.12); --shadow-lg: 0 8px 24px rgba(0,0,0,.2);
+    --row: #f6f8f8; --kpi-bg: #ffffff;
     --logo-dark: none; --logo-light: inline; color-scheme: light;
   }
 }
@@ -37,6 +39,7 @@
   --line: rgba(26,26,24,.12); --line-strong: rgba(26,26,24,.25); --line-subtle: rgba(26,26,24,.06);
   --crit: #b3372b; --crit-bg: #fbe4e1; --warn: #7d5900; --warn-bg: #fdf0cc; --good: #1f7a47; --good-bg: #ddf2e5; --info: #9d4b73; --info-bg: #fbe9f8;
   --shadow-card: 0 1px 2px rgba(0,0,0,.12); --shadow-lg: 0 8px 24px rgba(0,0,0,.2);
+  --row: #f6f8f8; --kpi-bg: #ffffff;
   --logo-dark: none; --logo-light: inline; color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -90,49 +93,73 @@ main { padding-block: 32px 80px; }
 .grid-2 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 24px; }
 @media (max-width: 960px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
 
-/* briefing */
-.brief { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; padding: 32px; }
-.brief h2 { font-size: clamp(28px, 4vw, 44px); line-height: 1.1; margin: 8px 0 16px; max-width: 22ch; }
-.brief .text { color: var(--ink-2); max-width: 72ch; }
+/* overview hero: briefing (left) + pulse (right) */
+.hero { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1020px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+.brief { padding: 28px 30px 22px; }
+.brief h2 { font-size: clamp(24px, 2.6vw, 34px); line-height: 1.12; margin: 8px 0 14px; max-width: 30ch; }
+.brief .text { color: var(--ink-2); max-width: 74ch; position: relative; }
+.brief .text.clamp { max-height: 236px; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent); mask-image: linear-gradient(to bottom, #000 72%, transparent); }
 .brief .text p { margin: 0 0 8px; }
-.brief .text h4 { font: 600 15px var(--f-display); color: var(--ink); margin: 14px 0 4px; letter-spacing: 0; }
-.brief .text ul { margin: 0 0 6px; padding-inline-start: 20px; }
-.brief .meta { font-size: 12px; color: var(--ink-3); margin-top: 10px; }
-.sevstack { display: grid; grid-template-columns: repeat(3, auto); gap: 10px; align-content: start; }
-.sev { padding: 14px 18px; border-radius: 12px; min-width: 104px; cursor: pointer; border: 0; text-align: start; transition: transform .15s var(--ease); }
+.brief .text h4 { font: 600 13px var(--f-body); text-transform: uppercase; letter-spacing: .05em; color: var(--accent-text); margin: 14px 0 4px; }
+.brief .text h4:first-child { margin-top: 0; }
+:root[lang="he"] .brief .text h4 { letter-spacing: 0; }
+.brief .text ul { margin: 0 0 6px; padding-inline-start: 18px; }
+.brief .text li { margin: 3px 0; }
+.brief .text strong { color: var(--ink); }
+.brief-foot { display: flex; gap: 8px 16px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.brief .meta { font-size: 12px; color: var(--ink-3); }
+.pulse { padding: 22px; display: grid; gap: 16px; }
+.sevstack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sev { padding: 12px 14px; border-radius: 10px; cursor: pointer; border: 0; text-align: start; transition: transform .15s var(--ease); min-width: 0; }
 .sev:hover { transform: translateY(-2px); }
-.sev b { display: block; font: 700 36px/1 var(--f-display); }
+.sev b { display: block; font: 700 30px/1 var(--f-display); font-variant-numeric: tabular-nums; }
 .sev span { font: 500 12px var(--f-body); }
 .sev.high { background: var(--crit-bg); color: var(--crit); }
 .sev.medium { background: var(--warn-bg); color: var(--warn); }
 .sev.low { background: var(--info-bg); color: var(--info); }
-@media (max-width: 720px) { .brief { grid-template-columns: minmax(0, 1fr); padding: 24px 20px; } }
+@media (max-width: 720px) { .brief { padding: 22px 18px 18px; } .pulse { padding: 18px; } }
 
-/* KPI stat blocks */
-.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.kpi { background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; padding: 20px; min-width: 0; box-shadow: var(--shadow-card); }
-.kpi .v { font: 700 30px/1.05 var(--f-display); overflow-wrap: anywhere; color: var(--accent-text); margin-top: 10px; font-variant-numeric: tabular-nums; }
-.kpi .v .v2 { display: block; font-size: 18px; margin-top: 4px; opacity: .85; }
-.kpi .d { font-size: 12px; color: var(--ink-3); margin-top: 8px; }
+/* KPI figures inside the pulse panel */
+.kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line-subtle); border-radius: 10px; overflow: hidden; }
+.kpi { background: var(--kpi-bg); padding: 14px 16px; min-width: 0; }
+.kpi .v { font: 700 22px/1.1 var(--f-display); overflow-wrap: anywhere; color: var(--ink); margin-top: 6px; font-variant-numeric: tabular-nums; }
+.kpi .v .v2 { font-size: 14px; color: var(--ink-2); font-weight: 600; margin-inline-start: 6px; }
+.kpi.bad .v { color: var(--crit); }
+.kpi .d { font-size: 11.5px; color: var(--ink-3); margin-top: 4px; line-height: 1.45; }
 .up { color: var(--good); } .down { color: var(--crit); }
-@media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi .v { font-size: 26px; } }
 
 /* alerts */
 .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .chip { border: 0; background: var(--tag); border-radius: 9999px; padding: 5px 14px; font: 500 12.5px var(--f-body); cursor: pointer; color: var(--ink-2); }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 .chip .n { font-family: var(--f-display); font-weight: 700; margin-inline-start: 4px; }
-.alist { display: grid; }
-.alert { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; padding: 16px 0; border-top: 1px solid var(--line-subtle); align-items: start; }
-.alert:first-child { border-top: 0; padding-top: 4px; }
-.alert > .pill { margin-top: 2px; }
-.alert .t { font-weight: 600; color: var(--ink); line-height: 1.5; }
+.alist { display: grid; gap: 8px; }
+.alert { --sc: var(--info); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 12px 14px 12px 16px; border-radius: 10px; background: var(--row); border-inline-start: 3px solid var(--sc); align-items: start; }
+.alert.high { --sc: var(--crit); } .alert.medium { --sc: var(--warn); }
+.alert .ah { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; color: var(--ink-3); margin-bottom: 2px; }
+.alert .ah .who { font: 600 12.5px var(--f-body); color: var(--ink); }
+.alert .ah .sv { font: 600 11px var(--f-body); color: var(--sc); text-transform: uppercase; letter-spacing: .05em; }
+:root[lang="he"] .alert .ah .sv { letter-spacing: 0; }
+.alert .t { font-weight: 600; color: var(--ink); line-height: 1.45; }
 .alert .dt { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
-.alert .am { display: flex; gap: 6px 12px; flex-wrap: wrap; font-size: 11.5px; color: var(--ink-3); margin-top: 8px; align-items: center; }
-.alert .side { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
-.alert.acked { opacity: .45; }
-@media (max-width: 560px) { .alert { grid-template-columns: minmax(0, 1fr); } .alert > .pill { justify-self: start; } .alert .side { flex-direction: row; gap: 16px; align-items: center; } }
+.alert.compact .dt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.alert .am { display: flex; gap: 6px 12px; flex-wrap: wrap; font-size: 11.5px; color: var(--ink-3); margin-top: 6px; align-items: center; }
+.alert .side { display: flex; gap: 6px; align-items: center; }
+.alert.acked { opacity: .5; }
+.alert.group { cursor: pointer; text-align: start; border-top: 0; border-inline-end: 0; border-bottom: 0; font: inherit; color: inherit; width: 100%; }
+.alert.group:hover .t { color: var(--accent-text); }
+.due { font-weight: 600; color: var(--ink-2); }
+.due.hot { color: var(--crit); }
+.mini { border: 1px solid var(--line); background: transparent; color: var(--ink-2); border-radius: 9999px; padding: 4px 11px; font: 600 11.5px var(--f-body); cursor: pointer; white-space: nowrap; transition: border-color .15s var(--ease), color .15s var(--ease); }
+.mini:hover { border-color: var(--accent); color: var(--accent-text); }
+.mini.ok::before { content: "✓ "; }
+@media (max-width: 600px) { .alert { grid-template-columns: minmax(0, 1fr); } .alert .side { margin-top: 6px; } }
+.agroup { display: grid; gap: 8px; }
+.agroup + .agroup { margin-top: 14px; }
+.agroup-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 4px 2px; }
+.agroup-h .nm { font: 600 15px var(--f-display); }
+.agroup-h .link-btn { font-size: 15px; font-weight: 600; font-family: var(--f-display); color: var(--ink); }
 .pill { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1 var(--f-body); padding: 5px 10px; border-radius: 9999px; white-space: nowrap; background: var(--tag); color: var(--ink-2); }
 .pill.pd::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .pill.crit, .pill.high, .pill.risk, .pill.expired, .pill.critical { background: var(--crit-bg); color: var(--crit); }
@@ -193,7 +220,7 @@ main { padding-block: 32px 80px; }
 .theme { border: 1px solid var(--line-subtle); border-radius: 12px; padding: 12px 14px; background: var(--card); }
 .theme b { display: block; font: 600 14px var(--f-display); margin-bottom: 4px; }
 .theme span { font-size: 12.5px; color: var(--ink-2); }
-.feed .row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--line-subtle); cursor: pointer; text-align: start; background: none; border-inline: 0; border-bottom: 0; width: 100%; color: inherit; font: inherit; }
+.feed .row { display: grid; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line-subtle); cursor: pointer; text-align: start; background: none; border-inline: 0; border-bottom: 0; width: 100%; color: inherit; font: inherit; }
 .feed .row:first-child { border-top: 0; }
 .feed .row:hover .t { color: var(--accent-text); }
 .feed .t { font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -238,6 +265,24 @@ tbody tr:hover { background: var(--line-subtle); }
 .hb .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hb .num { text-align: end; font-weight: 700; }
 
+/* client radar (overview table) */
+.radar td { vertical-align: middle; padding: 10px 12px; }
+.radar tbody tr { cursor: pointer; }
+.radar .cn { display: flex; align-items: center; gap: 10px; min-width: 0; font-weight: 600; }
+.radar .cn small { display: block; font-weight: 400; color: var(--ink-3); font-size: 11.5px; direction: ltr; text-align: start; unicode-bidi: plaintext; }
+.radar .clk { display: flex; align-items: center; gap: 10px; justify-content: flex-end; white-space: nowrap; }
+.radar .clk .num { font-weight: 700; }
+.radar .cnt { display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+.radar .cnt b { color: var(--crit); font-family: var(--f-display); }
+@media (max-width: 760px) { .radar .hide-sm { display: none; } }
+.finder { position: relative; flex: 0 1 230px; min-width: 0; }
+.finder input { width: 100%; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 9999px; padding: 7px 14px; font: 500 13px var(--f-body); }
+.finder input::placeholder { color: var(--ink-3); }
+@media (max-width: 720px) { .finder { display: none; } }
+.more-row { margin-top: 10px; }
+.stack { display: grid; gap: 24px; align-content: start; min-width: 0; }
+.feed .row { grid-template-columns: 78px minmax(0, 1fr); }
+
 /* drawer */
 .scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
 .drawer { position: fixed; top: 0; bottom: 0; inset-inline-end: 0; width: min(660px, 100%); background: var(--raised); z-index: 41; overflow-y: auto; border-inline-start: 1px solid var(--line); box-shadow: var(--shadow-lg); padding: calc(24px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); display: grid; gap: 22px; align-content: start; }
@@ -248,11 +293,14 @@ tbody tr:hover { background: var(--line-subtle); }
 .drawer ul { margin: 0; padding-inline-start: 18px; color: var(--ink-2); }
 .drawer li { margin: 4px 0; }
 .mgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mgrid.q4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.m .v.sm { font-size: 16px; line-height: 1.3; }
+@media (max-width: 620px) { .mgrid.q4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .m { background: var(--card); border: 1px solid var(--line-subtle); border-radius: 12px; padding: 12px 14px; }
 .m .v { font: 700 22px var(--f-display); color: var(--accent-text); }
 .m .l { font-size: 11.5px; color: var(--ink-3); }
 .close { position: sticky; top: 0; justify-self: end; background: var(--raised); }
-@media (max-width: 520px) { .mgrid { grid-template-columns: minmax(0, 1fr); } .drawer h2 { font-size: 28px; } }
+@media (max-width: 520px) { .mgrid:not(.q4) { grid-template-columns: minmax(0, 1fr); } .drawer h2 { font-size: 28px; } }
 
 /* chat */
 .chat { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 580px; }
@@ -297,6 +345,7 @@ tbody tr:hover { background: var(--line-subtle); }
       </div>
       <div class="fresh" id="fresh"><span class="dot stale"></span><span data-i18n="waiting">Waiting for data…</span></div>
       <div class="spacer"></div>
+      <div class="finder"><input id="finder" type="search" list="clientList" data-i18n-ph="findClient" placeholder="Jump to a client…" aria-label="Jump to a client" autocomplete="off"><datalist id="clientList"></datalist></div>
       <button class="btn lang" id="langBtn" lang="he" title="Switch language">עברית</button>
       <button class="btn" id="refreshBtn" hidden data-i18n="refreshNow">Refresh now</button>
       <button class="btn primary" id="askTop" data-i18n="askOpus">Ask Opus</button>
@@ -315,39 +364,38 @@ tbody tr:hover { background: var(--line-subtle); }
 <div class="wrap" id="staleBar" hidden><div class="stale"><b data-i18n="staleTitle">Data may be out of date.</b> <span id="staleText"></span></div></div>
 <main class="wrap">
   <section class="panel" data-panel="overview">
-    <div class="card brief">
-      <div>
+    <div class="hero">
+      <div class="card brief">
         <div class="eyebrow" id="briefDate" data-i18n="briefEyebrow">Agency briefing</div>
         <h2 id="briefTitle" data-i18n="briefEmptyTitle">The briefing appears after the first refresh</h2>
         <div class="text" id="briefText"><p data-i18n="briefEmptyText">Twice a day a routine reads every client brain and contract in Google Drive, the tools sheet and SurgeOS performance data, then writes what needs attention here.</p></div>
-        <div class="meta" id="briefMeta"></div>
+        <div class="brief-foot"><button class="link-btn" id="briefMore" hidden></button><span class="meta" id="briefMeta"></span></div>
       </div>
-      <div class="sevstack" id="sevstack"></div>
+      <div class="card pulse">
+        <div><div class="caption" data-i18n="pulseTitle">Open items</div><div class="sevstack" id="sevstack" style="margin-top:8px"></div></div>
+        <div class="kpis" id="kpis"></div>
+      </div>
     </div>
-    <div class="kpis" id="kpis"></div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-h"><h2 data-i18n="needsAttention">Needs attention</h2><span class="sub" data-i18n="needsAttentionSub">Highest severity first. Acknowledge what you've handled.</span></div>
+        <div class="card-h"><h2 data-i18n="actTitle">What to act on</h2><span class="sub" data-i18n="actSub">Ranked by severity, deadline and the kind of issue. Mark done what you've handled.</span></div>
         <div class="card-b"><div class="alist" id="topAlerts"></div>
-          <div style="margin-top:12px"><button class="link-btn arrow" data-goto="alerts" data-i18n="seeAll">See all alerts</button></div></div>
+          <div class="more-row"><button class="link-btn arrow" data-goto="alerts" id="seeAllBtn" data-i18n="seeAll">See all alerts</button></div></div>
       </div>
-      <div class="card">
-        <div class="card-h"><h2 data-i18n="upcomingTitle">Coming up</h2><span class="sub" data-i18n="next90">Renewals and contract ends, next 90 days</span></div>
-        <div class="card-b"><div id="upcoming"></div></div>
+      <div class="stack">
+        <div class="card">
+          <div class="card-h"><h2 data-i18n="upcomingTitle">Coming up</h2><span class="sub" data-i18n="next90">Renewals and contract ends, next 90 days</span></div>
+          <div class="card-b"><div id="upcoming"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h2 data-i18n="feedTitle">Latest client meetings</h2><span class="sub" data-i18n="feedSub">What was discussed with clients recently, from the client brains, meeting notes and calendar</span></div>
+          <div class="card-b"><div class="feed" id="meetFeed"></div><div class="more-row"><button class="link-btn" id="feedMore" hidden></button></div></div>
+        </div>
       </div>
     </div>
     <div class="card">
-      <div class="card-h"><h2 data-i18n="feedTitle">Latest client meetings</h2><span class="sub" data-i18n="feedSub">What was discussed with clients recently, from the client brains, meeting notes and calendar</span></div>
-      <div class="card-b"><div class="feed" id="meetFeed"></div></div>
-    </div>
-    <div class="card">
-      <div class="card-h"><h2 data-i18n="runway">Contract runway</h2><span class="sub" data-i18n="runwaySub">Each client's latest agreement, from today to its end date</span></div>
-      <div class="card-b"><div class="tl" id="timeline"></div>
-        <div class="legend"><span><i style="background:var(--crit)"></i><span data-i18n="lg1">Ends within 30 days or expired</span></span><span><i style="background:var(--warn)"></i><span data-i18n="lg2">31–90 days</span></span><span><i style="background:var(--accent)"></i><span data-i18n="lg3">More than 90 days</span></span><span><i style="background:var(--info)"></i><span data-i18n="lg4">No end date in the contract</span></span></div></div>
-    </div>
-    <div class="card">
-      <div class="card-h"><h2 data-i18n="health">Portfolio health</h2><span class="sub" data-i18n="healthSub">Organic clicks, last 28 days vs the 28 before (Search Console via SurgeOS)</span></div>
-      <div class="card-b"><div class="cgrid" id="healthGrid"></div></div>
+      <div class="card-h"><h2 data-i18n="radarTitle">Clients at a glance</h2><span class="sub" data-i18n="radarSub">Sorted by what needs attention first. Click a client for the full picture.</span></div>
+      <div class="card-b tbl-wrap"><table class="radar" id="radar"></table></div>
     </div>
     <div class="srcline" id="srcline"></div>
   </section>
@@ -355,7 +403,7 @@ tbody tr:hover { background: var(--line-subtle); }
   <section class="panel" data-panel="alerts" hidden>
     <div class="card">
       <div class="card-h"><h2 data-i18n="allAlerts">All alerts</h2><span class="sub" id="alertsSub"></span></div>
-      <div class="card-b"><div class="filters" id="alertFilters" style="margin-bottom:12px"></div><div class="alist" id="allAlerts"></div></div>
+      <div class="card-b"><div class="toolbar" style="margin-bottom:12px"><input class="search" id="alertSearch" type="search" data-i18n-ph="searchAlerts" placeholder="Search alerts…" aria-label="Search alerts"><button class="chip" id="groupBtn" aria-pressed="true" data-i18n="groupClient">Group by client</button></div><div class="filters" id="alertFilters" style="margin-bottom:14px"></div><div id="allAlerts"></div></div>
     </div>
   </section>
 
@@ -370,8 +418,14 @@ tbody tr:hover { background: var(--line-subtle); }
 
   <section class="panel" data-panel="contracts" hidden>
     <div class="card">
+      <div class="card-h"><h2 data-i18n="runway">Contract runway</h2><span class="sub" data-i18n="runwaySub">Each client's latest agreement, from today to its end date</span></div>
+      <div class="card-b"><div class="tl" id="timeline"></div>
+        <div class="legend"><span><i style="background:var(--crit)"></i><span data-i18n="lg1">Ends within 30 days or expired</span></span><span><i style="background:var(--warn)"></i><span data-i18n="lg2">31–90 days</span></span><span><i style="background:var(--accent)"></i><span data-i18n="lg3">More than 90 days</span></span></div>
+        <p class="note" id="noEndNote" style="margin:10px 0 0"></p></div>
+    </div>
+    <div class="card">
       <div class="card-h"><h2 data-i18n="tContracts">Contracts</h2><span class="sub" data-i18n="contractsSub">Found in Google Drive. "Inferred" end dates were computed from start date + term.</span></div>
-      <div class="card-b tbl-wrap"><table id="contractTable"></table></div>
+      <div class="card-b"><div class="filters" style="margin-bottom:10px"><button class="chip" id="olderBtn" aria-pressed="false" data-i18n="olderAg">Show older agreements</button></div><div class="tbl-wrap"><table id="contractTable"></table></div></div>
     </div>
   </section>
 
@@ -485,6 +539,14 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "Data coverage", covSub: "What the dashboard knows about each client, and how fresh it is", cBrain: "Client brain", cMeet: "Meetings", cContract: "Contract", cPerf: "Search data", cLogo: "Logo",
       covNone: "none", covShared: "via {0}", covStale: "stale", covConf: "{0} confidence", covYes: "yes", runsTitle: "Last refreshes", runFailed: "failed: {0}",
       provTitle: "Where this comes from", provBrain: "Brain {0}", provMeet: "Meetings checked {0}", provContract: "Contract: {0} ({1} confidence)", provPerf: "Search Console through {0}",
+      hk: "Housekeeping", olderAg: "Show older agreements", openN: "{0} open", pulseTitle: "Open items", actTitle: "What to act on", actSub: "Ranked by severity, deadline and the kind of issue. Mark done what you've handled.",
+      hygiene: "{0} tools look out of date in the tools sheet", hygieneSub: "Lapsed expiry dates, cancelled tools with auto-renew still on, and unclear billing. Review them together in Tools.", review: "Review",
+      radarTitle: "Clients at a glance", radarSub: "Sorted by what needs attention first. Click a client for the full picture.",
+      rStatus: "Status", rRel: "Relationship", rClicks: "Clicks · 28d", rContract: "Contract", rOpen: "Open items", rMeet: "Last meeting", urgentN: "{0} urgent", noneOpen: "none",
+      briefMore: "Read the full briefing", briefLess: "Show less", moreMeet: "Show {0} more", lessMeet: "Show fewer",
+      noEndN: "Not shown: {0} clients whose agreement has no end date ({1}).", findClient: "Jump to a client…", groupClient: "Group by client", searchAlerts: "Search alerts…", agencyGroup: "Agency and tools",
+      kSpendMo: "Tool spend / month", kRenN: "{0} renewals in the next 30 days", kEnd90: "Contracts ending ≤90d", markDone: "Mark done", seeAllN: "See all {0} alerts", dueToday: "due today", dueIn: "due in {0}d", overdue: "{0}d overdue",
+      qClicks: "Clicks · 28d", qContract: "Contract", qMeet: "Last meeting", qNone: "none on file",
       dFee: "Monthly fee", brainFull: "Whole brain read", brainSummary: "Summary of the brain's main files", sharedBrain: "Covered by the {0} brain",
     },
     he: {
@@ -552,6 +614,14 @@ tbody tr:hover { background: var(--line-subtle); }
       covTitle: "כיסוי נתונים", covSub: "מה הדשבורד יודע על כל לקוח, ועד כמה זה עדכני", cBrain: "Client brain", cMeet: "פגישות", cContract: "חוזה", cPerf: "נתוני חיפוש", cLogo: "לוגו",
       covNone: "אין", covShared: "דרך {0}", covStale: "לא מעודכן", covConf: "ביטחון {0}", covYes: "יש", runsTitle: "רענונים אחרונים", runFailed: "נכשל: {0}",
       provTitle: "מאיפה המידע", provBrain: "Brain {0}", provMeet: "פגישות נבדקו {0}", provContract: "חוזה: {0} (ביטחון {1})", provPerf: "Search Console עד {0}",
+      hk: "תחזוקה", olderAg: "הצג גם הסכמים קודמים", openN: "{0} פתוחים", pulseTitle: "פריטים פתוחים", actTitle: "מה לטפל בו עכשיו", actSub: "מדורג לפי חומרה, מועד וסוג הבעיה. סמנו מה שכבר טופל.",
+      hygiene: "{0} כלים נראים לא מעודכנים בגיליון הכלים", hygieneSub: "תאריכי תפוגה שעברו, כלים שבוטלו עם חידוש אוטומטי פעיל, וחיוב לא ברור. כדאי לעבור עליהם יחד בלשונית הכלים.", review: "לבדיקה",
+      radarTitle: "הלקוחות במבט אחד", radarSub: "ממוין לפי מה שדורש טיפול קודם. לחיצה על לקוח פותחת את התמונה המלאה.",
+      rStatus: "סטטוס", rRel: "מצב היחסים", rClicks: "קליקים · 28 יום", rContract: "חוזה", rOpen: "פריטים פתוחים", rMeet: "פגישה אחרונה", urgentN: "{0} דחופים", noneOpen: "אין",
+      briefMore: "לתדריך המלא", briefLess: "הצג פחות", moreMeet: "עוד {0}", lessMeet: "הצג פחות",
+      noEndN: "לא מוצגים: {0} לקוחות שבהסכם שלהם אין תאריך סיום ({1}).", findClient: "מעבר ללקוח…", groupClient: "קיבוץ לפי לקוח", searchAlerts: "חיפוש בהתראות…", agencyGroup: "סוכנות וכלים",
+      kSpendMo: "הוצאה על כלים / חודש", kRenN: "{0} חידושים ב-30 הימים הקרובים", kEnd90: "חוזים שמסתיימים ≤90 יום", markDone: "סמן כטופל", seeAllN: "לכל {0} ההתראות", dueToday: "היום", dueIn: "בעוד {0} ימים", overdue: "באיחור של {0} ימים",
+      qClicks: "קליקים · 28 יום", qContract: "חוזה", qMeet: "פגישה אחרונה", qNone: "אין בתיק",
       dFee: "תשלום חודשי", brainFull: "ה-brain נקרא במלואו", brainSummary: "תקציר של קבצי ה-brain העיקריים", sharedBrain: "מכוסה ע\"י ה-brain של {0}",
     },
   };
@@ -572,7 +642,7 @@ tbody tr:hover { background: var(--line-subtle); }
     return `<span class="lg" style="--lg:${size}px;--lgbg:${TILE[h % TILE.length]}" aria-hidden="true">${esc(letter)}</span>`;
   };
   const cname = (key, size = 18, label) => `<span class="cname">${logo(key, size)}<span>${esc(label ?? clientName(key))}</span></span>`;
-  const UI = { tab: "overview", alertCat: "all", alertSev: "all", showAcked: false, clientFilter: "all", toolFilter: "attention", contractSort: "daysLeft", toolSort: "daysToRenewal" };
+  const UI = { briefOpen: false, feedAll: false, group: true, tab: "overview", alertCat: "all", alertSev: "all", showAcked: false, clientFilter: "all", toolFilter: "attention", contractSort: "daysLeft", toolSort: "daysToRenewal" };
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -637,6 +707,7 @@ tbody tr:hover { background: var(--line-subtle); }
     const open = S.alerts.filter((a) => !isAcked(a)), hi = open.filter((a) => a.severity === "high").length;
     const c = $("#ct-alerts"); c.textContent = open.length; c.classList.toggle("hot", hi > 0);
     $("#ct-clients").textContent = S.clients.length;
+    const dl = S.clients.map((c) => `<option value="${esc(L(c, "name") || c.name)}"></option>`).join(""); if ($("#clientList").innerHTML !== dl) $("#clientList").innerHTML = dl;
     $("#ct-contracts").textContent = S.contracts.filter((k) => k.isLatest).length;
     $("#ct-tools").textContent = S.tools.length;
   }
@@ -668,7 +739,11 @@ tbody tr:hover { background: var(--line-subtle); }
     const b = S.briefing; if (!b) return;
     $("#briefDate").textContent = t("briefEyebrow") + " · " + new Date(b.generatedAt).toLocaleString(LOC(), { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     $("#briefTitle").textContent = L(b, "title") || t("briefEmptyTitle");
-    $("#briefText").innerHTML = md(L(b, "text"));
+    const el = $("#briefText"); el.innerHTML = md(L(b, "text"));
+    el.classList.toggle("clamp", !UI.briefOpen);
+    const long = el.scrollHeight > 260, mb = $("#briefMore");
+    if (!long) el.classList.remove("clamp");
+    mb.hidden = !long; mb.textContent = t(UI.briefOpen ? "briefLess" : "briefMore");
     $("#briefMeta").textContent = b.by ? t("writtenBy", b.by) : "";
   }
   function renderKpis() {
@@ -680,37 +755,51 @@ tbody tr:hover { background: var(--line-subtle); }
     let clicks = 0, prev = 0;
     S.clients.forEach((c) => { const w = c.perf?.w28; if (w?.clicks != null && w.clicksChangePct != null) { clicks += w.clicks; prev += w.clicks / (1 + w.clicksChangePct / 100); } });
     const pc = prev ? ((clicks - prev) / prev) * 100 : null, sp = m?.spend || {};
-    const k = [
-      [t("kClients"), S.clients.length || "—", t("kAtRisk", risk)],
-      [t("kEnding"), latest.length ? ending : "—", expired ? `<span class="down">${esc(t("kExpired", expired))}</span>` : esc(t("kOnFile", latest.length))],
-      [t("kClicks"), clicks ? fmtN(clicks) : "—", pc == null ? esc(t("kPortfolio")) : pct(pc) + " " + esc(t("kVsPrior"))],
-      [t("kSpend"), sp.yearly ? fmtUSD(sp.yearly) : "—", sp.monthly ? esc(t("kPerMonth", fmtUSD(sp.monthly))) : esc(t("kFromSheet"))],
-      [t("kRenewals"), S.tools.length ? ren30 : "—", esc(t("kSubs"))],
-      [t("kUrgent"), S.alerts.filter((a) => a.severity === "high" && !isAcked(a)).length, esc(t("kAcked", S.alerts.filter(isAcked).length))],
-    ];
     const rv = m?.revenue, ent = (o) => Object.entries(o || {}).sort((a) => (a[0] === "ILS" ? -1 : 1));
     const money = (o) => ent(o).map(([c, v]) => fmtMoney(v, c)).join(" + ");
     const moneyBig = (o) => ent(o).map(([c, v], i) => (i ? `<span class="v2">+ ${fmtMoney(v, c)}</span>` : fmtMoney(v, c))).join("");
+    const k = [];
     if (rv) {
-      k.splice(1, 0, [t("kMrr"), moneyBig(rv.active) || "—", Object.keys(rv.pipeline || {}).length ? esc(t("kMrrSub", money(rv.pipeline))) : esc(t("kMrrNone"))]);
-      k.splice(2, 0, [t("kRisk"), moneyBig(rv.atRisk) || "—", rv.clientsAtRisk ? `<span class="down">${esc(t("kRiskSub", rv.clientsAtRisk))}</span>` : esc(t("kRiskNone"))]);
+      k.push(["", t("kMrr"), moneyBig(rv.active) || "—", Object.keys(rv.pipeline || {}).length ? esc(t("kMrrSub", money(rv.pipeline))) : esc(t("kMrrNone"))]);
+      k.push([rv.clientsAtRisk ? "bad" : "", t("kRisk"), moneyBig(rv.atRisk) || "—", rv.clientsAtRisk ? esc(t("kRiskSub", rv.clientsAtRisk)) : esc(t("kRiskNone"))]);
     }
-    $("#kpis").innerHTML = k.map(([l, v, d]) => `<div class="kpi"><div class="caption">${esc(l)}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+    k.push([risk ? "bad" : "", t("kClients"), S.clients.length || "—", esc(t("kAtRisk", risk))]);
+    k.push(["", t("kClicks"), clicks ? fmtN(clicks) : "—", pc == null ? esc(t("kPortfolio")) : pct(pc) + " " + esc(t("kVsPrior"))]);
+    k.push([expired ? "bad" : "", t("kEnd90"), latest.length ? ending : "—", expired ? `<span class="down">${esc(t("kExpired", expired))}</span>` : esc(t("kOnFile", latest.length))]);
+    k.push(["", t("kSpendMo"), sp.monthly ? fmtUSD(sp.monthly) : "—", esc(t("kRenN", ren30))]);
+    $("#kpis").innerHTML = k.map(([cls, l, v, d]) => `<div class="kpi ${cls}"><div class="caption">${esc(l)}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
   }
-  function alertRow(a) {
+  // "Client name: title" → "Title" when the client is shown next to it
+  const bareTitle = (a) => { const s = L(a, "title") || ""; if (!a.client) return s; const m = s.match(/^[^:]{1,80}:\s+(.+)$/); if (!m) return s; const r = m[1]; return LANG === "en" ? r.charAt(0).toUpperCase() + r.slice(1) : r; };
+  const dueTag = (a) => { const d = days(a.dueDate); if (d == null || d < -60 || d > 60) return ""; return `<span class="due ${d <= 3 ? "hot" : ""}">${esc(d === 0 ? t("dueToday") : d > 0 ? t("dueIn", d) : t("overdue", -d))}</span>`; };
+  function alertRow(a, compact, inGroup) {
     const acked = S.acks[a.id];
     const by = acked ? (S.names[acked.by] || t("teammate")) : "";
-    const due = a.dueDate ? `<span>${esc(fmtD(a.dueDate))} (${esc(rel(days(a.dueDate)))})</span>` : "";
     const src = a.sourceUrl ? `<a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.source || t("source"))}</a>` : esc(a.source || "");
-    return `<div class="alert ${esc(a.severity)} ${acked ? "acked" : ""}"><span class="pill pd ${esc(a.severity)}">${esc(t(SEVL[a.severity] || "sevLow"))}</span>
-      <div style="min-width:0"><div class="t">${esc(L(a, "title"))}</div><div class="dt">${esc(L(a, "detail"))}</div>
-      <div class="am"><span class="pill mute">${esc(t(CATL[a.category] || a.category))}</span>${due}${src ? `<span>${src}</span>` : ""}${a.client ? `<button class="link-btn" data-client="${esc(a.client)}">${cname(a.client, 16)}</button>` : ""}${acked ? `<span>${esc(t("ackBy", by, ago(acked.at)))}</span>` : ""}</div></div>
-      <div class="side"><button class="link-btn" data-ack="${esc(a.id)}">${esc(acked ? t("reopen") : t("acknowledge"))}</button><button class="link-btn" data-askalert="${esc(a.id)}">${esc(t("askOpus"))}</button></div></div>`;
+    const who = a.client && !inGroup ? `<button class="link-btn who" data-client="${esc(a.client)}">${cname(a.client, 16)}</button>` : `<span class="who">${esc(t(CATL[a.category] || a.category))}</span>`;
+    return `<div class="alert ${esc(a.severity)} ${acked ? "acked" : ""} ${compact ? "compact" : ""}"><div style="min-width:0">
+      <div class="ah">${who}<span class="sv">${esc(t(SEVL[a.severity] || "sevLow"))}</span>${dueTag(a)}</div>
+      <div class="t">${esc(bareTitle(a))}</div><div class="dt">${esc(L(a, "detail"))}</div>
+      ${compact ? "" : `<div class="am"><span class="pill mute">${esc(t(CATL[a.category] || a.category))}</span>${a.dueDate ? `<span>${esc(fmtD(a.dueDate))}</span>` : ""}${src ? `<span>${src}</span>` : ""}${acked ? `<span>${esc(t("ackBy", by, ago(acked.at)))}</span>` : ""}</div>`}</div>
+      <div class="side"><button class="mini ${acked ? "" : "ok"}" data-ack="${esc(a.id)}">${esc(acked ? t("reopen") : t("markDone"))}</button><button class="mini" data-askalert="${esc(a.id)}">${esc(t("askOpus"))}</button></div></div>`;
   }
   const sortAlerts = (l) => l.slice().sort((a, b) => (SEV[a.severity] ?? 3) - (SEV[b.severity] ?? 3) || String(a.dueDate || "9").localeCompare(String(b.dueDate || "9")));
+  // Sheet housekeeping (stale expiry dates, cancelled tools still set to auto-renew, unclear billing) is real but low-stakes: group it.
+  const isHygiene = (a) => a.category === "tools" && /-(stale|expired|autorenew-on|billing-unclear)$/.test(a.id);
+  const CATW = { contracts: 70, clients: 45, agency: 35, performance: 25, tools: 15 };
+  const score = (a) => { const sv = { high: 300, medium: 150, low: 0 }[a.severity] ?? 0, d = days(a.dueDate);
+    const due = d == null ? 0 : d < -30 ? 0 : d <= 3 ? 60 : d <= 14 ? 35 : d <= 30 ? 15 : 0;
+    const c = S.clients.find((x) => x.key === a.client), rel = c?.intel?.relationship?.mood === "strained" ? 30 : 0, risk = c?.status === "risk" ? 15 : 0;
+    return sv + (CATW[a.category] ?? 0) + (/^intel-/.test(a.id) ? 40 : 0) + due + rel + risk; };
   function renderTopAlerts() {
-    const l = sortAlerts(S.alerts.filter((a) => !isAcked(a))).slice(0, 7);
-    $("#topAlerts").innerHTML = l.length ? l.map(alertRow).join("") : `<div class="empty">${esc(S.alerts.length ? t("allAcked") : t("noAlerts"))}</div>`;
+    const open = S.alerts.filter((a) => !isAcked(a));
+    const hyg = open.filter(isHygiene), main = open.filter((a) => !isHygiene(a)).sort((a, b) => score(b) - score(a));
+    const per = {}, pick = [];
+    for (const a of main) { const k = a.client || "_"; if ((per[k] = (per[k] || 0) + 1) > 2) continue; pick.push(a); if (pick.length >= 8) break; }
+    let html = pick.map((a) => alertRow(a, true)).join("");
+    if (hyg.length) html += `<button class="alert group low" data-goto="tools"><div style="min-width:0"><div class="ah"><span class="who">${esc(t("catTools"))}</span><span class="sv">${esc(t("hk"))}</span></div><div class="t">${esc(t("hygiene", hyg.length))}</div><div class="dt">${esc(t("hygieneSub"))}</div></div><div class="side"><span class="mini">${esc(t("review"))}</span></div></button>`;
+    $("#topAlerts").innerHTML = html || `<div class="empty">${esc(S.alerts.length ? t("allAcked") : t("noAlerts"))}</div>`;
+    $("#seeAllBtn").textContent = t("seeAllN", open.length);
   }
   const clientName = (key) => { const c = S.clients.find((x) => x.key === key); return c ? L(c, "name") || c.name : key; };
   function renderUpcoming() {
@@ -725,7 +814,9 @@ tbody tr:hover { background: var(--line-subtle); }
     $("#upcoming").innerHTML = items.length ? `<div class="tbl-wrap"><table><tbody>${items.slice(0, 12).map((i) => `<tr><td style="white-space:nowrap"><span class="num" style="font-weight:700">${esc(fmtD(i.date))}</span><div class="sub">${esc(i.d < 0 ? t("daysAgoLong", -i.d) : i.d === 0 ? t("today") : t("inDaysLong", i.d))}</div></td><td>${i.client ? `<button class="link-btn" style="font-size:13px;font-weight:600" data-client="${esc(i.client)}">${cname(i.client, 18, i.name)}</button>` : `<strong>${esc(i.name)}</strong>`}<div class="sub">${esc(i.what)}</div></td><td style="text-align:end"><span class="pill ${i.sev}">${esc(i.kind)}</span></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">${esc(t("nothing90"))}</div>`;
   }
   function renderTimeline() {
-    const rows = S.contracts.filter((k) => k.isLatest).map((k) => ({ k, d: days(k.endDate) })).sort((a, b) => (a.d ?? 9999) - (b.d ?? 9999));
+    const all = S.contracts.filter((k) => k.isLatest), noEnd = all.filter((k) => !k.endDate);
+    $("#noEndNote").textContent = noEnd.length ? t("noEndN", noEnd.length, noEnd.map((k) => clientName(k.client)).join(", ")) : "";
+    const rows = all.filter((k) => k.endDate).map((k) => ({ k, d: days(k.endDate) })).sort((a, b) => a.d - b.d);
     if (!rows.length) { $("#timeline").innerHTML = `<div class="empty">${esc(t("noContractsYet"))}</div>`; return; }
     const W = 1000, Lm = 180, R = 20, rh = 28, top = 34, H = top + rows.length * rh + 10;
     const t0 = today(), span = 365 * 864e5, x = (dt) => Lm + Math.max(0, Math.min(1, (dt - t0 + 30 * 864e5) / (span + 30 * 864e5))) * (W - Lm - R);
@@ -779,26 +870,54 @@ tbody tr:hover { background: var(--line-subtle); }
     const rows = [];
     S.clients.forEach((c) => { const it = c.intel; if (!it || it.sharedFrom) return; (it.meetings || []).forEach((m, i) => { if (m.type !== "internal") rows.push({ c, m, i }); }); });
     rows.sort((a, b) => String(b.m.date).localeCompare(String(a.m.date)));
-    $("#meetFeed").innerHTML = rows.length ? rows.slice(0, 10).map(({ c, m, i }) => { const h = IL(c).meetings?.[i] || {};
+    const n = UI.feedAll ? 14 : 5, fm = $("#feedMore");
+    fm.hidden = rows.length <= 5; fm.textContent = UI.feedAll ? t("lessMeet") : t("moreMeet", Math.min(rows.length, 14) - 5);
+    $("#meetFeed").innerHTML = rows.length ? rows.slice(0, n).map(({ c, m, i }) => { const h = IL(c).meetings?.[i] || {};
       return `<button class="row" data-client="${esc(c.key)}"><div><div class="num" style="font-weight:700">${esc(fmtD(m.date))}</div><div class="sub note">${esc(rel(days(m.date)))}</div></div>
       <div style="min-width:0"><div class="t">${cname(c.key, 18)}<span class="note">·</span><span>${esc(h.title || m.title)}</span>${moodTag(m.sentiment, " ")}</div><div class="s">${esc(h.summary || m.summary || "")}</div></div></button>`; }).join("") : `<div class="empty">${esc(t("noMeetings"))}</div>`;
   }
   function renderHealth() {
     renderFeed();
-    if (!S.clients.length) { $("#healthGrid").innerHTML = `<div class="empty">${esc(t("loading"))}</div>`; return; }
-    const o = { risk: 0, watch: 1, good: 2 };
-    $("#healthGrid").innerHTML = S.clients.slice().sort((a, b) => (o[a.status] ?? 3) - (o[b.status] ?? 3) || (b.perf?.w28?.clicks || 0) - (a.perf?.w28?.clicks || 0)).map(clientCard).join("");
+    if (!S.clients.length) { $("#radar").innerHTML = `<tbody><tr><td class="empty">${esc(t("loading"))}</td></tr></tbody>`; return; }
+    const open = S.alerts.filter((a) => !isAcked(a) && !isHygiene(a));
+    const cnt = (k) => { const l = open.filter((a) => a.client === k); return [l.length, l.filter((a) => a.severity === "high").length]; };
+    const o = { risk: 0, watch: 1, good: 2 }, mood = { strained: 0, tense: 0, neutral: 1, positive: 2 };
+    const rows = S.clients.map((c) => ({ c, n: cnt(c.key) })).sort((a, b) => (o[a.c.status] ?? 3) - (o[b.c.status] ?? 3) || (mood[a.c.intel?.relationship?.mood] ?? 1) - (mood[b.c.intel?.relationship?.mood] ?? 1) || b.n[1] - a.n[1] || b.n[0] - a.n[0] || (b.c.perf?.w28?.clicks || 0) - (a.c.perf?.w28?.clicks || 0));
+    const kchip = (c) => { const k = c.contract, kd = k?.endDate ? days(k.endDate) : null;
+      if (!k) return `<span class="pill mute">${esc(t("noContract"))}</span>`;
+      if (REL[k.relationship]) return `<span class="pill ${REL[k.relationship][0]}">${esc(t(REL[k.relationship][1]))}</span>`;
+      if (kd == null) return `<span class="pill unknown">${esc(t("csUnknown"))}</span>`;
+      return `<span class="pill ${kd < 0 ? "expired" : kd <= 30 ? "critical" : kd <= 90 ? "soon" : "ok"}">${esc(kd < 0 ? t("contractEnded") : t("contractDays", kd))}</span>`; };
+    $("#radar").innerHTML = `<thead><tr><th>${esc(t("cClient"))}</th><th>${esc(t("rStatus"))}</th><th class="hide-sm">${esc(t("rRel"))}</th><th class="num">${esc(t("rClicks"))}</th><th class="hide-sm">${esc(t("rContract"))}</th><th>${esc(t("rOpen"))}</th><th class="hide-sm">${esc(t("rMeet"))}</th></tr></thead><tbody>${rows.map(({ c, n }) => { const w = c.perf?.w28 || {}, it = c.intel, md_ = it?.relationship?.mood;
+      return `<tr data-client="${esc(c.key)}"><td><div class="cn">${logo(c.key, 28)}<div style="min-width:0">${esc(L(c, "name") || c.name)}<small>${esc(c.domain || "")}</small></div></div></td>
+        <td><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span></td>
+        <td class="hide-sm">${md_ ? moodTag(md_) : `<span class="note">—</span>`}</td>
+        <td><div class="clk"><div><div class="num">${w.clicks != null ? fmtN(w.clicks) : "—"}</div><div class="note">${pct(w.clicksChangePct)}</div></div>${spark(c.perf?.spark28, 72, 26)}</div></td>
+        <td class="hide-sm">${kchip(c)}</td>
+        <td><span class="cnt">${n[0] ? `<span>${esc(t("openN", n[0]))}</span>${n[1] ? `<span class="pill high">${esc(t("urgentN", n[1]))}</span>` : ""}` : `<span class="note">${esc(t("noneOpen"))}</span>`}</span></td>
+        <td class="hide-sm note">${it?.lastMeeting ? esc(rel(days(it.lastMeeting))) : it?.sharedFrom ? esc(t("covShared", clientName(it.sharedFrom))) : "—"}</td></tr>`; }).join("")}</tbody>`;
   }
 
   // ---------------------------------------------------------------- alerts tab
   function renderAlerts() {
     const cats = ["all", ...Object.keys(CATL)];
-    const vis = (a) => UI.showAcked || !isAcked(a);
+    const q = ($("#alertSearch").value || "").trim().toLowerCase();
+    const vis = (a) => (UI.showAcked || !isAcked(a)) && (!q || [a.title, a.detail, a.he?.title, a.he?.detail, a.client && clientName(a.client)].join(" ").toLowerCase().includes(q));
     $("#alertFilters").innerHTML = cats.map((c) => `<button class="chip" data-acat="${c}" aria-pressed="${UI.alertCat === c}">${esc(c === "all" ? t("fAll") : t(CATL[c]))}<span class="n">${S.alerts.filter((a) => (c === "all" || a.category === c) && vis(a)).length}</span></button>`).join("")
       + `<span style="width:8px"></span>` + ["all", "high", "medium", "low"].map((s) => `<button class="chip" data-asev="${s}" aria-pressed="${UI.alertSev === s}">${esc(s === "all" ? t("fAnySev") : t(SEVL[s]))}</button>`).join("")
       + `<button class="chip" data-acked aria-pressed="${UI.showAcked}">${esc(t("fShowAcked"))}</button>`;
+    $("#groupBtn").setAttribute("aria-pressed", String(UI.group));
     const l = sortAlerts(S.alerts.filter((a) => (UI.alertCat === "all" || a.category === UI.alertCat) && (UI.alertSev === "all" || a.severity === UI.alertSev) && vis(a)));
-    $("#allAlerts").innerHTML = l.length ? l.map(alertRow).join("") : `<div class="empty">${esc(t("noMatch"))}</div>`;
+    let html = "";
+    if (!l.length) html = `<div class="empty">${esc(t("noMatch"))}</div>`;
+    else if (!UI.group) html = `<div class="alist">${l.map((a) => alertRow(a)).join("")}</div>`;
+    else {
+      const g = {}; l.forEach((a) => (g[a.client || "_"] ||= []).push(a));
+      const keys = Object.keys(g).sort((a, b) => (a === "_") - (b === "_") || g[b].filter((x) => x.severity === "high").length - g[a].filter((x) => x.severity === "high").length || g[b].length - g[a].length);
+      html = keys.map((k) => { const hi = g[k].filter((x) => x.severity === "high").length;
+        return `<div class="agroup"><div class="agroup-h">${k === "_" ? `<span class="nm">${esc(t("agencyGroup"))}</span>` : `<button class="link-btn" data-client="${esc(k)}">${cname(k, 22)}</button>`}<span class="pill mute">${esc(g[k].length > 1 ? t("alertsNs", g[k].length) : t("alertsN", 1))}</span>${hi ? `<span class="pill high">${esc(t("urgentN", hi))}</span>` : ""}</div><div class="alist">${g[k].map((a) => alertRow(a, false, k !== "_")).join("")}</div></div>`; }).join("");
+    }
+    $("#allAlerts").innerHTML = html;
     $("#alertsSub").textContent = t("alertsTotal", S.alerts.length, S.alerts.filter(isAcked).length);
   }
 
@@ -834,7 +953,13 @@ tbody tr:hover { background: var(--line-subtle); }
     $("#drawer").innerHTML = `<button class="btn close" data-close>${esc(t("close"))}</button>
       <div><div class="eyebrow ltr" style="direction:ltr;text-align:start">${esc(c.domain || "")}</div><h2 style="margin-top:8px;display:flex;gap:14px;align-items:center">${logo(key, 44)}<span>${esc(nm)}</span></h2><div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill pd ${esc(c.status)}">${esc(t(STL[c.status] || "stGood"))}</span>${(c.services || []).map((s) => `<span class="pill mute">${esc(s)}</span>`).join("")}</div></div>
       ${L(c, "summary") ? `<div><h3>${esc(t("dBrain"))}</h3><p style="margin:0;color:var(--ink-2)">${esc(L(c, "summary"))}</p><p class="note" style="margin:6px 0 0">${[c.lastBrainUpdate ? t("dBrainUpdated", fmtD(c.lastBrainUpdate)) : "", c.sharedBrainOf ? t("sharedBrain", c.sharedBrainOf) : c.brainFullRead ? t("brainFull") : t("brainSummary")].filter(Boolean).map(esc).join(" · ")}</p></div>` : `<p class="note">${esc(t("dNoBrain"))}</p>`}
-      ${c.contract?.monthlyFee ? `<div class="mgrid"><div class="m"><div class="l">${esc(t("dFee"))}</div><div class="v">${fmtMoney(c.contract.monthlyFee, c.contract.currency)}</div></div></div>` : ""}
+      ${(() => { const k = c.contract, kd = k?.endDate ? days(k.endDate) : null, w = p.w28;
+        const kv = !k ? t("qNone") : REL[k.relationship] ? t(REL[k.relationship][1]) : kd == null ? t("csUnknown") : kd < 0 ? t("contractEnded") : fmtD(k.endDate);
+        return `<div class="mgrid q4"><div class="m"><div class="l">${esc(t("dFee"))}</div><div class="v sm">${k?.monthlyFee ? fmtMoney(k.monthlyFee, k.currency) : "—"}</div></div>
+        <div class="m"><div class="l">${esc(t("qClicks"))}</div><div class="v sm">${w ? fmtN(w.clicks) : "—"}</div><div class="l">${w ? pct(w.clicksChangePct) : ""}</div></div>
+        <div class="m"><div class="l">${esc(t("qContract"))}</div><div class="v sm">${esc(kv)}</div>${kd != null && kd >= 0 ? `<div class="l">${esc(rel(kd))}</div>` : ""}</div>
+        <div class="m"><div class="l">${esc(t("qMeet"))}</div><div class="v sm">${c.intel?.lastMeeting ? esc(fmtD(c.intel.lastMeeting)) : "—"}</div>${c.intel?.lastMeeting ? `<div class="l">${esc(rel(days(c.intel.lastMeeting)))}</div>` : ""}</div></div>`; })()}
+      ${al.length ? `<div><h3>${esc(t("dAlerts"))}</h3><div class="alist">${al.map((a) => alertRow(a, false, true)).join("")}</div></div>` : ""}
       ${c.intel ? (() => { const it = c.intel, h = IL(c), mt = it.meetings || [], hl = h.highlights || it.highlights || [];
         return `${it.relationship?.mood ? `<div><h3>${esc(t("iRelationship"))}</h3><p style="margin:0;color:var(--ink-2)">${moodTag(it.relationship.mood)} ${esc(h.why || it.relationship.why || "")}</p>${it.sharedFrom ? `<p class="note" style="margin:4px 0 0">${esc(t("iShared", clientName(it.sharedFrom)))}</p>` : ""}</div>` : ""}
         ${hl.length ? `<div><h3>${esc(t("iHighlights"))}</h3><ul class="hl-list">${hl.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
@@ -848,7 +973,6 @@ tbody tr:hover { background: var(--line-subtle); }
       <div><button class="btn primary" data-askclient="${esc(key)}">${esc(t("dAskAbout", nm))}</button></div>
       <div class="prov"><b>${esc(t("provTitle"))}:</b>${c.lastBrainUpdate ? `<span>${esc(t("provBrain", fmtD(c.lastBrainUpdate)))}</span>` : ""}${c.intel?.updatedAt ? `<span>${esc(t("provMeet", fmtD(c.intel.updatedAt)))}</span>` : ""}${c.contract ? `<span>${esc(t("provContract", (c.contract.title || "").split(" (")[0].slice(0, 60), c.contract.confidence || "?"))}</span>` : ""}${c.perf?.w28 ? `<span>${esc(t("provPerf", fmtD(S.meta?.dataThrough)))}</span>` : ""}</div>
       ${p.w28 ? `<div><h3>${esc(t("dOrganic"))}</h3><div class="mgrid">${win(p.w7, t("d7"))}${win(p.w28, t("d28l"))}${win(p.w90, t("d90"))}</div>${p.spark28 ? `<div style="margin-top:10px">${spark(p.spark28, 580, 64)}</div>` : ""}${L(c, "headline") ? `<p style="margin:8px 0 0;color:var(--ink-2)">${esc(L(c, "headline"))}</p>` : ""}</div>` : ""}
-      ${al.length ? `<div><h3>${esc(t("dAlerts"))}</h3><div class="alist">${al.map(alertRow).join("")}</div></div>` : ""}
       ${wins.length ? `<div><h3>${esc(t("dWins"))}</h3>${list(wins)}</div>` : ""}
       ${(p.okrs || []).length ? `<div><h3>${esc(t("dOkrs"))}</h3><ul>${p.okrs.map((o) => { const s = okl[o.status] || ["mute", "okUnknown"]; return `<li>${esc(o.name)} · <span class="num">${o.progressPct != null ? o.progressPct + "%" : "—"}</span> <span class="pill ${s[0]}">${esc(t(s[1]))}</span></li>`; }).join("")}</ul></div>` : ""}
       ${p.openTasks != null || p.hoursBudget ? `<div><h3>${esc(t("dDelivery"))}</h3><div class="mgrid"><div class="m"><div class="l">${esc(t("dOpen"))}</div><div class="v">${p.openTasks ?? "—"}</div></div><div class="m"><div class="l">${esc(t("dOverdue"))}</div><div class="v">${p.overdueTasks ?? "—"}</div></div><div class="m"><div class="l">${esc(t("dHours"))}</div><div class="v">${p.hoursUsed ?? "—"} / ${p.hoursBudget ?? "—"}</div></div></div></div>` : ""}
@@ -880,7 +1004,8 @@ tbody tr:hover { background: var(--line-subtle); }
       { key: "noticeDeadline", label: "cNotice", render: (k) => (k.noticeDeadline ? esc(fmtD(k.noticeDeadline)) : k.noticeDays ? esc(t("noticeD", k.noticeDays)) : "—") },
       { key: "autoRenew", label: "cAuto", render: (k) => (k.autoRenew == null ? "—" : esc(k.autoRenew ? t("yes") : t("no"))) },
       { key: "monthlyFee", label: "cFee", num: true, render: (k) => (k.monthlyFee ? fmtMoney(k.monthlyFee, k.currency) : k.totalValue ? fmtMoney(k.totalValue, k.currency) + " " + esc(t("total")) : "—") },
-    ], "contractSort", S.contracts);
+    ], "contractSort", UI.olderAg ? S.contracts : S.contracts.filter((k) => k.isLatest));
+    $("#olderBtn").setAttribute("aria-pressed", String(!!UI.olderAg));
   }
   const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const bcOf = (x) => x.browserCheck || S.toolchecks[slug(x.name)];
@@ -1027,6 +1152,10 @@ ${context()}`;
     const d = b.dataset;
     if (d.tab) return gotoTab(d.tab);
     if (d.goto) return gotoTab(d.goto);
+    if (b.id === "briefMore") { UI.briefOpen = !UI.briefOpen; return renderBrief(); }
+    if (b.id === "feedMore") { UI.feedAll = !UI.feedAll; return renderFeed(); }
+    if (b.id === "olderBtn") { UI.olderAg = !UI.olderAg; return renderContracts(); }
+    if (b.id === "groupBtn") { UI.group = !UI.group; return renderAlerts(); }
     if (d.sev) { UI.alertSev = d.sev; UI.alertCat = "all"; return gotoTab("alerts"); }
     if (d.acat) { UI.alertCat = d.acat; return renderAlerts(); }
     if (d.asev) { UI.alertSev = d.asev; return renderAlerts(); }
@@ -1046,6 +1175,11 @@ ${context()}`;
   $("#askTop").addEventListener("click", () => gotoTab("ask"));
   $("#langBtn").addEventListener("click", () => { LANG = LANG === "he" ? "en" : "he"; try { localStorage.setItem("ci.lang", LANG); } catch (e) {} closeDrawer(); applyLang(); });
   $("#clientSearch").addEventListener("input", renderClients);
+  $("#alertSearch").addEventListener("input", renderAlerts);
+  const findGo = () => { const q = $("#finder").value.trim().toLowerCase(); if (!q) return; const c = S.clients.find((x) => [x.name, L(x, "name")].some((n) => (n || "").toLowerCase() === q)) || S.clients.find((x) => [x.name, L(x, "name"), x.domain, x.key].join(" ").toLowerCase().includes(q)); if (c) { $("#finder").value = ""; $("#finder").blur(); openClient(c.key); } };
+  $("#finder").addEventListener("change", findGo);
+  $("#finder").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); findGo(); } });
+  document.addEventListener("keydown", (e) => { if (e.key === "/" && !/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || "") && getComputedStyle($(".finder")).display !== "none") { e.preventDefault(); $("#finder").focus(); } });
   $("#compose").addEventListener("submit", (e) => { e.preventDefault(); ask($("#q").value); });
   $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask($("#q").value); } });
   $("#stopBtn").addEventListener("click", () => chat.ctl?.abort());
