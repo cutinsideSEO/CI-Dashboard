@@ -160,6 +160,7 @@ python3 scripts/build_db.py --versions=prev/versions.json --prev-meta=prev/meta/
 
 - The build writes `out/writes.json`: ArtifactData batch entries pinned with `if_version` from `prev/versions.json`.
 - It also writes a delete for any snapshot shard that is no longer needed.
+- Any document that would pass ~180 KB is split into shards (`name`, `name-1`, …): the snapshot docs, and in `sources/` the translation memory, meetings, brains, contracts and Slack channels. `restore_prev.py` joins them back, and the build deletes shards that are no longer needed.
 - It never touches `acks/*`, where viewers record which alerts they've acknowledged. Alert ids are stable from run to run, so acknowledgements carry over.
 
 ## 6b. Hebrew

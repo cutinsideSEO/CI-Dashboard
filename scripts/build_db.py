@@ -813,30 +813,44 @@ def build():
     put("meta", "state", meta)
     if briefing:
         put("briefing", "latest", dict(briefing, generatedAt=briefing.get("generatedAt") or NOW))
-    tm_items = [{"en": k, "he": v} for k, v in sorted(TM_USED.items())]
-    parts, cur, size = [], [], 0
-    for it in tm_items:
-        n = len(json.dumps(it, ensure_ascii=False).encode())
-        if cur and size + n > 180_000:
-            parts.append(cur); cur, size = [], 0
-        cur.append(it); size += n
-    parts.append(cur)
-    for k, part in enumerate(parts):
-        put("sources", "tm" if k == 0 else f"tm-{k}", {"items": part, "updatedAt": NOW})
+    def split(items, limit=180_000):
+        parts, cur, size = [], [], 0
+        for it in items:
+            n = len(json.dumps(it, ensure_ascii=False).encode())
+            if cur and size + n > limit:
+                parts.append(cur); cur, size = [], 0
+            cur.append(it); size += n
+        parts.append(cur)
+        return parts
+
+    # sources/* documents are capped at 256 KiB like any other, so list-shaped ones are sharded as name, name-1, ...
+    # (scripts/restore_prev.py joins them back)
+    def put_source_items(name, items):
+        for k, part in enumerate(split(items)):
+            put("sources", name if k == 0 else f"{name}-{k}", {"items": part, "updatedAt": NOW})
+
+    put_source_items("tm", [{"en": k, "he": v} for k, v in sorted(TM_USED.items())])
     with open(os.path.join(OUT, "untranslated.json"), "w", encoding="utf-8") as f:
         json.dump(sorted(MISSING), f, ensure_ascii=False, indent=1)
     if intel:
-        put("sources", "meetings", {"items": list(intel.values()), "updatedAt": NOW})
+        put_source_items("meetings", list(intel.values()))
     # small inputs kept in the database so a fresh container can rebuild data/ (scripts/restore_prev.py)
     inputs = {"toolsCsv": open(os.path.join(DATA, "tools.csv"), encoding="utf-8").read() if os.path.exists(os.path.join(DATA, "tools.csv")) else None,
               "extraAlerts": load("extra_alerts.json", []), "calendar": load("calendar.json", []), "livechecks": load("livechecks.json", []), "updatedAt": NOW}
     put("sources", "inputs", inputs)
     if os.path.exists(os.path.join(DATA, "slack.json")):
-        put("sources", "slack", json.load(open(os.path.join(DATA, "slack.json"), encoding="utf-8")))
+        slack_raw = json.load(open(os.path.join(DATA, "slack.json"), encoding="utf-8"))
+        ch_parts = split(slack_raw.get("channels") or [])
+        # its tm is already merged into sources/tm*, so the stored copy leaves it out
+        put("sources", "slack", dict({k: v for k, v in slack_raw.items() if k != "tm"}, channels=ch_parts[0]))
+        for k, part in enumerate(ch_parts[1:], 1):
+            put("sources", f"slack-{k}", {"channels": part, "updatedAt": NOW})
     for name in ("brains", "contracts", "performance"):
         raw = load(f"{name}.json", None)
-        if raw is not None:
-            put("sources", name, raw if isinstance(raw, dict) else {"items": raw})
+        if isinstance(raw, list):
+            put_source_items(name, raw)
+        elif raw is not None:
+            put("sources", name, raw)
 
     # pin writes to the versions the caller read (ArtifactData requires if_version on existing docs)
     versions = {}
@@ -851,7 +865,7 @@ def build():
     live = {f"{w['collection']}/{w['doc_id']}" for w in writes}
     for key, ver in versions.items():  # shards that no longer exist
         col, did = key.split("/", 1)
-        if col in ("snapshot", "sources") and key not in live and ((col == "snapshot" and did not in ("favicons", "dataforseo", "team")) or did.startswith("tm-")):
+        if col in ("snapshot", "sources") and key not in live and ((col == "snapshot" and did not in ("favicons", "dataforseo", "team")) or did.startswith(("tm-", "meetings-", "slack-", "brains-", "contracts-"))):
             writes.append({"op": "delete", "collection": col, "doc_id": did, "if_version": int(ver)})
     with open(os.path.join(OUT, "writes.json"), "w") as f:
         json.dump(writes, f, indent=1)

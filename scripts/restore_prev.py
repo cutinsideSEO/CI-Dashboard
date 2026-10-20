@@ -28,34 +28,44 @@ def wr(name, obj, text=False):
     done.append(name)
 
 
+def rd_items(name, key="items"):
+    """A sharded sources/ document (name, name-1, ...) joined back into one list; None if it is missing."""
+    out, found = [], False
+    for k in range(0, 10):
+        d = rd(f"sources/{name}.json" if k == 0 else f"sources/{name}-{k}.json")
+        if d is None:
+            continue
+        found = True
+        out += d.get(key, []) if isinstance(d, dict) else d
+    return out if found else None
+
+
 os.makedirs(DATA, exist_ok=True)
 for name in ("brains", "contracts"):
-    d = rd(f"sources/{name}.json")
+    d = rd_items(name)
     if d is not None:
-        wr(f"{name}.json", d.get("items", d) if isinstance(d, dict) else d)
+        wr(f"{name}.json", d)
 d = rd("sources/performance.json")
 if d is not None:
     wr("performance.json", d)
-tm = {}
-for k in range(0, 10):
-    d = rd("sources/tm.json" if k == 0 else f"sources/tm-{k}.json")
-    if d:
-        tm.update({x["en"]: x["he"] for x in d.get("items", [])})
+tm = {x["en"]: x["he"] for x in rd_items("tm") or []}
 if tm:
     p = os.path.join(DATA, "tm.json")
     old = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
     old.update({k: v for k, v in tm.items() if k not in old})
     json.dump(old, open(p, "w", encoding="utf-8"), ensure_ascii=False)
     done.append("tm.json (merged)")
-d = rd("sources/meetings.json")
-for m in (d or {}).get("items", []):
+for m in rd_items("meetings") or []:
     key = m.get("client")
     if key:
         wr(f"meetings/{key}.json", m)
-for src, dst in (("sources/toolchecks.json", "toolchecks.json"), ("sources/slack.json", "slack.json")):
-    d = rd(src)
-    if d is not None:
-        wr(dst, d)
+d = rd("sources/toolchecks.json")
+if d is not None:
+    wr("toolchecks.json", d)
+d = rd("sources/slack.json")
+if d is not None:
+    d["channels"] = rd_items("slack", "channels")
+    wr("slack.json", d)
 d = rd("snapshot/favicons.json")
 if d and d.get("icons"):
     wr("favicons.json", d["icons"])
