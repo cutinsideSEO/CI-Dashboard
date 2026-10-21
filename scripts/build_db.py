@@ -646,6 +646,10 @@ def build():
 
     # DataForSEO spend: compact history for the page (from data/dataforseo_usage.json, rebuilt weekly from the free
     # id_list endpoint) plus a balance series that grows by one point per refresh (data/dfs_balance.json).
+    def days_range(a, b):
+        lo, hi = sorted((max(1, round(a)), max(1, round(b))))
+        return f"{lo} day{'s' if lo > 1 else ''}" if lo == hi else f"{lo}-{hi} days"
+
     dfs_doc = None
     usage = load("dataforseo_usage.json", None)
     lc = {slug(x.get("tool")): x for x in load("livechecks.json", [])}.get("dataforseo-api")
@@ -669,7 +673,7 @@ def build():
         avg30, avg7 = rr.get("avg30") or 0, rr.get("avg7") or 0
         if bal is not None and avg30 and bal / avg30 < 14:
             alert("tool-dataforseo-runway", "high" if bal / avg30 < 7 else "medium", "tools",
-                  f"DataForSEO: the ${bal:,.2f} balance covers about {bal/avg30:.0f}-{(bal/avg7 if avg7 else bal/avg30):.0f} days",
+                  f"DataForSEO: the ${bal:,.2f} balance covers about {days_range(bal / avg30, bal / avg7 if avg7 else bal / avg30)}",
                   f"Spend averaged ${avg30:.2f}/day over 30 days and ${avg7:.2f}/day over 7 (as of the last spend analysis, {str(prev_dfs.get('asOf'))[:10]}). Top up before the rank trackers stop, and decide which jobs should keep running (Tools → DataForSEO spend).",
                   source="DataForSEO API (user_data + id_list)")
             alerts["tool-dataforseo-runway"]["he"] = {"title": he(alerts["tool-dataforseo-runway"]["title"]), "detail": he(alerts["tool-dataforseo-runway"]["detail"])}
@@ -703,7 +707,7 @@ def build():
             run30, run7 = bal / avg30, (bal / avg7 if avg7 else None)
             if run30 < 14:
                 alert("tool-dataforseo-runway", "high" if run30 < 7 else "medium", "tools",
-                      f"DataForSEO: the ${bal:,.2f} balance covers about {run30:.0f}-{(run7 or run30):.0f} days",
+                      f"DataForSEO: the ${bal:,.2f} balance covers about {days_range(run30, run7 or run30)}",
                       f"Spend averaged ${avg30:.2f}/day over 30 days and ${avg7:.2f}/day over 7. One weekly SERP batch costs more than the balance. Top up before the rank trackers stop, and decide which jobs should keep running (Tools → DataForSEO spend).",
                       source="DataForSEO API (user_data + id_list)")
         top = (l30.get("byClient") or [{}])[0]
