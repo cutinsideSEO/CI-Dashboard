@@ -6,6 +6,8 @@ This is what the twice-daily routine (`trig_01WDH93AGHQEqNsCiNghRytm`, which run
 - Repo: `cutinsideSEO/CI-Dashboard`
 - Work directory: the repo root. Put inputs in `data/`. The build writes to `out/`.
 
+**People.** Nobody's pronouns are recorded, so never guess them from a name. In English, refer to people by name or as they/them; in Hebrew, use the name instead of a gendered pronoun (הוא/היא, לו/לה, שלו/שלה). Put this rule in every agent prompt that writes text about people (brains, meetings, Slack, calendars, translations).
+
 ## 0. Load the previous state
 
 The database holds a few documents: `meta/state`, `briefing/latest`, `snapshot/{clients,contracts,tools,alerts}` (plus `-1`, `-2`, … shards if one grows past ~180 KB) and `sources/{brains,contracts,performance}`. List each collection with `out_dir=prev`:
