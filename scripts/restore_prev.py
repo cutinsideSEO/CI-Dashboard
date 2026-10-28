@@ -31,7 +31,7 @@ def wr(name, obj, text=False):
 def rd_items(name, key="items"):
     """A sharded sources/ document (name, name-1, ...) joined back into one list; None if it is missing."""
     out, found = [], False
-    for k in range(0, 10):
+    for k in range(0, 50):
         d = rd(f"sources/{name}.json" if k == 0 else f"sources/{name}-{k}.json")
         if d is None:
             continue
