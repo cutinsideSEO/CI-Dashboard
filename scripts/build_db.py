@@ -844,7 +844,9 @@ def build():
     put("sources", "inputs", inputs)
     if os.path.exists(os.path.join(DATA, "slack.json")):
         slack_raw = json.load(open(os.path.join(DATA, "slack.json"), encoding="utf-8"))
-        ch_parts = split(slack_raw.get("channels") or [])
+        # the head document also carries clients/team, so leave room for them under the 256 KiB cap
+        head = len(json.dumps({k: v for k, v in slack_raw.items() if k not in ("tm", "channels")}, ensure_ascii=False).encode())
+        ch_parts = split(slack_raw.get("channels") or [], limit=max(40_000, min(180_000, 230_000 - head)))
         # its tm is already merged into sources/tm*, so the stored copy leaves it out
         put("sources", "slack", dict({k: v for k, v in slack_raw.items() if k != "tm"}, channels=ch_parts[0]))
         for k, part in enumerate(ch_parts[1:], 1):
